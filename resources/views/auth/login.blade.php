@@ -55,7 +55,7 @@
                         </span>
                     @enderror
                     <div class="row mt-3">
-                        <div class="col-8 mt-2">
+                        <div class="col-7 mt-2">
                             @if (Route::has('password.request'))
                                 <p class="mb-1 mt-2">
                                     <a href="{{ route('password.request') }}">
@@ -64,8 +64,8 @@
                                 </p>
                             @endif
                         </div>
-                        <div class="col-4 mt-2">
-                            <button type="submit" class="btn btn-primary btn-block">
+                        <div class="col-5 mt-2">
+                            <button type="submit" class="btn btn-primary btn-block loading-button">
                                 {{ __('Login') }}
                             </button>
                         </div>

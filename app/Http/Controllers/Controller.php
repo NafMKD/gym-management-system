@@ -10,7 +10,7 @@ abstract class Controller
     use AuthorizesRequests, ValidatesRequests;
 
     public const ADMIN_ = 'pages.admin.';
-    public const STAFF_ = 'pages.staff.';
+    public const TRAINER = 'pages.staff.';
     public const SUPERVISOR_ = 'pages.supervisor.';
 
     public const SUCCESS_ = 'success';
@@ -26,8 +26,4 @@ abstract class Controller
     public const ERROR_UNAUTHORIZED_ACCESS = 'You do not have permission to access this page!';
     public const ERROR_UNAUTHORIZED_ACTION = 'You are not authorized for this action!';
 
-    public const MAX_EVALUATOR = 3;
-
-    public const PEER_EVALUATION = "PEER_EVALUATION";
-    public const ANONYMOUS_EVALUATION = "ANONYMOUS_EVALUATION";
 }

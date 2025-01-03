@@ -10,9 +10,6 @@
 <script src="{{ asset('assets/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
 <!-- Data Tables -->
 <script src="{{ asset('assets/datatables/jquery.dataTables.min.js') }}"></script>
-<script src="{{ asset('assets/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
-<script src="{{ asset('assets/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
-<script src="{{ asset('assets/datatables-responsive/js/responsive.bootstrap4.min.js') }}"></script>
 <!-- Overlay Scrollbars -->
 <script src="{{ asset('assets/overlayScrollbars/js/jquery.overlayScrollbars.min.js') }}"></script>
 <!-- Select2 -->
@@ -38,12 +35,6 @@
             forcePlaceholderSize: true,
             zIndex: 999999
         })
-
-        //Initialize datatable
-        $('.dataTable').DataTable({
-            "responsive": true,
-            "autoWidth": false,
-        });
 
         //Initialize toaster
         Toast = Swal.mixin({
@@ -78,6 +69,13 @@
             title: {!! "'" . session('response-page-not-found') . "'" !!}
         });
         @endif
+
+        $('.loading-button').on('click', function () {
+            const $button = $(this);
+            $button.prop('disabled', true);
+            $button.html('<i class="fas fa-spinner fa-spin"></i> Loading...');
+            $button.closest('form').submit();
+        });
 
     });
 

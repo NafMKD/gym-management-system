@@ -6,8 +6,7 @@
 <!-- Font Awesome -->
 <link rel="stylesheet" href="{{ asset('assets/fontawesome-free/css/all.min.css') }}">
 <!-- Data Tables -->
-<link rel="stylesheet" href="{{ asset('assets/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
-<link rel="stylesheet" href="{{ asset('assets/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/datatables/jquery.dataTables.min.css') }}">
 <!-- Overlay Scrollbars -->
 <link rel="stylesheet" href="{{ asset('assets/overlayScrollbars/css/OverlayScrollbars.min.css') }}">
 <!-- Select2 -->
