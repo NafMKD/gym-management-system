@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\MembershipController;
 use App\Http\Controllers\Admin\PackageController;
 use App\Http\Controllers\Admin\UserController;
 
@@ -40,4 +41,24 @@ Route::group([
     Route::post('/update/{package}', [PackageController::class, 'update'])->name('update');
     Route::get('/delete/{package}', [PackageController::class, 'destroy'])->name('delete');
     Route::get('/list-data', [PackageController::class, 'getPackagesData'])->name('list.data');
+    Route::get('/package-data', [PackageController::class, 'getPackageData'])->name('package.data');
+});
+
+/**
+ * Group For `/admin/memberships/*`
+ */
+Route::group([
+    'prefix' => 'memberships',
+    'as' => 'memberships.'
+], function () {
+    Route::get('/add', [MembershipController::class, 'create'])->name('add');
+    Route::post('/add', [MembershipController::class, 'store'])->name('store');
+    Route::get('/list', [MembershipController::class, 'index'])->name('list');
+    Route::get('/view/{membership}', [MembershipController::class, 'show'])->name('view');
+    Route::get('/edit/{package}', [PackageController::class, 'edit'])->name('edit');
+    Route::post('/update/{package}', [PackageController::class, 'update'])->name('update');
+    Route::get('/delete/{package}', [PackageController::class, 'destroy'])->name('delete');
+    Route::get('/list-data', [MembershipController::class, 'getMembershipsData'])->name('list.data');
+    Route::post('/cancel', [MembershipController::class, 'cancel'])->name('cancel');
+    Route::post('/change-status', [MembershipController::class, 'changeStatus'])->name('change.status');
 });

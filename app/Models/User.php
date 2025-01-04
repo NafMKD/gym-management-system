@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
@@ -58,5 +59,15 @@ class User extends Authenticatable
     public function getName() : string 
     {
         return ucwords($this->first_name . " " . $this->last_name);
+    }
+
+    /**
+     * Get all Memberships for this User
+     *
+     * @return HasMany
+     */
+    public function memberships(): HasMany
+    {
+        return $this->hasMany(Membership::class, 'user_id');
     }
 }

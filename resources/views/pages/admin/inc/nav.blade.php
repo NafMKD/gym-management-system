@@ -86,6 +86,12 @@
                         </li>
                     </ul>
                 </li>
+                <li class="nav-item">
+                    <a href="{{ route('admin.memberships.list') }}" class="nav-link  {{ !request()->routeIs('admin.membership*') ?: 'active' }}">
+                        <i class="nav-icon fas fa-user-tag"></i>
+                        <p>{{ __("Membership") }}</p>
+                    </a>
+                </li>
             </ul>
         </nav>
         <!-- /.sidebar-menu -->

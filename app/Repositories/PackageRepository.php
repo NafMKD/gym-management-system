@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 class PackageRepository extends BaseRepository {
 
     /**
-     * Store a new user in the database.
+     * Store a new package in the database.
      *
      * @param array $attributes
      * @return bool
@@ -38,7 +38,7 @@ class PackageRepository extends BaseRepository {
     }
 
     /**
-     * Update an existing user in the database.
+     * Update an existing package in the database.
      *
      * @param mixed $model
      * @param array $attributes
