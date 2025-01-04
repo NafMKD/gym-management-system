@@ -3,20 +3,21 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Repositories\UserRepository;
-use App\Models\User;
-use App\Exceptions\NoUpdateNeededException;
+use App\Models\Package;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
+use App\Repositories\PackageRepository;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 use Throwable;
 use Yajra\DataTables\Facades\DataTables;
+use App\Exceptions\NoUpdateNeededException;
 
-class UserController extends Controller
+class PackageController extends Controller
 {
+
     public function __construct(
-        protected UserRepository $userRepository
+        protected PackageRepository $packageRepository
         )
     {
     }
@@ -29,8 +30,8 @@ class UserController extends Controller
     public function index(): View|RedirectResponse
     {
         try {
-            $users = User::paginate(10);
-            return view(self::ADMIN_.'users.list', compact('users'));
+            $packages = Package::paginate(10);
+            return view(self::ADMIN_.'packages.list', compact('packages'));
         } catch (Throwable $e) {
             return redirect()->back()->with(self::ERROR_, self::ERROR_UNKNOWN);
         }
@@ -44,7 +45,7 @@ class UserController extends Controller
     public function create(): View|RedirectResponse
     {
         try {
-            return view(self::ADMIN_.'users.add');
+            return view(self::ADMIN_.'packages.add');
         } catch (Throwable $e) {
             return redirect()->back()->withInput()->with(self::ERROR_, self::ERROR_UNKNOWN);
         }
@@ -59,26 +60,21 @@ class UserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validator = Validator::make($request->all(), [
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'nullable|string|min:8',
-            'phone' => 'required|numeric|digits:10',
-            'role' => 'nullable|in:admin,trainer,reception,member',
-            'gender' => 'required|in:Female,Male',
+            'name' => 'required|string|max:255',
+            'price' => 'required|numeric|min:0',
+            'duration' => 'required|integer|min:1',
+            'description' => 'nullable|string|max:1000',
         ]);
 
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $attributes = $request->only(['first_name', 'last_name', 'email', 'phone', 'gender']);
-        $attributes['role'] = $request->input('role', 'member');
-        $attributes['password'] = $request->input('password', '12345678');
+        $attributes = $request->only(['name', 'price', 'duration', 'description']);
 
         try {
-            $this->userRepository->store($attributes);
-            return redirect()->back()->with(self::SUCCESS_, 'User'.self::SUCCESS_STORE);;
+            $this->packageRepository->store($attributes);
+            return redirect()->back()->with(self::SUCCESS_, 'Package'.self::SUCCESS_STORE);;
         } catch (Throwable $e) {
             return redirect()->back()->withInput()->with(self::ERROR_, self::ERROR_UNKNOWN);
         }
@@ -87,14 +83,15 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param User $user
+     * @param Package $package
      * @return View|RedirectResponse
      */
-    public function show(User $user): View|RedirectResponse
+    public function show(Package $package): View|RedirectResponse
     {
         try {
-            return view(self::ADMIN_.'users.view', compact('user'));
+            return view(self::ADMIN_.'packages.view', compact('package'));
         } catch (Throwable $e) {
+            dd($e);
             return redirect()->back()->withInput()->with(self::ERROR_, self::ERROR_UNKNOWN);
         }
     }
@@ -102,13 +99,13 @@ class UserController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param User $user
+     * @param Package $package
      * @return View|RedirectResponse
      */
-    public function edit(User $user): View|RedirectResponse
+    public function edit(Package $package): View|RedirectResponse
     {
         try {
-            return view(self::ADMIN_.'users.edit', compact('user'));
+            return view(self::ADMIN_.'packages.edit', compact('package'));
         } catch (Throwable $e) {
             return redirect()->back()->withInput()->with(self::ERROR_, self::ERROR_UNKNOWN);
         }
@@ -118,29 +115,26 @@ class UserController extends Controller
      * Update the specified resource in storage.
      *
      * @param Request $request
-     * @param User $user
+     * @param Package $package
      * @return RedirectResponse
      */
-    public function update(Request $request, User $user): RedirectResponse
+    public function update(Request $request, Package $package): RedirectResponse
     {
         $validator = Validator::make($request->all(), [
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'email' => 'sometimes|string|email|max:255|unique:users,email,' . $user->id,
-            'password' => 'sometimes|string|min:8',
-            'phone' => 'required|numeric|digits:10',
-            'role' => 'sometimes|in:admin,trainer,reception,member',
-            'gender' => 'sometimes|in:Female,Male',
+            'name' => 'required|string|max:255',
+            'price' => 'required|numeric|min:0',
+            'duration' => 'required|integer|min:1',
+            'description' => 'nullable|string|max:1000',
         ]);
 
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $attributes = $request->only(['first_name', 'last_name', 'email', 'password', 'phone', 'role', 'gender']);
+        $attributes = $request->only(['name', 'price', 'duration', 'description']);
 
         try {
-            $this->userRepository->update($user, $attributes);
+            $this->packageRepository->update($package, $attributes);
             return redirect()->back()->withInput()->with(self::SUCCESS_, self::SUCCESS_UPDATE);
         } catch (NoUpdateNeededException $e) {
             return redirect()->back()->withInput()->with(self::SUCCESS_, self::SUCCESS_NO_UPDATE);
@@ -152,13 +146,13 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param User $user
+     * @param Package $package
      * @return RedirectResponse
      */
-    public function destroy(User $user): RedirectResponse
+    public function destroy(Package $package): RedirectResponse
     {
         try {
-            $this->userRepository->destroy($user);
+            $this->packageRepository->destroy($package);
             return redirect()->back()->withInput()->with(self::SUCCESS_, self::SUCCESS_DELETE);
         } catch (Throwable $e) {
             return redirect()->back()->withInput()->with(self::ERROR_, self::ERROR_UNKNOWN);
@@ -170,41 +164,37 @@ class UserController extends Controller
      *
      * 
      */
-    public function getUsersData()
+    public function getPackagesData()
     {
-        $query = User::query(); 
+        $query = Package::query(); 
 
         return DataTables::of($query)
             ->addIndexColumn() 
             ->editColumn('name', function ($row) {
-                return $row->getName();
+                return $row->name;
             })
-            ->editColumn('email', function ($row) {
-                return $row->email;
+            ->editColumn('duration', function ($row) {
+                return $row->duration;
             })
-            ->editColumn('phone', function ($row) {
-                return $row->phone; 
+            ->editColumn('price', function ($row) {
+                return $row->price; 
             })
             ->addColumn('action', function ($row) {
                 return '
-                    <a href="' . route('admin.users.view', $row->id) . '" class="btn btn-info btn-xs btn-flat">
+                    <a href="' . route('admin.packages.view', $row->id) . '" class="btn btn-info btn-xs btn-flat">
                         <i class="fas fa-eye"></i> View
                     </a>
-                    <a href="' . route('admin.users.edit', $row->id) . '" class="btn btn-primary btn-xs btn-flat">
+                    <a href="' . route('admin.packages.edit', $row->id) . '" class="btn btn-primary btn-xs btn-flat">
                         <i class="fas fa-edit"></i> Edit
                     </a>
-                    <a href="' . route('admin.users.delete', $row->id) . '" 
-                        onclick="if(confirm(\'Are you sure you want to delete ' . $row->getName() . '?\') == false){event.preventDefault()}" 
+                    <a href="' . route('admin.packages.delete', $row->id) . '" 
+                        onclick="if(confirm(\'Are you sure you want to delete ' . $row->name . '?\') == false){event.preventDefault()}" 
                         class="btn btn-danger btn-xs btn-flat">
                         <i class="fas fa-trash"></i> Delete
                     </a>
                 ';
             })
-            ->filterColumn('name', function ($query, $keyword) {
-                $query->whereRaw("CONCAT(first_name, ' ', last_name) like ?", ["%{$keyword}%"]);
-            })
             ->rawColumns(['action'])
             ->make(true);
     }
-
 }

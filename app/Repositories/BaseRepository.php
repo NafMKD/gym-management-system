@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use Illuminate\Support\Facades\DB;
 
 abstract class BaseRepository
 {
@@ -23,10 +24,20 @@ abstract class BaseRepository
     abstract public function update(mixed $model, array $attributes): mixed;
 
     /**
-     * Remove the specified resource from storage.(SoftDelete)
+     * Soft delete a user from the database.
      *
      * @param mixed $model
      * @return bool
      */
-    abstract public function destroy(mixed $model): bool;
+    public function destroy(mixed $model): bool
+    {
+        try {
+            DB::transaction(function () use ($model) {
+                $model->delete();
+            });
+            return true;
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
 }

@@ -10,7 +10,7 @@
 
         @include('layouts.navigation')
 
-        {{-- @include('pages.admin.inc.nav') --}}
+        @include('pages.admin.inc.nav')
 
         <!-- Content Wrapper. Contains page content -->
         <div class="content-wrapper">

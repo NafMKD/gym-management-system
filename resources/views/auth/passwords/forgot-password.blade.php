@@ -39,7 +39,7 @@
                     <div class="row mt-3">
                         <div class="col-1"></div>
                         <div class="col-10">
-                            <button type="submit" class="btn btn-primary btn-block">
+                            <button type="submit" class="btn btn-primary btn-block loading-button">
                                 {{ __('Send Password Reset Link') }}
                             </button>
                         </div>

@@ -39,7 +39,7 @@
                     <div class="row mt-3">
                         <div class="col-4"></div>
                         <div class="col-8">
-                            <button type="submit" class="btn btn-primary btn-block">
+                            <button type="submit" class="btn btn-primary btn-block loading-button">
                                 {{ __('Confirm Password') }}
                             </button>
                         </div>

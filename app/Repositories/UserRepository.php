@@ -19,7 +19,8 @@ class UserRepository extends BaseRepository {
         try {
             DB::transaction(function () use ($attributes) {
                 $validatedAttributes = [
-                    'name' => $attributes['name'] ?? null,
+                    'first_name' => $attributes['first_name'] ?? null,
+                    'last_name' => $attributes['last_name'] ?? null,
                     'email' => $attributes['email'] ?? null,
                     'password' => $attributes['password'] ?? null,
                     'phone' => $attributes['phone'] ?? null,
@@ -27,7 +28,7 @@ class UserRepository extends BaseRepository {
                     'gender' => $attributes['gender'] ?? null,
                 ];
 
-                if (!isset($validatedAttributes['name'], $validatedAttributes['email'], $validatedAttributes['password'], $validatedAttributes['role'], $validatedAttributes['gender'])) {
+                if (!isset($validatedAttributes['first_name'], $validatedAttributes['last_name'], $validatedAttributes['email'], $validatedAttributes['password'], $validatedAttributes['role'], $validatedAttributes['gender'])) {
                     throw new \Exception("Missing required attributes.");
                 }
 
@@ -36,8 +37,7 @@ class UserRepository extends BaseRepository {
             });
             return true;
         } catch (\Exception $e) {
-            // TODO: Log the error or handle exception as needed
-            return false;
+            throw $e;
         }
     }
 
@@ -51,11 +51,11 @@ class UserRepository extends BaseRepository {
     public function update(mixed $model, array $attributes): mixed
     {
         try {
-            $originalAttributes = $model->only(['name', 'email', 'phone', 'role', 'gender']);
+            $originalAttributes = $model->only(['first_name', 'last_name', 'email', 'phone', 'role', 'gender']);
 
             $updateData = array_filter(
                 $attributes,
-                fn($value, $key) => array_key_exists($key, $originalAttributes) && $value !== $originalAttributes[$key],
+                fn($value, $key) => array_key_exists($key, $originalAttributes) && $value != $originalAttributes[$key],
                 ARRAY_FILTER_USE_BOTH
             );
 
@@ -73,27 +73,7 @@ class UserRepository extends BaseRepository {
 
             return $model;
         } catch (\Exception $e) {
-            // TODO: Log the error or handle exception as needed
-            return null;
-        }
-    }
-
-    /**
-     * Soft delete a user from the database.
-     *
-     * @param mixed $model
-     * @return bool
-     */
-    public function destroy(mixed $model): bool
-    {
-        try {
-            DB::transaction(function () use ($model) {
-                $model->delete();
-            });
-            return true;
-        } catch (\Exception $e) {
-            // TODO: Log the error or handle exception as needed
-            return false;
+            throw $e;
         }
     }
 }

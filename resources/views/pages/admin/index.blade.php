@@ -21,7 +21,7 @@
 
 @section('content')
 <x-content class="content" sortable>
-    hello
+    Comming soon...
 </x-content>
 @endsection
 
