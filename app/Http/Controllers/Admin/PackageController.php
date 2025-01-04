@@ -12,6 +12,7 @@ use Illuminate\View\View;
 use Throwable;
 use Yajra\DataTables\Facades\DataTables;
 use App\Exceptions\NoUpdateNeededException;
+use Illuminate\Http\JsonResponse;
 
 class PackageController extends Controller
 {
@@ -196,5 +197,22 @@ class PackageController extends Controller
             })
             ->rawColumns(['action'])
             ->make(true);
+    }
+
+    /**
+     * Fetch package data.
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getPackageData(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'package_id' => 'required|exists:packages,id',
+        ]);
+
+        $package = Package::find($validated['package_id']);
+
+        return response()->json($package);
     }
 }

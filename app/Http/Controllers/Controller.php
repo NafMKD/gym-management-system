@@ -26,4 +26,7 @@ abstract class Controller
     public const ERROR_UNAUTHORIZED_ACCESS = 'You do not have permission to access this page!';
     public const ERROR_UNAUTHORIZED_ACTION = 'You are not authorized for this action!';
 
+    public const DAY_PASS_PRICE = 500;
+    public const CUSTOM_PACKAGE_PRICE = 500;
+
 }
