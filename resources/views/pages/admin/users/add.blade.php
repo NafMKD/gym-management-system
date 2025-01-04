@@ -30,7 +30,7 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>{{ __("First Name") }}</label>
+                                <label>{{ __("First Name") }}</label> <i class="text-danger font-weight-bold">*</i>
                                 <input id="first_name" placeholder="{{ __("Enter First Name") }}" type="text"
                                     class="form-control @error('first_name') is-invalid @enderror" name="first_name"
                                     value="{{ old('first_name') }}" required autocomplete="first_name">
@@ -43,7 +43,7 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>{{ __("Last Name") }}</label>
+                                <label>{{ __("Last Name") }}</label> <i class="text-danger font-weight-bold">*</i>
                                 <input id="last_name" placeholder="{{ __("Enter Last Name") }}" type="text"
                                     class="form-control @error('last_name') is-invalid @enderror" name="last_name"
                                     value="{{ old('last_name') }}" required autocomplete="last_name">
@@ -56,7 +56,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>{{ __("Email") }}</label>
+                        <label>{{ __("Email") }}</label> <i class="text-danger font-weight-bold">*</i>
                         <input id="email" placeholder="{{ __("Enter Email") }}" type="email"
                             class="form-control @error('email') is-invalid @enderror" name="email"
                             value="{{ old('email') }}" required autocomplete="email">
@@ -69,7 +69,7 @@
                     <div class="row">
                         <div class="col-md-8">
                             <div class="form-group">
-                                <label>{{ __("Phone") }}</label>
+                                <label>{{ __("Phone") }}</label> <i class="text-danger font-weight-bold">*</i>
                                 <input id="phone" placeholder="{{ __("Enter Phone") }}" type="text"
                                     class="form-control @error('phone') is-invalid @enderror" name="phone"
                                     value="{{ old('phone') }}" maxlength="10" minlength="0" required autocomplete="phone">

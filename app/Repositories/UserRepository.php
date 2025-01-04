@@ -76,22 +76,4 @@ class UserRepository extends BaseRepository {
             throw $e;
         }
     }
-
-    /**
-     * Soft delete a user from the database.
-     *
-     * @param mixed $model
-     * @return bool
-     */
-    public function destroy(mixed $model): bool
-    {
-        try {
-            DB::transaction(function () use ($model) {
-                $model->delete();
-            });
-            return true;
-        } catch (\Exception $e) {
-            throw $e;
-        }
-    }
 }

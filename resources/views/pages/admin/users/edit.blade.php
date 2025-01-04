@@ -14,6 +14,7 @@
                 <ol class="breadcrumb float-sm-right">
                     <li class="breadcrumb-item">{{ __("Home") }}</li>
                     <li class="breadcrumb-item">{{ __("User") }}</li>
+                    <li class="breadcrumb-item"><a href="{{ route('admin.users.list') }}">{{ __("List") }}</a></li>
                     <li class="breadcrumb-item active">{{ __("Edit") }}</li>
                 </ol>
             </div><!-- /.col -->
@@ -109,7 +110,7 @@
             </div>
             <x-slot:footer>
                 <p class=" float-left"><i class="text-danger font-weight-bold">*</i> {{ __("are required fields") }}</p>
-                <button type="submit" class="btn btn-primary float-right .loading-button">{{ __("Update") }}</button>
+                <button type="submit" class="btn btn-primary float-right loading-button">{{ __("Update") }}</button>
             </x-slot:footer>
         </x-card>
     </x-content>

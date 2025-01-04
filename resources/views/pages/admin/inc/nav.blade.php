@@ -63,6 +63,29 @@
                         </li>
                     </ul>
                 </li>
+                <li class="nav-item  {{ !request()->routeIs('admin.packages*') ?: 'menu-open' }}">
+                    <a href="#" class="nav-link {{ !request()->routeIs('admin.packages*') ?: 'active' }}">
+                        <i class="nav-icon fas fa-box"></i>
+                        <p>
+                            {{ __("Packages") }}
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{{ route('admin.packages.add') }}" class="nav-link {{ !request()->routeIs('admin.packages.add') ?: 'active' }}">
+                                <i class="fas fa-plus nav-icon"></i>
+                                <p>{{ __("Add Package") }}</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.packages.list') }}" class="nav-link {{ !(request()->routeIs('admin.packages.list') || request()->routeIs('admin.packages.view') || request()->routeIs('admin.packages.edit')) ?: 'active' }}">
+                                <i class="fas fa-list nav-icon"></i>
+                                <p>{{ __("Packages List") }}</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
             </ul>
         </nav>
         <!-- /.sidebar-menu -->
