@@ -20,6 +20,7 @@ class Package extends Model
         'name',
         'price',
         'duration',
+        'granted_days', 
         'description',
     ];
 
@@ -31,6 +32,7 @@ class Package extends Model
     protected $casts = [
         'price' => 'decimal:2',
         'duration' => 'integer',
+        'granted_days' => 'integer',
     ];
 
     /**

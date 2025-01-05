@@ -84,7 +84,7 @@ class MembershipController extends Controller
         try {
             if (isset($attributes['package_id'])) {
                 $package = Package::find($attributes['package_id']);
-                $attributes['remaining_days'] = $package->duration;
+                $attributes['remaining_days'] = $package->granted_days;
                 $attributes['end_date'] = Carbon::parse($attributes['start_date'])->addDays($package->duration);
                 $attributes['price'] = $package->price;
             } else {

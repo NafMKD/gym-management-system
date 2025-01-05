@@ -39,7 +39,7 @@
                         @enderror
                     </div>
                     <div class="row">
-                        <div class="col-md-8">
+                        <div class="col-md-4">
                             <div class="form-group">
                                 <label>{{ __("Price") }}</label> <i class="text-danger font-weight-bold">*</i>
                                 <input id="price" placeholder="{{ __("Enter Price") }}" type="number"
@@ -59,6 +59,19 @@
                                     class="form-control @error('duration') is-invalid @enderror" name="duration"
                                     value="{{ old('duration') }}" required autocomplete="duration">
                                 @error('duration')
+                                <span class="text-danger" role="alert">
+                                    {{ $message }}
+                                </span>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>{{ __("Granted Days") }}</label> <i class="text-danger font-weight-bold">*</i>
+                                <input id="granted_days" placeholder="{{ __("Enter Granted Days") }}" type="number"
+                                    class="form-control @error('granted_days') is-invalid @enderror" name="granted_days"
+                                    value="{{ old('granted_days') }}" required autocomplete="granted_days">
+                                @error('granted_days')
                                 <span class="text-danger" role="alert">
                                     {{ $message }}
                                 </span>

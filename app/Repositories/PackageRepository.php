@@ -21,10 +21,11 @@ class PackageRepository extends BaseRepository {
                     'name' => $attributes['name'] ?? null,
                     'price' => $attributes['price'] ?? null,
                     'duration' => $attributes['duration'] ?? null,
+                    'granted_days' => $attributes['granted_days'] ?? null,
                     'description' => $attributes['description'] ?? null,
                 ];
 
-                if (!isset($validatedAttributes['name'], $validatedAttributes['price'], $validatedAttributes['duration'])) {
+                if (!isset($validatedAttributes['name'], $validatedAttributes['price'], $validatedAttributes['duration'], $validatedAttributes['granted_days'])) {
                     throw new \Exception("Missing required attributes.");
                 }
 
