@@ -63,7 +63,8 @@ class PackageController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
-            'duration' => 'required|integer|min:1',
+            'granted_days' => 'required|integer|min:1',
+            'duration' => 'required|integer|min:1|gte:granted_days',
             'description' => 'nullable|string|max:1000',
         ]);
 
@@ -71,7 +72,7 @@ class PackageController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $attributes = $request->only(['name', 'price', 'duration', 'description']);
+        $attributes = $request->only(['name', 'price', 'duration', 'granted_days', 'description']);
 
         try {
             $this->packageRepository->store($attributes);

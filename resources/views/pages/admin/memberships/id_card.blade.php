@@ -77,7 +77,7 @@
 
             // Redirect back to the dashboard after printing
             window.onafterprint = function() {
-                window.location.href = "{{ route('admin.memberships.add') }}";
+                window.location.href = "{{ route('admin.users.add') }}";
             };
         };
     </script>
