@@ -14,6 +14,7 @@ use Throwable;
 use Carbon\Carbon;
 use Illuminate\View\View;
 use Yajra\DataTables\Facades\DataTables;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class MembershipController extends Controller
 {
@@ -97,10 +98,11 @@ class MembershipController extends Controller
             $attributes['status'] = 'active';
             $attributes['start_date'] = Carbon::createFromFormat('m/d/Y', $attributes['start_date'])->format('Y-m-d');
 
-            $this->membershipRepository->store($attributes);
-            return redirect()->back()->with(self::SUCCESS_, 'Membership '.self::SUCCESS_STORE);;
+            $membership = $this->membershipRepository->store($attributes);
+
+            return redirect()->route('admin.memberships.print_id_card', $membership);
         } catch (Throwable $e) {
-            return redirect()->back()->withInput()->with(self::ERROR_, self::ERROR_UNKNOWN);
+            return redirect()->back()->withInput()->with(self::ERROR_, $e->getMessage());
         }
     }
 
@@ -241,5 +243,23 @@ class MembershipController extends Controller
 
         return response()->json(['message' => 'Membership status updated successfully.'], 200);
     }
+
+    /**
+     * Print an ID card for a membership.
+     *
+     * @param Membership $membership
+     * @return mixed
+     */
+    public function printIdCard(Membership $membership)
+    {
+
+        // $pdf = Pdf::loadView(Self::ADMIN_.'memberships.id_card', compact('membership'));
+
+        // // Optional: Stream or download the PDF
+        // return $pdf->stream('id_card.pdf'); // To view in browser
+        // // return $pdf->download('id_card.pdf'); // To download
+        return view(Self::ADMIN_.'memberships.id_card', compact('membership'));
+    }
+
 
 }

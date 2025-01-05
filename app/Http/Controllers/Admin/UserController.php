@@ -61,7 +61,7 @@ class UserController extends Controller
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            // 'email' => 'required|string|email|max:255|unique:users',
             'password' => 'nullable|string|min:8',
             'phone' => 'required|numeric|digits:10',
             'role' => 'nullable|in:admin,trainer,reception,member',
@@ -72,13 +72,17 @@ class UserController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
+        $id = User::latest('id')->first();
+
+        
         $attributes = $request->only(['first_name', 'last_name', 'email', 'phone', 'gender']);
         $attributes['role'] = $request->input('role', 'member');
         $attributes['password'] = $request->input('password', '12345678');
+        $attributes['email'] = 'admin'. $id->id + 1 .'@gmail.com';
 
         try {
             $this->userRepository->store($attributes);
-            return redirect()->back()->with(self::SUCCESS_, 'User'.self::SUCCESS_STORE);;
+            return redirect()->route('admin.memberships.add')->with(self::SUCCESS_, 'User'.self::SUCCESS_STORE);
         } catch (Throwable $e) {
             return redirect()->back()->withInput()->with(self::ERROR_, self::ERROR_UNKNOWN);
         }

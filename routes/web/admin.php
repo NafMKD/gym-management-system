@@ -55,6 +55,7 @@ Route::group([
     Route::post('/add', [MembershipController::class, 'store'])->name('store');
     Route::get('/list', [MembershipController::class, 'index'])->name('list');
     Route::get('/view/{membership}', [MembershipController::class, 'show'])->name('view');
+    Route::get('/{membership}/print-id-card', [MembershipController::class, 'printIdCard'])->name('print_id_card');
     Route::get('/edit/{package}', [PackageController::class, 'edit'])->name('edit');
     Route::post('/update/{package}', [PackageController::class, 'update'])->name('update');
     Route::get('/delete/{package}', [PackageController::class, 'destroy'])->name('delete');

@@ -14,7 +14,7 @@ class UserRepository extends BaseRepository {
      * @param array $attributes
      * @return bool
      */
-    public function store(array $attributes): bool
+    public function store(array $attributes): mixed
     {
         try {
             DB::transaction(function () use ($attributes) {

@@ -12,7 +12,7 @@ abstract class BaseRepository
      * @param array $attributes
      * @return mixed
      */
-    abstract public function store(array $attributes): bool;
+    abstract public function store(array $attributes): mixed;
 
     /**
      * Update the specified resource in storage.

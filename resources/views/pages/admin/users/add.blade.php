@@ -55,7 +55,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="form-group">
+                    {{-- <div class="form-group">
                         <label>{{ __("Email") }}</label> <i class="text-danger font-weight-bold">*</i>
                         <input id="email" placeholder="{{ __("Enter Email") }}" type="email"
                             class="form-control @error('email') is-invalid @enderror" name="email"
@@ -65,7 +65,7 @@
                             {{ $message }}
                         </span>
                         @enderror
-                    </div>
+                    </div> --}}
                     <div class="row">
                         <div class="col-md-8">
                             <div class="form-group">
