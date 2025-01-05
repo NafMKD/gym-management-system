@@ -20,6 +20,7 @@ return new class extends Migration
             $table->integer('remaining_days')->nullable();
             $table->enum('status', ['active', 'inactive', 'cancelled']);
             $table->decimal('price', 8, 2); // 'price' column (up to 999,999.99)
+            $table->string('qr_code')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

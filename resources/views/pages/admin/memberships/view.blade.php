@@ -27,10 +27,14 @@
         <x-card class="card-default" title="Membership Detail" no-message footer>
             <x-slot:headerTools>
                 <div class="card-tools mr-5">
+                    <a class="mr-5" href="{{ route('admin.memberships.print_id_card', $membership->id) }}"><button type="button" class="btn btn-success"><i
+                            class="fas fa-print"></i>
+                    {{ __("Print ID Card") }}
+                    </button></a>
                     <a href="{{ route('admin.memberships.list') }}"><button type="button" class="btn btn-tool"><i
-                                class="fas fa-arrow-left"></i>
-                        {{ __("Back") }}
-                        </button></a>
+                        class="fas fa-arrow-left"></i>
+                    {{ __("Back") }}
+                    </button></a>
                 </div>
             </x-slot:headerTools>
             <div class="row">

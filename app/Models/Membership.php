@@ -23,7 +23,8 @@ class Membership extends Model
         'package_id',
         'remaining_days',
         'status',
-        'price'
+        'price',
+        'qr_code'
     ];
 
     /**
