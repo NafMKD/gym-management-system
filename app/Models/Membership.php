@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Membership extends Model
 {
@@ -54,5 +55,15 @@ class Membership extends Model
     public function package(): BelongsTo
     {
         return $this->belongsTo(Package::class, 'package_id');
+    }
+
+    /**
+     * Get the print batches associated with this membership.
+     * 
+     * @return HasMany
+     */
+    public function printBatches(): HasMany
+    {
+        return $this->hasMany(PrintBatch::class, 'membership_id');
     }
 }

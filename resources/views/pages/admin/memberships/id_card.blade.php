@@ -4,9 +4,11 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
             margin: 0;
             padding: 0;
+            position: relative; /* Use relative positioning for the body */
+            height: 297mm; /* A4 height */
+            width: 210mm; /* A4 width */
         }
 
         .id-card {
@@ -20,6 +22,48 @@
             flex-direction: column;
             justify-content: space-between;
             align-items: center;
+            position: absolute; /* Use absolute positioning for ID cards */
+        }
+
+        /* Define positions for each card based on $print->position */
+        .position-1 {
+            top: 20px;
+            left: 20px;
+        }
+
+        .position-2 {
+            top: 20px;
+            left: 520px; /* Move to the right column */
+        }
+
+        .position-3 {
+            top: 325px; /* Height of one card */
+            left: 20px;
+        }
+
+        .position-4 {
+            top: 325px;
+            left: 520px;
+        }
+
+        .position-5 {
+            top: 630px; /* Height of two cards */
+            left: 20px;
+        }
+
+        .position-6 {
+            top: 630px;
+            left: 520px;
+        }
+
+        .position-7 {
+            top: 935px; /* Height of three cards */
+            left: 20px;
+        }
+
+        .position-8 {
+            top: 935px;
+            left: 520px;
         }
 
         .gym-name {
@@ -51,7 +95,7 @@
     </style>
 </head>
 <body>
-    <div class="id-card">
+    <div class="id-card position-{{ $print->position }}">
         <!-- Gym Name -->
         <div class="gym-name">My Fitness</div>
 
