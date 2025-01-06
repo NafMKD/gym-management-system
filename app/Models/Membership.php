@@ -66,4 +66,14 @@ class Membership extends Model
     {
         return $this->hasMany(PrintBatch::class, 'membership_id');
     }
+
+    /**
+     * Get the attendance associated with this membership.
+     * 
+     * @return HasMany
+     */
+    public function attendances(): HasMany
+    {
+        return $this->hasMany(Attendance::class, 'membership_id');
+    }
 }

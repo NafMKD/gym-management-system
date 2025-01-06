@@ -1,5 +1,6 @@
-<?php 
+<?php
 
+use App\Http\Controllers\Admin\AttendanceController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\MembershipController;
@@ -56,10 +57,18 @@ Route::group([
     Route::get('/list', [MembershipController::class, 'index'])->name('list');
     Route::get('/view/{membership}', [MembershipController::class, 'show'])->name('view');
     Route::get('/{membership}/print-id-card', [MembershipController::class, 'printIdCard'])->name('print_id_card');
-    Route::get('/edit/{package}', [PackageController::class, 'edit'])->name('edit');
-    Route::post('/update/{package}', [PackageController::class, 'update'])->name('update');
-    Route::get('/delete/{package}', [PackageController::class, 'destroy'])->name('delete');
     Route::get('/list-data', [MembershipController::class, 'getMembershipsData'])->name('list.data');
     Route::post('/cancel', [MembershipController::class, 'cancel'])->name('cancel');
     Route::post('/change-status', [MembershipController::class, 'changeStatus'])->name('change.status');
+});
+
+/**
+ * Group For `/admin/attendance/*`
+ */
+Route::group([
+    'prefix' => 'attendance',
+    'as' => 'attendance.'
+], function () {
+    Route::get('/scan', [AttendanceController::class, 'showScanPage'])->name('scan');
+    Route::post('/scan', [AttendanceController::class, 'recordAttendance'])->name('record');
 });

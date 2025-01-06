@@ -49,27 +49,24 @@ class MembershipRepository extends BaseRepository {
 
                 $membership = Membership::create($validatedAttributes);
 
-                // Generate QR Code
                 $membershipId = $membership->id;
                 $timestamp = now()->format('Y_m_d_H_i_s_u');
                 $fileName = "qr_code_{$timestamp}.png";
 
                 $writer = new PngWriter();
 
-                // Create QR code
                 $qrCode = new QrCode(
-                    data: bcrypt($membershipId), // Use encrypted membership ID
+                    data: $membershipId, 
                     encoding: new Encoding('UTF-8'),
                     errorCorrectionLevel: ErrorCorrectionLevel::Low,
                     size: 300,
                     margin: 10,
                     roundBlockSizeMode: RoundBlockSizeMode::Margin,
-                    foregroundColor: new Color(0, 0, 0), // Black foreground
-                    backgroundColor: new Color(255, 255, 255) // White background
+                    foregroundColor: new Color(0, 0, 0), 
+                    backgroundColor: new Color(255, 255, 255) 
                 );
 
-                // Optional: Add logo (if applicable)
-                $logoPath = public_path('assets/dist/img/logo.jpg'); // Replace with your logo path
+                $logoPath = public_path('assets/dist/img/logo.jpg'); 
                 $logo = file_exists($logoPath)
                     ? new Logo(
                         path: $logoPath,
@@ -78,19 +75,18 @@ class MembershipRepository extends BaseRepository {
                     )
                     : null;
 
-                // Optional: Add label
+                
                 $label = new Label(
                     text: 'Membership QR',
-                    textColor: new Color(255, 0, 0) // Red text color
+                    textColor: new Color(255, 0, 0) 
                 );
 
                 $result = $writer->write($qrCode, $logo, $label);
 
-                // Save the QR code file
                 $filePath = public_path("qr_codes/{$fileName}");
 
                 if (!file_exists(public_path('qr_codes'))) {
-                    mkdir(public_path('qr_codes'), 0777, true); // Create the directory if it doesn't exist
+                    mkdir(public_path('qr_codes'), 0777, true); 
                 }
 
                 file_put_contents($filePath, $result->getString());

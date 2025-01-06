@@ -31,6 +31,9 @@
 </div>
 
 @include('layouts.script')
+<!-- Custom Scripts -->
+@yield('script')
+<!-- ./Custom scripts -->
 </body>
 
 </html>
