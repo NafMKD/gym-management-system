@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Membership;
 use App\Models\Package;
+use App\Models\PrintBatch;
 use App\Models\User;
 use App\Repositories\MembershipRepository;
 use Illuminate\Http\Request;
@@ -15,6 +16,7 @@ use Carbon\Carbon;
 use Illuminate\View\View;
 use Yajra\DataTables\Facades\DataTables;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\DB;
 
 class MembershipController extends Controller
 {
@@ -252,13 +254,23 @@ class MembershipController extends Controller
      */
     public function printIdCard(Membership $membership)
     {
+        try 
+        {
+            $lastPrint = PrintBatch::latest('id')->first();
 
-        // $pdf = Pdf::loadView(Self::ADMIN_.'memberships.id_card', compact('membership'));
+            $index = $lastPrint ? ($lastPrint->position % 8) + 1 : 1;
 
-        // // Optional: Stream or download the PDF
-        // return $pdf->stream('id_card.pdf'); // To view in browser
-        // // return $pdf->download('id_card.pdf'); // To download
-        return view(Self::ADMIN_.'memberships.id_card', compact('membership'));
+            $print = PrintBatch::create([
+                'position' => $index,
+                'membership_id' => $membership->id,
+                'is_printed' => true,
+            ]);
+
+            return view(Self::ADMIN_ . 'memberships.id_card', compact('membership', 'print'));
+        } catch (Throwable $e) {
+            dd($e);
+            return redirect()->back()->with(self::ERROR_, $e->getMessage());
+        }
     }
 
 
