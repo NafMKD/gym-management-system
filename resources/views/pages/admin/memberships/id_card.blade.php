@@ -10,8 +10,8 @@
         }
 
         .id-card {
-            height: 6cm;
-            width: 9cm;
+            height: 265px;
+            width: 430px;
             border: 1px solid #000;
             padding: 10px;
             background-color: #ffffff;
@@ -23,14 +23,14 @@
         }
 
         .gym-name {
-            font-size: 16px;
+            font-size: 20px;
             font-weight: bold;
             color: #2c3e50;
             margin-bottom: 5px;
         }
 
         .user-info {
-            font-size: 12px;
+            font-size: 15px;
             text-align: center;
         }
 
@@ -39,8 +39,8 @@
         }
 
         .qr-code {
-            width: 70px;
-            height: 70px;
+            width: 100px;
+            height: 100px;
             margin-top: 10px;
         }
 
