@@ -37,32 +37,32 @@
         }
 
         .position-3 {
-            top: 325px; /* Height of one card */
+            top: 305px; /* Height of one card */
             left: 20px;
         }
 
         .position-4 {
-            top: 325px;
+            top: 305px;
             left: 520px;
         }
 
         .position-5 {
-            top: 630px; /* Height of two cards */
+            top: 610px; /* Height of two cards */
             left: 20px;
         }
 
         .position-6 {
-            top: 630px;
+            top: 610px;
             left: 520px;
         }
 
         .position-7 {
-            top: 935px; /* Height of three cards */
+            top: 915px; /* Height of three cards */
             left: 20px;
         }
 
         .position-8 {
-            top: 935px;
+            top: 915px;
             left: 520px;
         }
 
