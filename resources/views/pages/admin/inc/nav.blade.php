@@ -92,6 +92,12 @@
                         <p>{{ __("Membership") }}</p>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a href="{{ route('admin.audit_trail.list') }}" class="nav-link  {{ !request()->routeIs('admin.audit_trail*') ?: 'active' }}">
+                        <i class="nav-icon fas fa-history"></i>
+                        <p>{{ __("Audit Trail") }}</p>
+                    </a>
+                </li>
             </ul>
         </nav>
         <!-- /.sidebar-menu -->

@@ -70,4 +70,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(Membership::class, 'user_id');
     }
+
+    /**
+     * Get all Audit Trail for this User
+     *
+     * @return HasMany
+     */
+    public function auditTrail(): HasMany
+    {
+        return $this->hasMany(Membership::class, 'user_id');
+    }
 }

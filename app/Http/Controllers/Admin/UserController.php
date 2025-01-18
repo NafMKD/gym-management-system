@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Repositories\UserRepository;
 use App\Models\User;
 use App\Exceptions\NoUpdateNeededException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\RedirectResponse;
@@ -172,9 +173,9 @@ class UserController extends Controller
     /**
      * Retrieves user data from the database.
      *
-     * 
+     * @return JsonResponse
      */
-    public function getUsersData()
+    public function getUsersData(): JsonResponse
     {
         $query = User::query(); 
 

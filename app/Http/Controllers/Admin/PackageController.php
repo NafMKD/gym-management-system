@@ -164,7 +164,7 @@ class PackageController extends Controller
     /**
      * Retrieves user data from the database.
      *
-     * 
+     * @return JsonResponse
      */
     public function getPackagesData()
     {

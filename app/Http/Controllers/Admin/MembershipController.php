@@ -15,8 +15,6 @@ use Throwable;
 use Carbon\Carbon;
 use Illuminate\View\View;
 use Yajra\DataTables\Facades\DataTables;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\DB;
 
 class MembershipController extends Controller
 {
@@ -49,14 +47,14 @@ class MembershipController extends Controller
     public function create(): View|RedirectResponse
     {
         try {
-            $available_members = User::where('role', 'member')
+            $availableMembers = User::where('role', 'member')
             ->whereNull('deleted_at')
             ->whereDoesntHave('memberships', function ($query) {
                 $query->where('status', 'active');
             })
             ->get();
-            $available_packages = Package::all(); 
-            return view(self::ADMIN_.'memberships.add', compact('available_members', 'available_packages'));
+            $availablePackages = Package::all(); 
+            return view(self::ADMIN_.'memberships.add', compact('availableMembers', 'availablePackages'));
         } catch (Throwable $e) {
             return redirect()->back()->withInput()->with(self::ERROR_, self::ERROR_UNKNOWN);
         }
