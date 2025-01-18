@@ -7,6 +7,7 @@ use App\Models\Membership;
 use App\Models\Package;
 use App\Models\PrintBatch;
 use App\Models\User;
+use App\Repositories\InvoiceRepository;
 use App\Repositories\MembershipRepository;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
@@ -19,7 +20,8 @@ use Yajra\DataTables\Facades\DataTables;
 class MembershipController extends Controller
 {
     public function __construct(
-        protected MembershipRepository $membershipRepository
+        protected MembershipRepository $membershipRepository, 
+        protected InvoiceRepository $invoiceRepository
         )
     {
     }
@@ -100,7 +102,15 @@ class MembershipController extends Controller
 
             $membership = $this->membershipRepository->store($attributes);
 
-            return redirect()->route('admin.memberships.print_id_card', $membership);
+            // Create invoice for the membership
+            $invoiceAttributes = [
+                'membership_id' => $membership->id,
+                'amount' => $attributes['price'],
+            ];
+            
+            $invoice = $this->invoiceRepository->store($invoiceAttributes);
+
+            return redirect()->route('admin.invoices.view', $invoice);
         } catch (Throwable $e) {
             return redirect()->back()->withInput()->with(self::ERROR_, $e->getMessage());
         }
@@ -117,7 +127,6 @@ class MembershipController extends Controller
         try {
             return view(self::ADMIN_.'memberships.view', compact('membership'));
         } catch (Throwable $e) {
-            dd($e);
             return redirect()->back()->withInput()->with(self::ERROR_, self::ERROR_UNKNOWN);
         }
     }

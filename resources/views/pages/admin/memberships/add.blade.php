@@ -41,8 +41,8 @@
                                 class="form-control @error('user_id') is-invalid @enderror select2bs4"
                                 >
                             <option value="">-- {{ __("Select") }} --</option>
-                            @foreach ($available_members as $available_member)
-                                <option value="{{ $available_member->id }}">{{ $available_member->getName() }}
+                            @foreach ($availableMembers as $availableMember)
+                                <option value="{{ $availableMember->id }}">{{ $availableMember->getName() }}
                                 </option>
                             @endforeach
                         </select>
@@ -58,8 +58,8 @@
                                 class="form-control @error('package_id') is-invalid @enderror select2bs4"
                                 >
                             <option value="">{{ __("Custom") }}</option>
-                            @foreach ($available_packages as $available_package)
-                                <option value="{{ $available_package->id }}">{{ $available_package->name }}
+                            @foreach ($availablePackages as $availablePackage)
+                                <option value="{{ $availablePackage->id }}">{{ $availablePackage->name }}
                                 </option>
                             @endforeach
                         </select>
