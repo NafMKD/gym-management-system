@@ -81,7 +81,7 @@ class AuditTrailController extends Controller
             })
             ->filterColumn('user_id', function ($query, $keyword) {
                 $query->whereHas('user', function ($subQuery) use ($keyword) {
-                    $subQuery->where('name', 'like', "%{$keyword}%");
+                    $subQuery->whereRaw("CONCAT(first_name, ' ', last_name) like ?", ["%{$keyword}%"]);
                 });
             })
             ->rawColumns(['action', 'table_action']) 
