@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\InvoiceController;
 use App\Http\Controllers\Admin\MembershipController;
 use App\Http\Controllers\Admin\PackageController;
+use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\UserController;
 
 Route::get('/home', [DashboardController::class, 'index'])->name('home');
@@ -83,8 +84,8 @@ Route::group([
     'as' => 'audit_trail.'
 ], function () {
     Route::get('/list', action: [AuditTrailController::class, 'index'])->name('list');
-    Route::get('/list-data', [AuditTrailController::class, 'getTrailsData'])->name('list.data');
     Route::get('/view/{audit_trail}', [AuditTrailController::class, 'show'])->name('view');
+    Route::get('/list-data', [AuditTrailController::class, 'getTrailsData'])->name('list.data');
 });
 
 /**
@@ -95,6 +96,22 @@ Route::group([
     'as' => 'invoices.'
 ], function () {
     Route::get('/list', action: [InvoiceController::class, 'index'])->name('list');
-    Route::get('/list-data', [InvoiceController::class, 'getInvoicesData'])->name('list.data');
     Route::get('/view/{invoice}', [InvoiceController::class, 'show'])->name('view');
+    Route::get('/list-data', [InvoiceController::class, 'getInvoicesData'])->name('list.data');
+});
+
+/**
+ * Group For `/admin/payments/*`
+ */
+Route::group([
+    'prefix' => 'payments',
+    'as' => 'payments.'
+], function () {
+    Route::get('/list', action: [PaymentController::class, 'index'])->name('list');
+    Route::get('/add/{invoice}', [PaymentController::class, 'create'])->name('add');
+    Route::post('/add', [PaymentController::class, 'store'])->name('store');
+    Route::get('/view/{payment}', [PaymentController::class, 'show'])->name('view');
+    Route::get('/list-data', [PaymentController::class, 'getPaymentsData'])->name('list.data');
+    Route::post('/mark-failed', [PaymentController::class, 'markFailed'])->name('mark.failed');
+    Route::post('/mark-completed', [PaymentController::class, 'markCompleted'])->name('mark.completed');
 });

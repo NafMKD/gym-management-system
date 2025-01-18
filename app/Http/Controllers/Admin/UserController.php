@@ -30,8 +30,7 @@ class UserController extends Controller
     public function index(): View|RedirectResponse
     {
         try {
-            $users = User::paginate(10);
-            return view(self::ADMIN_.'users.list', compact('users'));
+            return view(self::ADMIN_.'users.list');
         } catch (Throwable $e) {
             return redirect()->back()->with(self::ERROR_, self::ERROR_UNKNOWN);
         }

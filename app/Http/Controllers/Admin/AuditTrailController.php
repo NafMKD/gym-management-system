@@ -20,8 +20,7 @@ class AuditTrailController extends Controller
     public function index(): View|RedirectResponse
     {
         try {
-            $auditTrails = AuditTrail::orderBy('created_at', 'desc')->paginate(10);
-            return view(self::ADMIN_.'audit-trail.list', compact('auditTrails'));
+            return view(self::ADMIN_.'audit-trail.list');
         } catch (Throwable $e) {
             dd($e);
             return redirect()->back()->with(self::ERROR_, self::ERROR_UNKNOWN);

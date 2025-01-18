@@ -86,4 +86,14 @@ class Membership extends Model
     {
         return $this->hasMany(Invoice::class, 'membership_id');
     }
+
+    /**
+     * Get the payments associated with this membership.
+     * 
+     * @return HasMany
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class, 'membership_id');
+    }
 }

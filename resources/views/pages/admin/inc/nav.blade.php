@@ -89,14 +89,37 @@
                 <li class="nav-item">
                     <a href="{{ route('admin.memberships.list') }}" class="nav-link  {{ !request()->routeIs('admin.membership*') ?: 'active' }}">
                         <i class="nav-icon fas fa-user-tag"></i>
-                        <p>{{ __("Membership") }}</p>
+                        <p>{{ __("Memberships") }}</p>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="{{ route('admin.invoices.list') }}" class="nav-link  {{ !request()->routeIs('admin.invoices*') ?: 'active' }}">
                         <i class="nav-icon fas fa-file-invoice"></i>
-                        <p>{{ __("Invoice") }}</p>
+                        <p>{{ __("Invoices") }}</p>
                     </a>
+                </li>
+                <li class="nav-item  {{ !request()->routeIs('admin.payments*') ?: 'menu-open' }}">
+                    <a href="#" class="nav-link {{ !request()->routeIs('admin.payments*') ?: 'active' }}">
+                        <i class="nav-icon fas fa-dollar-sign"></i>
+                        <p>
+                            {{ __("Payments") }}
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{{ route('admin.payments.list') }}" class="nav-link {{ !(request()->routeIs('admin.payments.list') || request()->routeIs('admin.payments.view') || request()->routeIs('admin.payments.add')) ?: 'active' }}">
+                                <i class="fas fa-list nav-icon"></i>
+                                <p>{{ __("Payments List") }}</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.payments.list.data') }}" class="nav-link {{ !request()->routeIs('admin.payments.list.data') ?: 'active' }}">
+                                <i class="fas fa-plus nav-icon"></i>
+                                <p>{{ __("Revenue") }}</p>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
                 <li class="nav-item">
                     <a href="{{ route('admin.audit_trail.list') }}" class="nav-link  {{ !request()->routeIs('admin.audit_trail*') ?: 'active' }}">
