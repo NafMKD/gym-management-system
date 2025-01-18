@@ -31,8 +31,7 @@ class PackageController extends Controller
     public function index(): View|RedirectResponse
     {
         try {
-            $packages = Package::paginate(10);
-            return view(self::ADMIN_.'packages.list', compact('packages'));
+            return view(self::ADMIN_.'packages.list');
         } catch (Throwable $e) {
             return redirect()->back()->with(self::ERROR_, self::ERROR_UNKNOWN);
         }
@@ -166,7 +165,7 @@ class PackageController extends Controller
      *
      * @return JsonResponse
      */
-    public function getPackagesData()
+    public function getPackagesData(): JsonResponse
     {
         $query = Package::query(); 
 

@@ -67,7 +67,7 @@ class InvoiceRepository extends BaseRepository
      */
     public function markAsPaid(mixed $invoice): mixed
     {
-        return $this->update($invoice, ['status' => 'paid']);
+        return $invoice->update(['status' => 'paid']);
     }
 
     /**
@@ -79,5 +79,20 @@ class InvoiceRepository extends BaseRepository
     public function getByMembershipId(int $membershipId): mixed
     {
         return Invoice::where('membership_id', $membershipId)->get();
+    }
+    
+    /**
+     * Check if the invoice is paid.
+     * 
+     * @param mixed $invoice
+     * @return bool
+     */
+    public function isInvoicePaid(mixed $invoice): bool
+    {
+        $totalPaid = $invoice->payments()
+            ->where('status', 'completed')
+            ->sum('amount');
+
+    return $totalPaid >= $invoice->amount;
     }
 }

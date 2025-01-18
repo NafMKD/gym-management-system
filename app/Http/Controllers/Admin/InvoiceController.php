@@ -59,7 +59,7 @@ class InvoiceController extends Controller
                 return $row->membership->user->getName();
             })
             ->editColumn('package', function ($row) {
-                return is_null($row->membership->package?->name) ? '-' :ucwords($row->membership->package?->name);
+                return is_null($row->membership->package?->name) ? __("Custom") :ucwords($row->membership->package?->name);
             })
             ->editColumn('amount', function ($row) {
                 return number_format($row->amount, 2); 
@@ -92,7 +92,7 @@ class InvoiceController extends Controller
                 // Add the "Add Payment" button only if the invoice status is unpaid
                 if ($row->status == 'unpaid') {
                     $action .= '
-                        <a href="' . route('admin.invoices.list', $row->id) . '" class="btn btn-success btn-xs btn-flat">
+                        <a href="' . route('admin.payments.add', $row->id) . '" class="btn btn-success btn-xs btn-flat">
                             <i class="fas fa-credit-card"></i> Add Payment
                         </a>
                     ';

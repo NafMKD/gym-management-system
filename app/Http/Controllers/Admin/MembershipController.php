@@ -14,6 +14,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
 use Throwable;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\View\View;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -34,8 +35,7 @@ class MembershipController extends Controller
     public function index(): View|RedirectResponse
     {
         try {
-            $memberships = Package::paginate(10);
-            return view(self::ADMIN_.'memberships.list', compact('memberships'));
+            return view(self::ADMIN_.'memberships.list');
         } catch (Throwable $e) {
             return redirect()->back()->with(self::ERROR_, self::ERROR_UNKNOWN);
         }
@@ -134,9 +134,9 @@ class MembershipController extends Controller
     /**
      * Retrieves user data from the database.
      *
-     * 
+     * @return  JsonResponse
      */
-    public function getMembershipsData()
+    public function getMembershipsData(): JsonResponse
     {
         $query = Membership::query(); 
 
