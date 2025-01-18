@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AttendanceController;
+use App\Http\Controllers\Admin\AuditTrailController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\MembershipController;
@@ -71,4 +72,16 @@ Route::group([
 ], function () {
     Route::get('/scan', [AttendanceController::class, 'showScanPage'])->name('scan');
     Route::post('/scan', [AttendanceController::class, 'recordAttendance'])->name('record');
+});
+
+/**
+ * Group For `/admin/audit-trail/*`
+ */
+Route::group([
+    'prefix' => 'audit-trail',
+    'as' => 'audit_trail.'
+], function () {
+    Route::get('/list', action: [AuditTrailController::class, 'index'])->name('list');
+    Route::get('/list-data', [AuditTrailController::class, 'getTrailsData'])->name('list.data');
+    Route::get('/view/{audit_trail}', [AuditTrailController::class, 'show'])->name('view');
 });
