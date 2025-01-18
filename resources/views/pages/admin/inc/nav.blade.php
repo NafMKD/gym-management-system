@@ -93,6 +93,12 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a href="{{ route('admin.invoices.list') }}" class="nav-link  {{ !request()->routeIs('admin.invoices*') ?: 'active' }}">
+                        <i class="nav-icon fas fa-file-invoice"></i>
+                        <p>{{ __("Invoice") }}</p>
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a href="{{ route('admin.audit_trail.list') }}" class="nav-link  {{ !request()->routeIs('admin.audit_trail*') ?: 'active' }}">
                         <i class="nav-icon fas fa-history"></i>
                         <p>{{ __("Audit Trail") }}</p>

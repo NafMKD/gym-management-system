@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\AuditTrailController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\InvoiceController;
 use App\Http\Controllers\Admin\MembershipController;
 use App\Http\Controllers\Admin\PackageController;
 use App\Http\Controllers\Admin\UserController;
@@ -84,4 +85,16 @@ Route::group([
     Route::get('/list', action: [AuditTrailController::class, 'index'])->name('list');
     Route::get('/list-data', [AuditTrailController::class, 'getTrailsData'])->name('list.data');
     Route::get('/view/{audit_trail}', [AuditTrailController::class, 'show'])->name('view');
+});
+
+/**
+ * Group For `/admin/invoices/*`
+ */
+Route::group([
+    'prefix' => 'invoices',
+    'as' => 'invoices.'
+], function () {
+    Route::get('/list', action: [InvoiceController::class, 'index'])->name('list');
+    Route::get('/list-data', [InvoiceController::class, 'getInvoicesData'])->name('list.data');
+    Route::get('/view/{invoice}', [InvoiceController::class, 'show'])->name('view');
 });

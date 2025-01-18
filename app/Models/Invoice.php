@@ -7,29 +7,26 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class AuditTrail extends Model
+class Invoice extends Model
 {
     use HasFactory, SoftDeletes, HelperTrait;
 
     protected $fillable = [
-        'table_name',
-        'record_id',
-        'user_id',
-        'action',
-        'changed_data',
-    ];
-
-    protected $casts = [
-        'changed_data' => 'array',
+        'membership_id',
+        'invoice_number',
+        'amount',
+        'status',
+        'issued_date',
+        'due_date',
     ];
 
     /**
-     * Get the user that performed the action
-     * 
+     * Get the Membership that owns this Invoice
+     *
      * @return BelongsTo
      */
-    public function user(): BelongsTo
+    public function membership(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(Membership::class, 'membership_id');
     }
 }
