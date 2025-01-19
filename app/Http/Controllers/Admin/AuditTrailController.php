@@ -54,7 +54,7 @@ class AuditTrailController extends Controller
         return DataTables::of($query)
             ->addIndexColumn() 
             ->editColumn('user_id', function ($row) {
-                return $row->user->getName() ?? 'N/A'; 
+                return $row->user?->getName() ?? 'N/A'; 
             })
             ->editColumn('table_name', function ($row) {
                 return $row->table_name; 
