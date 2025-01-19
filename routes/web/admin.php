@@ -108,6 +108,7 @@ Route::group([
     'as' => 'payments.'
 ], function () {
     Route::get('/list', action: [PaymentController::class, 'index'])->name('list');
+    Route::get('/revenue/list', [PaymentController::class, 'revenueOverview'])->name('revenue.list');
     Route::get('/add/{invoice}', [PaymentController::class, 'create'])->name('add');
     Route::post('/add', [PaymentController::class, 'store'])->name('store');
     Route::get('/view/{payment}', [PaymentController::class, 'show'])->name('view');

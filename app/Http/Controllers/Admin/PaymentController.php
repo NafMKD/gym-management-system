@@ -262,4 +262,70 @@ class PaymentController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Display the revenue overview with filter capabilities using DataTables.
+     *
+     * @param Request $request
+     * @return View|RedirectResponse|JsonResponse
+     */
+    public function revenueOverview(Request $request): View|RedirectResponse|JsonResponse
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'start_date' => 'nullable|date',
+                'end_date' => 'nullable|date|after:start_date',
+                'payment_method' => 'nullable|in:cash,bank',
+                'status' => 'nullable|in:pending,completed,failed',
+            ]);
+    
+            if ($validator->fails()) {
+                if ($request->ajax()) return response()->json([
+                    'message' => __("Invalid input values."),
+                    'errors' => $validator->errors()
+                ], 400);
+    
+                return redirect()->back()->withInput()->with(self::ERROR_, self::ERROR_UNKNOWN);
+            }
+    
+            if ($request->ajax()) {
+                $filters = $request->only(['start_date', 'end_date', 'payment_method', 'status']);
+                $query = $this->paymentRepository->getFilteredPaymentsQuery($filters);
+    
+                return DataTables::of($query)
+                    ->addIndexColumn()
+                    ->editColumn('membership_id', function ($row) {
+                        return $row->membership->user->getName();
+                    })
+                    ->editColumn('invoice', function ($row) {
+                        return $row->invoice->invoice_number;
+                    })
+                    ->editColumn('amount', function ($row) {
+                        return number_format($row->amount, 2);
+                    })
+                    ->editColumn('payment_method', function ($row) {
+                        return ucfirst($row->payment_method);
+                    })
+                    ->editColumn('payment_date', function ($row) {
+                        return \Carbon\Carbon::parse($row->payment_date)->format('d/m/Y');
+                    })
+                    ->editColumn('status', function ($row) {
+                        $badgeClass = match ($row->status) {
+                            'completed' => 'badge-success',
+                            'pending' => 'badge-warning',
+                            'failed' => 'badge-danger',
+                            default => '',
+                        };
+                        return '<span class="badge ' . $badgeClass . '">' . ucfirst($row->status) . '</span>';
+                    })
+                    ->rawColumns(['status'])
+                    ->make(true);
+            }
+    
+            return view(self::ADMIN_ . 'payments.revenue');
+        } catch (Throwable $e) {
+            return redirect()->back()->withInput()->with(self::ERROR_, self::ERROR_UNKNOWN);
+        }
+    }
+
 }

@@ -103,4 +103,26 @@ class PaymentRepository extends BaseRepository {
             throw $e;
         }
     }
+
+    /**
+     * Get filtered payments query for DataTables.
+     *
+     * @param array $filters
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function getFilteredPaymentsQuery(array $filters)
+    {
+        return Payment::query()
+            ->when(isset($filters['start_date']) && isset($filters['end_date']), function ($query) use ($filters) {
+                $query->whereBetween('payment_date', [$filters['start_date'], $filters['end_date']]);
+            })
+            ->when(isset($filters['payment_method']), function ($query) use ($filters) {
+                $query->where('payment_method', $filters['payment_method']);
+            })
+            ->when(isset($filters['status']), function ($query) use ($filters) {
+                $query->where('status', $filters['status']);
+            });
+    }
+
+
 }
