@@ -40,7 +40,7 @@
                         <dt class="col-sm-4">{{ __("Audit ID") }}:</dt>
                         <dd class="col-sm-8">{{ $auditTrail->id }}</dd>
                         <dt class="col-sm-4">{{ __("User") }}:</dt>
-                        <dd class="col-sm-8">{{ $auditTrail->user->getName() ?? 'N/A' }}</dd>
+                        <dd class="col-sm-8">{{ $auditTrail->user?->getName() ?? 'N/A' }}</dd>
                         <dt class="col-sm-4">{{ __("Table Name") }}:</dt>
                         <dd class="col-sm-8">{{ $auditTrail->table_name }}</dd>
                         <dt class="col-sm-4">{{ __("Record ID") }}:</dt>
