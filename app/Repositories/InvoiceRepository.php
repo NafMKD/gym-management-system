@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Invoice;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class InvoiceRepository extends BaseRepository
@@ -35,8 +36,8 @@ class InvoiceRepository extends BaseRepository
                 $validatedAttributes['invoice_number'] = 'INV-' . $year . '-' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
                 
                 $validatedAttributes['status'] = 'unpaid';
-                $validatedAttributes['issued_date'] = now();
-                $validatedAttributes['due_date'] = now()->addDays(7);
+                $validatedAttributes['issued_date'] = Carbon::now();
+                $validatedAttributes['due_date'] = Carbon::now()->addDays(7);
 
                 return Invoice::create($validatedAttributes);
             });
