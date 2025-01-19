@@ -154,8 +154,15 @@
             toggleBankFields($(this).val());
         });
 
+        function getEthiopiaDateTime() {
+            const now = new Date();
+            now.setHours(now.getUTCHours() + 3);
+            const ethiopianDateTime = now.toISOString().slice(0, 16);
+            return ethiopianDateTime;
+        }
+
         // Set payment date to current and disable future dates
-        const currentDateTime = new Date().toISOString().slice(0, 16);
+        const currentDateTime = getEthiopiaDateTime();
         $('#payment_date').val(currentDateTime).attr('max', currentDateTime);
     });
 </script>
