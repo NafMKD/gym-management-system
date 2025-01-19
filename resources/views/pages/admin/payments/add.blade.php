@@ -156,9 +156,19 @@
 
         function getEthiopiaDateTime() {
             const now = new Date();
-            now.setHours(now.getUTCHours() + 3);
-            const ethiopianDateTime = now.toISOString().slice(0, 16);
-            return ethiopianDateTime;
+            const options = {
+                timeZone: 'Africa/Addis_Ababa',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            };
+            const formatter = new Intl.DateTimeFormat('en-CA', options);
+            const parts = formatter.formatToParts(now);
+            const formattedDateTime = `${parts[0].value}-${parts[2].value}-${parts[4].value}T${parts[6].value}:${parts[8].value}`;
+            return formattedDateTime;
         }
 
         // Set payment date to current and disable future dates
