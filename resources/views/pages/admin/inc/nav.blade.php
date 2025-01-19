@@ -114,8 +114,8 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ route('admin.payments.list.data') }}" class="nav-link {{ !request()->routeIs('admin.payments.list.data') ?: 'active' }}">
-                                <i class="fas fa-plus nav-icon"></i>
+                            <a href="{{ route('admin.payments.revenue.list') }}" class="nav-link {{ !request()->routeIs('admin.payments.revenue.list') ?: 'active' }}">
+                                <i class="fas fa-chart-line nav-icon"></i>
                                 <p>{{ __("Revenue") }}</p>
                             </a>
                         </li>

@@ -51,7 +51,7 @@
                                 <label>{{ __("Amount") }}</label> <i class="text-danger font-weight-bold">*</i>
                                 <input id="amount" type="number" step="0.01"
                                     class="form-control @error('amount') is-invalid @enderror" name="amount"
-                                    value="{{ $invoice->amount }}" required autocomplete="amount">
+                                    value="{{ $invoice->amount - $invoice->payments()->where('status', 'completed')->sum('amount') }}" required autocomplete="amount">
                                 @error('amount')
                                 <span class="text-danger" role="alert">
                                     {{ $message }}

@@ -20,7 +20,7 @@ class MembershipRepository extends BaseRepository {
      * Store a new membership in the database.
      *
      * @param array $attributes
-     * @return bool
+     * @return mixed
      */
     public function store(array $attributes): mixed
     {
