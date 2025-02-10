@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Payment;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class PaymentRepository extends BaseRepository {
@@ -21,7 +22,7 @@ class PaymentRepository extends BaseRepository {
                     'invoice_id' => $attributes['invoice_id'] ?? null,
                     'membership_id' => $attributes['membership_id'] ?? null,
                     'amount' => $attributes['amount'] ?? null,
-                    'payment_date' => $attributes['payment_date'] ?? null,
+                    'payment_date' => Carbon::now(),
                     'payment_method' => $attributes['payment_method'] ?? null,
                     'payment_bank' => $attributes['payment_bank'] ?? null,
                     'bank_transaction_number' => $attributes['bank_transaction_number'] ?? null,

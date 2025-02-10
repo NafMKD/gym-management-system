@@ -103,10 +103,7 @@ class PaymentController extends Controller
                     }
                 },
             ],
-            'payment_date' => 'required|date|before_or_equal:now',
-            'payment_method' => 'required|in:cash,bank',
-            'payment_bank' => 'nullable|required_if:payment_method,bank|in:telebirr,cbe,boa',
-            'bank_transaction_number' => 'nullable|required_if:payment_method,bank|string|max:50',
+            'payment_method' => 'required|in:cash,bank'
         ]);
 
         if ($validator->fails()) {
@@ -117,10 +114,7 @@ class PaymentController extends Controller
             'invoice_id',
             'membership_id',
             'amount',
-            'payment_date',
             'payment_method',
-            'payment_bank',
-            'bank_transaction_number',
         ]);
 
         try {
