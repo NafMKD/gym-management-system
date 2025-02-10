@@ -322,4 +322,33 @@ class PaymentController extends Controller
         }
     }
 
+    /**
+     * Get the total revenue and count of transactions.
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getTotalRevenue(Request $request): JsonResponse
+    {
+        try {
+            $filters = $request->only(['start_date', 'end_date', 'payment_method', 'status']);
+            $query = $this->paymentRepository->getFilteredPaymentsQuery($filters);
+
+            // Calculate total revenue and count of transactions
+            $totalRevenue = $query->sum('amount');
+            $totalTransactions = $query->count();
+
+            return response()->json([
+                'totalRevenue' => number_format($totalRevenue, 2),
+                'totalTransactions' => $totalTransactions
+            ]);
+        } catch (Throwable $e) {
+            return response()->json([
+                'message' => 'Error fetching revenue data',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
 }

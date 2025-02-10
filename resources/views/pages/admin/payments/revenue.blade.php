@@ -89,6 +89,32 @@
 
 @section('script')
     <script>
+        function fetchTotalRevenue() {
+            $.ajax({
+                url: "{{ route('admin.payments.revenue.total') }}",
+                type: "GET",
+                data: {
+                    start_date: $('#start_date').val(),
+                    end_date: $('#end_date').val(),
+                    payment_method: $('#payment_method').val(),
+                    status: $('#status').val()
+                },
+                success: function(response) {
+                    let formattedTotal = response.totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+                    // Update UI
+                    $('#total-revenue').text(formattedTotal);
+                    $('#total-transactions').text(response.totalTransactions);
+                },
+                error: function(xhr) {
+                    Toast.fire({
+                        icon: 'error',
+                        title: 'Failed to fetch total revenue.'
+                    });
+                }
+            });
+        }
+
         $(document).ready(function () {
             let table = $('#paymentsTable').DataTable({
                 processing: true,
@@ -129,16 +155,7 @@
                     { data: 'payment_date' }
                 ],
                 drawCallback: function(settings) {
-                    let api = this.api();
-                    let total = api
-                        .column(3, { page: 'all' })
-                        .data()
-                        .reduce(function (a, b) {
-                            return parseFloat(a) + parseFloat(b.replace(/[\$,]/g, '')); // Removing any currency symbols or commas
-                        }, 0);
-                    let count = api.data().count();
-                    $('#total-revenue').text(total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
-                    $('#total-transactions').text(count);
+                    fetchTotalRevenue();
                 }
             });
 
@@ -169,6 +186,8 @@
                 });
                 $('#paymentsTable').DataTable().ajax.reload();
             });
+
+            fetchTotalRevenue();
         });
     </script>
 @endsection
