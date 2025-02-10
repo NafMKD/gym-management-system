@@ -38,7 +38,7 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="form-group">
                                 <label>{{ __("Membership ID") }}</label> <i class="text-danger font-weight-bold">*</i>
                                 <input id="membership_id" type="text"
@@ -46,35 +46,7 @@
                                     value="{{ $invoice->membership_id }}" readonly>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>{{ __("Amount") }}</label> <i class="text-danger font-weight-bold">*</i>
-                                <input id="amount" type="number" step="0.01"
-                                    class="form-control @error('amount') is-invalid @enderror" name="amount"
-                                    value="{{ $invoice->amount - $invoice->payments()->where('status', 'completed')->sum('amount') }}" required autocomplete="amount">
-                                @error('amount')
-                                <span class="text-danger" role="alert">
-                                    {{ $message }}
-                                </span>
-                                @enderror
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>{{ __("Payment Date") }}</label> <i class="text-danger font-weight-bold">*</i>
-                                <input id="payment_date" type="datetime-local"
-                                    class="form-control @error('payment_date') is-invalid @enderror" name="payment_date"
-                                    value="{{ date('Y-m-d\TH:i') }}" max="{{ date('Y-m-d\TH:i') }}" required>
-                                @error('payment_date')
-                                <span class="text-danger" role="alert">
-                                    {{ $message }}
-                                </span>
-                                @enderror
-                            </div>
-                        </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="form-group">
                                 <label>{{ __("Payment Method") }}</label> <i class="text-danger font-weight-bold">*</i>
                                 <select name="payment_method" id="payment_method"
@@ -89,32 +61,13 @@
                                 @enderror
                             </div>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="form-group">
-                                <label>{{ __("Payment Bank") }}</label>
-                                <select name="payment_bank" id="payment_bank"
-                                        class="form-control @error('payment_bank') is-invalid @enderror">
-                                    <option value="">{{ __("Select Bank") }}</option>
-                                    <option value="telebirr">{{ __("Telebirr") }}</option>
-                                    <option value="cbe">{{ __("CBE") }}</option>
-                                    <option value="boa">{{ __("BOA") }}</option>
-                                </select>
-                                @error('payment_bank')
-                                <span class="text-danger" role="alert">
-                                    {{ $message }}
-                                </span>
-                                @enderror
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>{{ __("Bank Transaction Number") }}</label>
-                                <input id="bank_transaction_number" placeholder="{{ __("Enter Bank Transaction Number") }}" type="text"
-                                    class="form-control @error('bank_transaction_number') is-invalid @enderror" name="bank_transaction_number"
-                                    value="{{ old('bank_transaction_number') }}" autocomplete="bank_transaction_number">
-                                @error('bank_transaction_number')
+                                <label>{{ __("Amount") }}</label> <i class="text-danger font-weight-bold">*</i>
+                                <input id="amount" type="number" step="0.01"
+                                    class="form-control @error('amount') is-invalid @enderror" name="amount"
+                                    value="{{ $invoice->amount - $invoice->payments()->where('status', 'completed')->sum('amount') }}" required autocomplete="amount">
+                                @error('amount')
                                 <span class="text-danger" role="alert">
                                     {{ $message }}
                                 </span>
@@ -130,50 +83,4 @@
             </x-slot:footer>
         </x-card>
     </x-content>
-@endsection
-
-@section('script')
-<script>
-    $(document).ready(function () {
-        // Set default behavior for bank fields
-        const bankFields = ['#payment_bank', '#bank_transaction_number'];
-
-        function toggleBankFields(paymentMethod) {
-            if (paymentMethod === 'bank') {
-                $(bankFields.join(',')).attr('required', true).parent().show();
-            } else {
-                $(bankFields.join(',')).attr('required', false).parent().hide();
-            }
-        }
-
-        // Initialize based on default value
-        toggleBankFields($('#payment_method').val());
-
-        // Listen for payment method change
-        $('#payment_method').change(function () {
-            toggleBankFields($(this).val());
-        });
-
-        function getEthiopiaDateTime() {
-            const now = new Date();
-            const options = {
-                timeZone: 'Africa/Addis_Ababa',
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: false
-            };
-            const formatter = new Intl.DateTimeFormat('en-CA', options);
-            const parts = formatter.formatToParts(now);
-            const formattedDateTime = `${parts[0].value}-${parts[2].value}-${parts[4].value}T${parts[6].value}:${parts[8].value}`;
-            return formattedDateTime;
-        }
-
-        // Set payment date to current and disable future dates
-        const currentDateTime = getEthiopiaDateTime();
-        $('#payment_date').val(currentDateTime).attr('max', currentDateTime);
-    });
-</script>
 @endsection
