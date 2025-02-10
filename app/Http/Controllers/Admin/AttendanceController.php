@@ -50,6 +50,8 @@ class AttendanceController extends Controller
             }
     
             if ($membership->remaining_days <= 0) {
+                $membership->status = 'inactive';
+                $membership->save();
                 return response()->json(['success' => false, 'message' => 'No remaining days on this membership.'], 400);
             }
     
@@ -57,7 +59,10 @@ class AttendanceController extends Controller
                 'entry_date' => now(),
             ]);
     
-            $membership->remaining_days -= 1;
+            $membership->remaining_days = max(0, $membership->remaining_days - 1);
+            if ($membership->remaining_days === 0) {
+                $membership->status = 'inactive';
+            }
             $membership->save();
     
             return response()->json([
