@@ -121,6 +121,29 @@
                         </li>
                     </ul>
                 </li>
+                <li class="nav-item  {{ !request()->routeIs('admin.staffs*') ?: 'menu-open' }}">
+                    <a href="#" class="nav-link {{ !request()->routeIs('admin.staffs*') ?: 'active' }}">
+                        <i class="nav-icon fas fa-user-tie"></i>
+                        <p>
+                            {{ __("Staff Management") }}
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{{ route('admin.staffs.add') }}" class="nav-link {{ !request()->routeIs('admin.staffs.add') ?: 'active' }}">
+                                <i class="fas fa-user-plus nav-icon"></i>
+                                <p>{{ __("Add Staff") }}</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.staffs.list') }}" class="nav-link {{ !(request()->routeIs('admin.staffs.list') || request()->routeIs('admin.staffs.view') || request()->routeIs('admin.staffs.edit')) ?: 'active' }}">
+                                <i class="fas fa-list nav-icon"></i>
+                                <p>{{ __("Staff List") }}</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>                
                 <li class="nav-item">
                     <a href="{{ route('admin.audit_trail.list') }}" class="nav-link  {{ !request()->routeIs('admin.audit_trail*') ?: 'active' }}">
                         <i class="nav-icon fas fa-history"></i>

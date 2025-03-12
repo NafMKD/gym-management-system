@@ -14,57 +14,37 @@ use Illuminate\View\View;
 use Throwable;
 use Yajra\DataTables\Facades\DataTables;
 
-class UserController extends Controller
+class StaffController extends Controller
 {
     public function __construct(
         protected UserRepository $userRepository
-        )
-    {
-    }
+    ) {}
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return View|RedirectResponse
-     */
     public function index(): View|RedirectResponse
     {
         try {
-            return view(self::ADMIN_.'users.list');
+            return view(self::ADMIN_.'staffs.list');
         } catch (Throwable $e) {
             return redirect()->back()->with(self::ERROR_, self::ERROR_UNKNOWN);
         }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return View|RedirectResponse
-     */
     public function create(): View|RedirectResponse
     {
         try {
-            return view(self::ADMIN_.'users.add');
+            return view(self::ADMIN_.'staffs.add');
         } catch (Throwable $e) {
             return redirect()->back()->withInput()->with(self::ERROR_, self::ERROR_UNKNOWN);
         }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param Request $request
-     * @return RedirectResponse
-     */
     public function store(Request $request): RedirectResponse
     {
         $validator = Validator::make($request->all(), [
+            'email' => 'required|string|email|max:255|unique:users',
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            // 'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'nullable|string|min:8',
             'phone' => 'required|numeric|digits:10',
-            'role' => 'nullable|in:admin,trainer,reception,member',
             'gender' => 'required|in:Female,Male',
         ]);
 
@@ -72,18 +52,14 @@ class UserController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $id = User::latest('id')->first();
-
-        
         $attributes = $request->only(['first_name', 'last_name', 'email', 'phone', 'gender']);
-        $attributes['role'] = $request->input('role', 'member');
+        $attributes['role'] = $request->input('role', 'trainer');
         $attributes['password'] = $request->input('password', '12345678');
-        $attributes['email'] = 'admin'. $id->id + 1 .'@gmail.com';
-
         try {
             $this->userRepository->store($attributes);
-            return redirect()->route('admin.memberships.add')->with(self::SUCCESS_, 'User'.self::SUCCESS_STORE);
+            return redirect()->route('admin.staffs.add')->with(self::SUCCESS_, 'Staff'.self::SUCCESS_STORE);
         } catch (Throwable $e) {
+            dd($e);
             return redirect()->back()->withInput()->with(self::ERROR_, self::ERROR_UNKNOWN);
         }
     }
@@ -97,34 +73,22 @@ class UserController extends Controller
     public function show(User $user): View|RedirectResponse
     {
         try {
-            return view(self::ADMIN_.'users.view', compact('user'));
+            return view(self::ADMIN_.'staffs.view', compact('user'));
         } catch (Throwable $e) {
+            dd($e);
             return redirect()->back()->withInput()->with(self::ERROR_, self::ERROR_UNKNOWN);
         }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param User $user
-     * @return View|RedirectResponse
-     */
     public function edit(User $user): View|RedirectResponse
     {
         try {
-            return view(self::ADMIN_.'users.edit', compact('user'));
+            return view(self::ADMIN_.'staffs.edit', compact('user'));
         } catch (Throwable $e) {
             return redirect()->back()->withInput()->with(self::ERROR_, self::ERROR_UNKNOWN);
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param Request $request
-     * @param User $user
-     * @return RedirectResponse
-     */
     public function update(Request $request, User $user): RedirectResponse
     {
         $validator = Validator::make($request->all(), [
@@ -133,7 +97,7 @@ class UserController extends Controller
             'email' => 'sometimes|string|email|max:255|unique:users,email,' . $user->id,
             'password' => 'sometimes|string|min:8',
             'phone' => 'required|numeric|digits:10',
-            'role' => 'sometimes|in:admin,trainer,reception,member',
+            'role' => 'sometimes|in:admin,trainer,reception',
             'gender' => 'sometimes|in:Female,Male',
         ]);
 
@@ -145,7 +109,7 @@ class UserController extends Controller
 
         try {
             $this->userRepository->update($user, $attributes);
-            return redirect()->back()->withInput()->with(self::SUCCESS_, self::SUCCESS_UPDATE);
+            return redirect()->back()->withInput()->with(self::SUCCESS_, 'Staff'.self::SUCCESS_UPDATE);
         } catch (NoUpdateNeededException $e) {
             return redirect()->back()->withInput()->with(self::SUCCESS_, self::SUCCESS_NO_UPDATE);
         } catch (Throwable $e) {
@@ -153,12 +117,6 @@ class UserController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param User $user
-     * @return RedirectResponse
-     */
     public function destroy(User $user): RedirectResponse
     {
         try {
@@ -170,16 +128,16 @@ class UserController extends Controller
     }
 
     /**
-     * Retrieves user data from the database.
+     * Retrieves staff data from the database.
      *
      * @return JsonResponse
      */
-    public function getUsersData(): JsonResponse
+    public function getStaffData(): JsonResponse
     {
-        $query = User::where('role', 'member'); 
+        $query = User::where('role', 'trainer');
 
         return DataTables::of($query)
-            ->addIndexColumn() 
+            ->addIndexColumn()
             ->editColumn('name', function ($row) {
                 return $row->getName();
             })
@@ -187,17 +145,17 @@ class UserController extends Controller
                 return $row->email;
             })
             ->editColumn('phone', function ($row) {
-                return $row->phone; 
+                return $row->phone;
             })
             ->addColumn('action', function ($row) {
                 return '
-                    <a href="' . route('admin.users.view', $row->id) . '" class="btn btn-info btn-xs btn-flat">
+                    <a href="' . route('admin.staffs.view', $row->id) . '" class="btn btn-info btn-xs btn-flat">
                         <i class="fas fa-eye"></i> View
                     </a>
-                    <a href="' . route('admin.users.edit', $row->id) . '" class="btn btn-primary btn-xs btn-flat">
+                    <a href="' . route('admin.staffs.edit', $row->id) . '" class="btn btn-primary btn-xs btn-flat">
                         <i class="fas fa-edit"></i> Edit
                     </a>
-                    <a href="' . route('admin.users.delete', $row->id) . '" 
+                    <a href="' . route('admin.staffs.delete', $row->id) . '" 
                         onclick="if(confirm(\'Are you sure you want to delete ' . $row->getName() . '?\') == false){event.preventDefault()}" 
                         class="btn btn-danger btn-xs btn-flat">
                         <i class="fas fa-trash"></i> Delete
@@ -210,5 +168,4 @@ class UserController extends Controller
             ->rawColumns(['action'])
             ->make(true);
     }
-
 }

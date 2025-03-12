@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\AuditTrailController;
+use App\Http\Controllers\Admin\StaffController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\InvoiceController;
@@ -116,4 +117,21 @@ Route::group([
     Route::get('/list-data', [PaymentController::class, 'getPaymentsData'])->name('list.data');
     Route::post('/mark-failed', [PaymentController::class, 'markFailed'])->name('mark.failed');
     Route::post('/mark-completed', [PaymentController::class, 'markCompleted'])->name('mark.completed');
+});
+
+/**
+ * Group For `/admin/staffs/*`
+ */
+Route::group([
+    'prefix' => 'staffs',
+    'as' => 'staffs.'
+], function () {
+    Route::get('/add', [StaffController::class, 'create'])->name('add');
+    Route::post('/add', [StaffController::class, 'store'])->name('store');
+    Route::get('/list', [StaffController::class, 'index'])->name('list');
+    Route::get('/view/{user}', [StaffController::class, 'show'])->name('view');
+    Route::get('/edit/{user}', [StaffController::class, 'edit'])->name('edit');
+    Route::post('/update/{user}', [StaffController::class, 'update'])->name('update');
+    Route::get('/delete/{user}', [StaffController::class, 'destroy'])->name('delete');
+    Route::get('/list-data', [StaffController::class, 'getStaffData'])->name('list.data');
 });
