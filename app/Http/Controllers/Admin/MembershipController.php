@@ -143,7 +143,7 @@ class MembershipController extends Controller
         return DataTables::of($query)
             ->addIndexColumn() 
             ->editColumn('name', function ($row) {
-                return $row->user->getName();
+                return $row->user?->getName() ?? 'N/A';
             })
             ->editColumn('start_date', function ($row) {
                 return $row->start_date;

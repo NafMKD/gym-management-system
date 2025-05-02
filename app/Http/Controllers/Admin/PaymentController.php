@@ -149,7 +149,7 @@ class PaymentController extends Controller
         return DataTables::of($query)
             ->addIndexColumn() 
             ->editColumn('name', function ($row) {
-                return $row->membership->user->getName();
+                return $row->membership?->user?->getName() ?? 'N/A';
             })
             ->editColumn('invoice', function ($row) {
                 return $row->invoice->invoice_number;
@@ -289,7 +289,7 @@ class PaymentController extends Controller
                 return DataTables::of($query)
                     ->addIndexColumn()
                     ->editColumn('membership_id', function ($row) {
-                        return $row->membership->user->getName();
+                        return $row->membership?->user?->getName() ?? 'N/A';
                     })
                     ->editColumn('invoice', function ($row) {
                         return $row->invoice->invoice_number;

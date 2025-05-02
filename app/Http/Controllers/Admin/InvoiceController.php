@@ -56,7 +56,7 @@ class InvoiceController extends Controller
         return DataTables::of($query)
             ->addIndexColumn() 
             ->editColumn('name', function ($row) {
-                return $row->membership->user->getName();
+                return $row->membership?->user?->getName() ?? 'N/A';;
             })
             ->editColumn('package', function ($row) {
                 return is_null($row->membership->package?->name) ? __("Custom") :ucwords($row->membership->package?->name);
