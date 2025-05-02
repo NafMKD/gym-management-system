@@ -139,7 +139,7 @@ class StaffController extends Controller
         return DataTables::of($query)
             ->addIndexColumn()
             ->editColumn('name', function ($row) {
-                return $row->getName();
+                return $row?->getName() ?? 'N/A';
             })
             ->editColumn('email', function ($row) {
                 return $row->email;
