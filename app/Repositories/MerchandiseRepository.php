@@ -20,7 +20,7 @@ class MerchandiseRepository
     /**
      * Sell merchandise: invoice, sale lines, stock movements, completed payment.
      *
-     * @param  array{user_id:int,lines:array<int,array{product_id:int,quantity:int}>,payment_method:string,payment_bank?:string|null,bank_transaction_number?:string|null,notes?:string|null}  $attributes
+     * @param  array{user_id?:int|null,lines:array<int,array{product_id:int,quantity:int}>,payment_method:string,payment_bank?:string|null,bank_transaction_number?:string|null,notes?:string|null}  $attributes
      */
     public function checkout(array $attributes): Invoice
     {
@@ -81,9 +81,16 @@ class MerchandiseRepository
                 throw new \Exception(__('Invoice total must be greater than zero.'));
             }
 
+            $userId = $attributes['user_id'] ?? null;
+            if ($userId === '' || $userId === false) {
+                $userId = null;
+            } elseif ($userId !== null) {
+                $userId = (int) $userId;
+            }
+
             /** @var Invoice $invoice */
             $invoice = $this->invoiceRepository->store([
-                'user_id' => (int) $attributes['user_id'],
+                'user_id' => $userId,
                 'amount' => $total,
                 'invoice_source' => 'merchandise',
             ]);

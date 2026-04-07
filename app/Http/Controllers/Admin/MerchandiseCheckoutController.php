@@ -41,7 +41,10 @@ class MerchandiseCheckoutController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validator = Validator::make($request->all(), [
-            'user_id' => 'required|exists:users,id',
+            'user_id' => [
+                'nullable',
+                Rule::exists('users', 'id')->where(fn ($q) => $q->where('role', 'member')),
+            ],
             'payment_method' => 'required|in:cash,bank',
             'payment_bank' => [
                 Rule::requiredIf(fn () => $request->input('payment_method') === 'bank'),
@@ -73,8 +76,9 @@ class MerchandiseCheckoutController extends Controller
             return redirect()->back()->withInput()->with(self::ERROR_, __('Add at least one product line.'));
         }
 
+        $rawUserId = $request->input('user_id');
         $payload = [
-            'user_id' => (int) $request->input('user_id'),
+            'user_id' => ($rawUserId === null || $rawUserId === '') ? null : (int) $rawUserId,
             'lines' => $lines,
             'payment_method' => $request->input('payment_method'),
             'payment_bank' => $request->input('payment_bank'),

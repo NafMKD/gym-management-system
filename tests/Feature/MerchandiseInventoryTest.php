@@ -1,6 +1,7 @@
 <?php
 
 use App\Mail\LowStockProductsMail;
+use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
@@ -44,6 +45,45 @@ test('merchandise checkout creates invoice, payment, and decrements stock', func
         'product_id' => $product->id,
         'quantity_change' => -2,
         'reason' => 'sale',
+    ]);
+});
+
+test('walk-in merchandise checkout creates paid invoice with null user_id', function () {
+    $admin = User::factory()->admin()->create();
+
+    $product = Product::factory()->create([
+        'stock_quantity' => 5,
+        'unit_price' => 25.00,
+        'low_stock_threshold' => 2,
+        'is_active' => true,
+    ]);
+
+    $response = $this->actingAs($admin)->post(route('admin.merchandise.checkout.store'), [
+        'user_id' => '',
+        'payment_method' => 'cash',
+        'lines' => [
+            ['product_id' => $product->id, 'quantity' => 1],
+        ],
+    ]);
+
+    $response->assertRedirect();
+    $product->refresh();
+    expect($product->stock_quantity)->toBe(4);
+
+    $invoice = Invoice::query()
+        ->where('invoice_source', 'merchandise')
+        ->whereNull('user_id')
+        ->where('amount', 25.00)
+        ->latest('id')
+        ->first();
+
+    $this->assertNotNull($invoice);
+    expect($invoice->status)->toBe('paid');
+
+    $this->assertDatabaseHas('payments', [
+        'invoice_id' => $invoice->id,
+        'status' => 'completed',
+        'amount' => 25.00,
     ]);
 });
 

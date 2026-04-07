@@ -125,13 +125,19 @@ Each phase below should **list concrete routes/pages** per role so “dashboard�
 
 | # | Task | Check |
 |---|------|-------|
-| 3.1 | Repository: extend `MerchandiseRepository::checkout()` (or equivalent) to allow **`user_id` null**; set `invoice_source` / `user_id` consistently; ensure `InvoiceRepository` / validation updated. | [ ] |
-| 3.2 | Migration if needed: confirm `invoices.user_id` nullable (already true from Ch.2—recheck); document “walk-in” display label in UI. | [ ] |
-| 3.3 | **POS UI:** redesign checkout Blade + JS—quick line items, optional customer picker, large tap targets, minimal steps (match AdminLTE assets, no new SPA framework). | [ ] |
-| 3.4 | Remove mandatory “Customer (member) *” from validation; optional select or “Walk-in” default. | [ ] |
-| 3.5 | Regression tests: checkout with member, checkout walk-in, stock + invoice + payment assertions. | [ ] |
+| 3.1 | Repository: extend `MerchandiseRepository::checkout()` (or equivalent) to allow **`user_id` null**; set `invoice_source` / `user_id` consistently; ensure `InvoiceRepository` / validation updated. | [x] |
+| 3.2 | Migration if needed: confirm `invoices.user_id` nullable (already true from Ch.2—recheck); document “walk-in” display label in UI. | [x] |
+| 3.3 | **POS UI:** redesign checkout Blade + JS—quick line items, optional customer picker, large tap targets, minimal steps (match AdminLTE assets, no new SPA framework). | [x] |
+| 3.4 | Remove mandatory “Customer (member) *” from validation; optional select or “Walk-in” default. | [x] |
+| 3.5 | Regression tests: checkout with member, checkout walk-in, stock + invoice + payment assertions. | [x] |
 
-**Phase 3 implementation notes:** _(fill when done.)_
+**Phase 3 implementation notes:**
+
+- **`invoices.user_id`:** Already nullable (`2026_04_09_100001_add_merchandise_fields_to_invoices_and_payments.php`); no new migration.
+- **`InvoiceRepository::store`:** Merchandise invoices no longer require `user_id`; membership invoices still require `membership_id`.
+- **`MerchandiseRepository::checkout`:** Accepts nullable `user_id`; `MerchandiseCheckoutController` validates `user_id` as optional `exists:users,id` scoped to `role = member`.
+- **UI:** `resources/views/pages/admin/merchandise/checkout.blade.php` — default **Walk-in**, `form-control-lg` / large buttons, **Quick add** product chips + line table, member labels show phone (and email when present).
+- **Display:** Invoice PDF/HTML partial, invoice DataTables name column, and merchandise email greeting use **Walk-in** when no member is linked.
 
 ---
 

@@ -116,7 +116,7 @@ class InvoiceController extends Controller
             ->addIndexColumn()
             ->editColumn('name', function ($row) {
                 if (($row->invoice_source ?? 'membership') === 'merchandise') {
-                    return $row->customer?->getName() ?? 'N/A';
+                    return $row->customer?->getName() ?? __('Walk-in');
                 }
 
                 return $row->membership?->user?->getName() ?? 'N/A';

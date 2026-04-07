@@ -4,7 +4,7 @@
 @php
     $isMerchandise = ($invoice->invoice_source ?? 'membership') === 'merchandise';
     $helloName = $isMerchandise
-        ? ($invoice->customer?->first_name ?? __('Customer'))
+        ? ($invoice->customer?->first_name ?? __('Walk-in'))
         : ($invoice->membership?->user?->first_name ?? __('Member'));
 @endphp
 

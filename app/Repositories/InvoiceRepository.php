@@ -34,9 +34,7 @@ class InvoiceRepository extends BaseRepository
                 if ($source === 'membership' && empty($validatedAttributes['membership_id'])) {
                     throw new \Exception('Membership is required for membership invoices.');
                 }
-                if ($source === 'merchandise' && empty($validatedAttributes['user_id'])) {
-                    throw new \Exception('Customer is required for merchandise invoices.');
-                }
+                // Merchandise: user_id optional (walk-in / retail without linked member).
 
                 $year = now()->format('y');
                 $lastInvoice = Invoice::where('invoice_number', 'like', "INV-$year-%")->latest('id')->first();

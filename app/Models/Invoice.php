@@ -34,7 +34,7 @@ class Invoice extends Model
     }
 
     /**
-     * Customer (walk-in / merchandise buyer) when not tied to a membership row.
+     * Linked member for merchandise invoices; null means walk-in (no member on file).
      */
     public function customer(): BelongsTo
     {

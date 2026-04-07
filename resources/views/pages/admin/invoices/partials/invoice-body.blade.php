@@ -34,6 +34,9 @@
                     <strong>{{ $billTo->getName() }}</strong><br>
                     @php $phone = (string) $billTo->phone; @endphp
                     Phone: (251) {{ strlen($phone) >= 9 ? substr($phone, 0, 3) . '-' . substr($phone, 3, 2) . '-' . substr($phone, 5) : $phone }}<br>
+                @elseif($isMerchandise)
+                    <strong>{{ __('Walk-in') }}</strong><br>
+                    <span class="text-muted">{{ __('No member linked') }}</span>
                 @else
                     <strong>—</strong>
                 @endif
