@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\AuditTrailController;
+use App\Http\Controllers\Admin\MembershipExtensionRequestController;
 use App\Http\Controllers\Admin\StaffController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\DashboardController;
@@ -56,6 +57,20 @@ Route::group([
     'prefix' => 'memberships',
     'as' => 'memberships.'
 ], function () {
+    Route::get('/renew/{membership}', [MembershipController::class, 'renew'])->name('renew');
+    Route::get('/upgrade/{membership}', [MembershipController::class, 'showUpgrade'])->name('upgrade');
+    Route::post('/upgrade/{membership}', [MembershipController::class, 'updateUpgrade'])->name('upgrade.update');
+
+    Route::prefix('extension-requests')->as('extension_requests.')->group(function () {
+        Route::get('/list', [MembershipExtensionRequestController::class, 'index'])->name('list');
+        Route::get('/add', [MembershipExtensionRequestController::class, 'create'])->name('add');
+        Route::post('/add', [MembershipExtensionRequestController::class, 'store'])->name('store');
+        Route::get('/list-data', [MembershipExtensionRequestController::class, 'getListData'])->name('list.data');
+        Route::get('/view/{membership_extension_request}', [MembershipExtensionRequestController::class, 'show'])->name('view');
+        Route::post('/approve', [MembershipExtensionRequestController::class, 'approve'])->name('approve');
+        Route::post('/reject', [MembershipExtensionRequestController::class, 'reject'])->name('reject');
+    });
+
     Route::get('/add', [MembershipController::class, 'create'])->name('add');
     Route::post('/add', [MembershipController::class, 'store'])->name('store');
     Route::get('/list', [MembershipController::class, 'index'])->name('list');

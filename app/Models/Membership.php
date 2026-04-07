@@ -96,4 +96,14 @@ class Membership extends Model
     {
         return $this->hasMany(Payment::class, 'membership_id');
     }
+
+    /**
+     * Extension requests for this membership.
+     *
+     * @return HasMany
+     */
+    public function extensionRequests(): HasMany
+    {
+        return $this->hasMany(MembershipExtensionRequest::class, 'membership_id');
+    }
 }

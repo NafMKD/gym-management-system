@@ -42,7 +42,7 @@
                                 >
                             <option value="">-- {{ __("Select") }} --</option>
                             @foreach ($availableMembers as $availableMember)
-                                <option value="{{ $availableMember->id }}">{{ $availableMember->getName() }}
+                                <option value="{{ $availableMember->id }}" @selected((string) old('user_id', $selectedUserId ?? '') === (string) $availableMember->id)>{{ $availableMember->getName() }}
                                 </option>
                             @endforeach
                         </select>
@@ -59,7 +59,7 @@
                                 >
                             <option value="">{{ __("Custom") }}</option>
                             @foreach ($availablePackages as $availablePackage)
-                                <option value="{{ $availablePackage->id }}">{{ $availablePackage->name }}
+                                <option value="{{ $availablePackage->id }}" @selected((string) old('package_id', $selectedPackageId ?? '') === (string) $availablePackage->id)>{{ $availablePackage->name }}
                                 </option>
                             @endforeach
                         </select>
@@ -106,6 +106,13 @@
 @section('script')
     <script>
         $(function () {
+            @if(!empty($renewalMembership))
+            Swal.fire({
+                icon: 'info',
+                title: '{{ __("Renewal") }}',
+                text: '{{ __("You are adding a membership after #:id. Choose dates and package, then register.", ["id" => $renewalMembership->id]) }}'
+            });
+            @endif
             let packageData = {};
 
             // date

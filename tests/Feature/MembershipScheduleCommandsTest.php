@@ -23,7 +23,7 @@ test('memberships:process-expiry sets inactive when calendar end date has passed
 
     expect($membership->fresh()->status)->toBe('inactive');
 
-    Carbon::setTestNow();
+    Carbon::setTestNow(null);
 });
 
 test('memberships:process-expiry sets inactive when remaining_days is zero', function () {
@@ -43,7 +43,7 @@ test('memberships:process-expiry sets inactive when remaining_days is zero', fun
 
     expect($membership->fresh()->status)->toBe('inactive');
 
-    Carbon::setTestNow();
+    Carbon::setTestNow(null);
 });
 
 test('memberships:notify-expiring sends mail for memberships ending in configured days', function () {
@@ -67,5 +67,5 @@ test('memberships:notify-expiring sends mail for memberships ending in configure
         return $mail->hasTo($user->email);
     });
 
-    Carbon::setTestNow();
+    Carbon::setTestNow(null);
 });

@@ -27,6 +27,12 @@
         <x-card class="card-default" title="Membership Detail" no-message footer>
             <x-slot:headerTools>
                 <div class="card-tools mr-5">
+                    @if($membership->status === 'active')
+                        <a class="mr-2" href="{{ route('admin.memberships.upgrade', $membership) }}"><button type="button" class="btn btn-secondary"><i class="fas fa-level-up-alt"></i> {{ __("Change package") }}</button></a>
+                        <a class="mr-2" href="{{ route('admin.memberships.extension_requests.add') }}?membership_id={{ $membership->id }}"><button type="button" class="btn btn-info"><i class="fas fa-calendar-plus"></i> {{ __("Extension request") }}</button></a>
+                    @elseif($membership->status === 'inactive')
+                        <a class="mr-2" href="{{ route('admin.memberships.renew', $membership) }}"><button type="button" class="btn btn-primary"><i class="fas fa-redo"></i> {{ __("Renew") }}</button></a>
+                    @endif
                     <a class="mr-5" href="{{ route('admin.memberships.print_id_card', $membership->id) }}"><button type="button" class="btn btn-success"><i
                             class="fas fa-print"></i>
                     {{ __("Print ID Card") }}

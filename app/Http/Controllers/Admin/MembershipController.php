@@ -44,9 +44,10 @@ class MembershipController extends Controller
     /**
      * Show the form for creating a new resource.
      *
+     * @param Request $request
      * @return View|RedirectResponse
      */
-    public function create(): View|RedirectResponse
+    public function create(Request $request): View|RedirectResponse
     {
         try {
             $availableMembers = User::where('role', 'member')
@@ -55,10 +56,115 @@ class MembershipController extends Controller
                 $query->where('status', 'active');
             })
             ->get();
-            $availablePackages = Package::all(); 
-            return view(self::ADMIN_.'memberships.add', compact('availableMembers', 'availablePackages'));
+
+            $renewalMembership = null;
+            $selectedUserId = null;
+            $selectedPackageId = null;
+
+            $renewFromId = $request->query('renew_from');
+            if ($renewFromId) {
+                $renewalMembership = Membership::with(['user', 'package'])->find($renewFromId);
+                if (
+                    $renewalMembership
+                    && $renewalMembership->status !== 'active'
+                    && $renewalMembership->user
+                ) {
+                    $selectedUserId = $renewalMembership->user_id;
+                    $selectedPackageId = $renewalMembership->package_id;
+                    if (! $availableMembers->contains('id', $selectedUserId)) {
+                        $availableMembers = $availableMembers->push($renewalMembership->user)->unique('id');
+                    }
+                } else {
+                    $renewalMembership = null;
+                }
+            }
+
+            $availablePackages = Package::all();
+
+            return view(self::ADMIN_.'memberships.add', compact(
+                'availableMembers',
+                'availablePackages',
+                'selectedUserId',
+                'selectedPackageId',
+                'renewalMembership'
+            ));
         } catch (Throwable $e) {
             return redirect()->back()->withInput()->with(self::ERROR_, self::ERROR_UNKNOWN);
+        }
+    }
+
+    /**
+     * Shortcut to add a new membership for renewal after a non-active membership.
+     *
+     * @param Membership $membership
+     * @return RedirectResponse
+     */
+    public function renew(Membership $membership): RedirectResponse
+    {
+        if ($membership->status === 'active') {
+            return redirect()
+                ->route('admin.memberships.view', $membership)
+                ->with(self::ERROR_, __('Renewal is only for members without an active membership.'));
+        }
+
+        return redirect()->route('admin.memberships.add', ['renew_from' => $membership->id]);
+    }
+
+    /**
+     * Form to change package on an active membership (upgrade / downgrade).
+     *
+     * @param Membership $membership
+     * @return View|RedirectResponse
+     */
+    public function showUpgrade(Membership $membership): View|RedirectResponse
+    {
+        try {
+            if ($membership->status !== 'active') {
+                return redirect()
+                    ->route('admin.memberships.view', $membership)
+                    ->with(self::ERROR_, __('Only active memberships can change package.'));
+            }
+
+            $availablePackages = Package::all();
+
+            return view(self::ADMIN_.'memberships.upgrade', compact('membership', 'availablePackages'));
+        } catch (Throwable $e) {
+            return redirect()->back()->with(self::ERROR_, self::ERROR_UNKNOWN);
+        }
+    }
+
+    /**
+     * Apply selected package to an active membership.
+     *
+     * @param Request $request
+     * @param Membership $membership
+     * @return RedirectResponse
+     */
+    public function updateUpgrade(Request $request, Membership $membership): RedirectResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'package_id' => 'required|exists:packages,id',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        try {
+            if ($membership->status !== 'active') {
+                return redirect()
+                    ->route('admin.memberships.view', $membership)
+                    ->with(self::ERROR_, __('Only active memberships can change package.'));
+            }
+
+            $package = Package::findOrFail($request->input('package_id'));
+            $this->membershipRepository->applyPackageUpgrade($membership, $package);
+
+            return redirect()
+                ->route('admin.memberships.view', $membership)
+                ->with(self::SUCCESS_, __('Package updated.'));
+        } catch (Throwable $e) {
+            return redirect()->back()->withInput()->with(self::ERROR_, $e->getMessage());
         }
     }
 
@@ -273,9 +379,8 @@ class MembershipController extends Controller
                 'is_printed' => true,
             ]);
 
-            return view(Self::ADMIN_ . 'memberships.id_card', compact('membership', 'print'));
+            return view(self::ADMIN_.'memberships.id_card', compact('membership', 'print'));
         } catch (Throwable $e) {
-            dd($e);
             return redirect()->back()->with(self::ERROR_, $e->getMessage());
         }
     }

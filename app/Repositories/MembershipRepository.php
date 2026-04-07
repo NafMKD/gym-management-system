@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Membership;
+use App\Models\Package;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -157,5 +158,56 @@ class MembershipRepository extends BaseRepository {
             ->whereDate('end_date', $target)
             ->with('user')
             ->get();
+    }
+
+    /**
+     * Extend an active membership by adding days to the calendar end date and visit allowance.
+     * All calendar updates for extensions go through this method.
+     *
+     * @throws \Exception
+     */
+    public function extendActiveMembership(Membership $membership, int $days): void
+    {
+        if ($days < 1 || $days > 10) {
+            throw new \Exception(__('Extension must be between 1 and 10 days.'));
+        }
+
+        if ($membership->status !== 'active') {
+            throw new \Exception(__('Only active memberships can be extended.'));
+        }
+
+        $today = Carbon::today()->toDateString();
+        if ($today > Carbon::parse($membership->end_date)->toDateString()) {
+            throw new \Exception(__('This membership is past its calendar end date; extend only while still valid.'));
+        }
+
+        DB::transaction(function () use ($membership, $days) {
+            $membership->end_date = Carbon::parse($membership->end_date)->addDays($days)->toDateString();
+            $membership->remaining_days = ($membership->remaining_days ?? 0) + $days;
+            $membership->save();
+        });
+    }
+
+    /**
+     * Switch an active membership to a new package (upgrade / downgrade): new price, duration, and visit grant from the package.
+     *
+     * @throws \Exception
+     */
+    public function applyPackageUpgrade(Membership $membership, Package $package): void
+    {
+        if ($membership->status !== 'active') {
+            throw new \Exception(__('Only active memberships can be upgraded.'));
+        }
+
+        DB::transaction(function () use ($membership, $package) {
+            $membership->package_id = $package->id;
+            $membership->price = $package->price;
+            $membership->remaining_days = $package->granted_days;
+
+            $start = Carbon::parse($membership->start_date)->startOfDay();
+            $base = Carbon::today()->gt($start) ? Carbon::today() : $start;
+            $membership->end_date = $base->copy()->addDays($package->duration)->toDateString();
+            $membership->save();
+        });
     }
 }

@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\Attendance;
 use App\Models\Invoice;
 use App\Models\Membership;
+use App\Models\MembershipExtensionRequest;
 use App\Models\Package;
 use App\Models\Payment;
 use App\Models\User;
@@ -32,5 +33,6 @@ class AppServiceProvider extends ServiceProvider
         Package::observe(AuditTrailObserver::class);
         Payment::observe(AuditTrailObserver::class);
         User::observe(AuditTrailObserver::class);
+        MembershipExtensionRequest::observe(AuditTrailObserver::class);
     }
 }

@@ -75,11 +75,13 @@ Do **not** introduce new architectural layers (e.g. service classes, DTOs, API r
 
 | # | Task | Check |
 |---|------|-------|
-| 3.1 | Design migrations for extension requests (reason, requested days, status `pending|approved|rejected`, approver `user_id`, timestamps) — mirror enum/string style of existing tables. | [ ] |
-| 3.2 | Add repository methods for create/update extension; keep transactions where multiple rows change (`Membership` + extension row). | [ ] |
-| 3.3 | Admin UI: list + approve/reject using DataTables pattern; only touch `Membership` dates/`remaining_days` in one place to avoid drift. | [ ] |
-| 3.4 | Renewal / upgrade flow: new membership from existing member or extend `end_date` — pick one strategy and implement in `MembershipController` + repository with validation consistent with `store`. | [ ] |
-| 3.5 | Register new models on `AuditTrailObserver` if they should appear in audit trail like other core entities. | [ ] |
+| 3.1 | Design migrations for extension requests (reason, requested days, status `pending|approved|rejected`, approver `user_id`, timestamps) — mirror enum/string style of existing tables. | [x] |
+| 3.2 | Add repository methods for create/update extension; keep transactions where multiple rows change (`Membership` + extension row). | [x] |
+| 3.3 | Admin UI: list + approve/reject using DataTables pattern; only touch `Membership` dates/`remaining_days` in one place to avoid drift. | [x] |
+| 3.4 | Renewal / upgrade flow: new membership from existing member or extend `end_date` — pick one strategy and implement in `MembershipController` + repository with validation consistent with `store`. | [x] |
+| 3.5 | Register new models on `AuditTrailObserver` if they should appear in audit trail like other core entities. | [x] |
+
+**Phase 3 implementation notes:** Table `membership_extension_requests` (`MembershipExtensionRequest` model). `MembershipExtensionRequestRepository` handles `store` / `approve` / `reject`; calendar + visit extension applies only via `MembershipRepository::extendActiveMembership()` (1–10 days). Admin UI: `MembershipExtensionRequestController`, routes `admin.memberships.extension_requests.*`, views under `pages/admin/membership_extension_requests/`. **Renewal:** `GET admin/memberships/renew/{membership}` → add form with `renew_from` + preselected member/package. **Upgrade:** `MembershipRepository::applyPackageUpgrade()` + `memberships/upgrade` Blade. Sidebar **Memberships** submenu lists Add, List, Extension requests. `MembershipExtensionRequest` is observed for audit trail. Feature test: `tests/Feature/MembershipLifecycleTest.php`. Pest `afterEach` resets Carbon test time for Feature tests.
 
 ---
 

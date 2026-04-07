@@ -86,11 +86,34 @@
                         </li>
                     </ul>
                 </li>
-                <li class="nav-item">
-                    <a href="{{ route('admin.memberships.list') }}" class="nav-link  {{ !request()->routeIs('admin.membership*') ?: 'active' }}">
+                <li class="nav-item  {{ !request()->routeIs('admin.memberships*') ?: 'menu-open' }}">
+                    <a href="#" class="nav-link {{ !request()->routeIs('admin.memberships*') ?: 'active' }}">
                         <i class="nav-icon fas fa-user-tag"></i>
-                        <p>{{ __("Memberships") }}</p>
+                        <p>
+                            {{ __("Memberships") }}
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
                     </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{{ route('admin.memberships.add') }}" class="nav-link {{ !request()->routeIs('admin.memberships.add') ?: 'active' }}">
+                                <i class="fas fa-plus nav-icon"></i>
+                                <p>{{ __("Add Membership") }}</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.memberships.list') }}" class="nav-link {{ !(request()->routeIs('admin.memberships.list') || request()->routeIs('admin.memberships.view') || request()->routeIs('admin.memberships.upgrade') || request()->routeIs('admin.memberships.renew')) ?: 'active' }}">
+                                <i class="fas fa-list nav-icon"></i>
+                                <p>{{ __("Memberships List") }}</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.memberships.extension_requests.list') }}" class="nav-link {{ request()->routeIs('admin.memberships.extension_requests*') ? 'active' : '' }}">
+                                <i class="fas fa-calendar-plus nav-icon"></i>
+                                <p>{{ __("Extension requests") }}</p>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
                 <li class="nav-item">
                     <a href="{{ route('admin.invoices.list') }}" class="nav-link  {{ !request()->routeIs('admin.invoices*') ?: 'active' }}">
