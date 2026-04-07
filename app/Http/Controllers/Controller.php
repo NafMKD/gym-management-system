@@ -11,6 +11,7 @@ abstract class Controller
 
     public const ADMIN_ = 'pages.admin.';
     public const TRAINER = 'pages.staff.';
+    public const MEMBER_ = 'pages.member.';
     public const SUPERVISOR_ = 'pages.supervisor.';
 
     public const SUCCESS_ = 'success';

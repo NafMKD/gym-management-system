@@ -34,11 +34,13 @@ Do **not** introduce new architectural layers (e.g. service classes, DTOs, API r
 
 | # | Task | Check |
 |---|------|-------|
-| 1.1 | Align Laravel Breeze registration with `User` model fields (`first_name`, `last_name`, `phone`, `gender`, `role`) and hashed `password`; remove or replace invalid `User::create(['name' => ...])` usage in `RegisteredUserController`. | [ ] |
-| 1.2 | Either implement named routes `trainer.home`, `reception.home`, `member.home` with minimal Blade shells under `resources/views/pages/...`, **or** change `AuthenticatedSessionController` to redirect non-admin roles to a documented fallback (e.g. login with message) until portals exist — avoid `RouteNotFoundException`. | [ ] |
-| 1.3 | If public self-registration is out of scope, disable `register` routes/middleware consistently and document; if in scope, match validation to `UserController@store` conventions. | [ ] |
-| 1.4 | Reconcile `UserAccess` middleware with actual route names after 1.2 (each role must land somewhere valid). | [ ] |
-| 1.5 | Smoke-test: admin login → `admin.home`; each role path resolves without 500/404. | [ ] |
+| 1.1 | Align Laravel Breeze registration with `User` model fields (`first_name`, `last_name`, `phone`, `gender`, `role`) and hashed `password`; remove or replace invalid `User::create(['name' => ...])` usage in `RegisteredUserController`. | [x] |
+| 1.2 | Either implement named routes `trainer.home`, `reception.home`, `member.home` with minimal Blade shells under `resources/views/pages/...`, **or** change `AuthenticatedSessionController` to redirect non-admin roles to a documented fallback (e.g. login with message) until portals exist — avoid `RouteNotFoundException`. | [x] |
+| 1.3 | If public self-registration is out of scope, disable `register` routes/middleware consistently and document; if in scope, match validation to `UserController@store` conventions. | [x] |
+| 1.4 | Reconcile `UserAccess` middleware with actual route names after 1.2 (each role must land somewhere valid). | [x] |
+| 1.5 | Smoke-test: admin login → `admin.home`; each role path resolves without 500/404. | [x] |
+
+**Phase 1 implementation notes:** Registration stays **enabled**; `RegisteredUserController` delegates to `UserRepository` (same hashing/fields as admin user creation), default role `member`, redirect to `dashboard`. Named route `dashboard` (`GET /dashboard`) forwards by role to `admin.home`, `trainer.home`, `reception.home`, or `member.home`. Portal UI uses `layouts.portal` and `pages.staff.home` / `pages.member.home` (“Coming soon.”). `routes/web/portal.php` holds trainer/reception/member route groups. `UserFactory` matches the real `users` columns. Auth tests: `verification.send` in verify-email view; `NewPasswordController` passes `token`/`email` into the reset Blade.
 
 ---
 

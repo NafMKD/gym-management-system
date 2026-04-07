@@ -28,7 +28,7 @@ class UserRepository extends BaseRepository {
                     'gender' => $attributes['gender'] ?? null,
                 ];
 
-                if (!isset($validatedAttributes['first_name'], $validatedAttributes['last_name'], $validatedAttributes['email'], $validatedAttributes['password'], $validatedAttributes['role'], $validatedAttributes['gender'])) {
+                if (! isset($validatedAttributes['first_name'], $validatedAttributes['last_name'], $validatedAttributes['email'], $validatedAttributes['password'], $validatedAttributes['phone'], $validatedAttributes['role'], $validatedAttributes['gender'])) {
                     throw new \Exception("Missing required attributes.");
                 }
 

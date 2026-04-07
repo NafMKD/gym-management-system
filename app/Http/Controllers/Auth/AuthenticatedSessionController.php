@@ -30,19 +30,16 @@ class AuthenticatedSessionController extends Controller
 
         $input = $request->all(['email', 'password']);
         
-        if( Auth::attempt($input) ) {
-            if (Auth::user()->role === 'admin') {
-                return redirect()->route('admin.home');
-            } elseif (Auth::user()->role === 'trainer') {
-                return redirect()->route('trainer.home');
-            } elseif (Auth::user()->role === 'reception') {
-                return redirect()->route('reception.home');
-            } elseif (Auth::user()->role === 'member') {
-                return redirect()->route('member.home');
+        if (Auth::attempt($input)) {
+            $role = Auth::user()->role;
+
+            if (! in_array($role, ['admin', 'trainer', 'reception', 'member'], true)) {
+                Auth::logout();
+
+                return redirect()->back()->withInput()->with('error', 'Invalid Role Type, please contact admin!');
             }
 
-            Auth::logout();
-            return redirect()->back()->withInput()->with('error', 'Invalid Role Type, please contact admin!');
+            return redirect()->route('dashboard');
         }
 
         // login failed

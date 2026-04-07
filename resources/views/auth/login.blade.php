@@ -56,6 +56,11 @@
                     @enderror
                     <div class="row mt-3">
                         <div class="col-7 mt-2">
+                            @if (Route::has('register'))
+                                <p class="mb-1 mt-2">
+                                    <a href="{{ route('register') }}">{{ __('Register') }}</a>
+                                </p>
+                            @endif
                             @if (Route::has('password.request'))
                                 <p class="mb-1 mt-2">
                                     <a href="{{ route('password.request') }}">
