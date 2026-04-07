@@ -13,7 +13,8 @@ use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\UserController;
 
 Route::get('/home', [DashboardController::class, 'index'])->name('home');
-
+Route::get('/export/memberships-csv', [DashboardController::class, 'exportMembershipsCsv'])->name('export.memberships_csv');
+Route::get('/export/payments-csv', [DashboardController::class, 'exportPaymentsCsv'])->name('export.payments_csv');
 
 /**
  * Group For `/admin/users/*`

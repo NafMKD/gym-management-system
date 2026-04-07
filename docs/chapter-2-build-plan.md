@@ -114,10 +114,12 @@ Do **not** introduce new architectural layers (e.g. service classes, DTOs, API r
 
 | # | Task | Check |
 |---|------|-------|
-| 5.1 | `DashboardController@index`: pass aggregates (counts by membership status, new memberships in period, revenue from `Payment` with `completed` status) — thin controller, calculations in repository or query scopes. | [ ] |
-| 5.2 | Replace “Comming soon” in `pages/admin/index.blade.php` with cards/tables consistent with AdminLTE markup used elsewhere. | [ ] |
-| 5.3 | Optional: simple chart JS only if the same asset pipeline (Vite vs public assets) is respected; avoid a new JS framework. | [ ] |
-| 5.4 | Export CSV for membership/payment reports optional; if added, follow DataTables export pattern already used or a single dedicated download action. | [ ] |
+| 5.1 | `DashboardController@index`: pass aggregates (counts by membership status, new memberships in period, revenue from `Payment` with `completed` status) — thin controller, calculations in repository or query scopes. | [x] |
+| 5.2 | Replace “Comming soon” in `pages/admin/index.blade.php` with cards/tables consistent with AdminLTE markup used elsewhere. | [x] |
+| 5.3 | Optional: simple chart JS only if the same asset pipeline (Vite vs public assets) is respected; avoid a new JS framework. | [x] |
+| 5.4 | Export CSV for membership/payment reports optional; if added, follow DataTables export pattern already used or a single dedicated download action. | [x] |
+
+**Phase 5 implementation notes:** `DashboardRepository` (read-only, not extending `BaseRepository`) supplies `getDashboardSummary()`: membership counts by `active` / `inactive` / `cancelled`, new memberships **this calendar month** (`created_at`), unpaid invoice count, **completed** payment revenue (this month + all time; net of refunds), last 6 months revenue series, recent memberships/payments. `DashboardController` passes `summary` to `pages/admin/index.blade.php`: AdminLTE **info-box** KPI row, **Chart.js** doughnut + bar (`public/assets/chart.js`, already in `layouts/script.blade.php`), small tables with links. CSV: `GET admin/export/memberships-csv` and `admin/export/payments-csv` streaming UTF-8 with BOM. Tests: `tests/Feature/DashboardTest.php`.
 
 ---
 
