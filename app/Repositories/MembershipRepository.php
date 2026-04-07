@@ -4,6 +4,8 @@ namespace App\Repositories;
 
 use App\Models\Membership;
 use App\Models\User;
+use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Endroid\QrCode\Writer\PngWriter;
 use Endroid\QrCode\QrCode;
@@ -110,5 +112,50 @@ class MembershipRepository extends BaseRepository {
     public function update(mixed $model, array $attributes): mixed
     {
         return null;
+    }
+
+    /**
+     * Deactivate memberships that are past the calendar end date or have no visits left.
+     * Calendar rule: inactive the day after `end_date` (same as scheduled daily check).
+     *
+     * @return int Number of memberships updated
+     */
+    public function processExpiry(): int
+    {
+        return (int) DB::transaction(function () {
+            $today = Carbon::today()->toDateString();
+
+            $memberships = Membership::query()
+                ->where('status', 'active')
+                ->where(function ($query) use ($today) {
+                    $query->whereDate('end_date', '<', $today)
+                        ->orWhere('remaining_days', '<=', 0);
+                })
+                ->get();
+
+            foreach ($memberships as $membership) {
+                $membership->status = 'inactive';
+                $membership->save();
+            }
+
+            return $memberships->count();
+        });
+    }
+
+    /**
+     * Active memberships whose calendar end date is exactly $daysFromToday days from today.
+     *
+     * @param  int  $daysFromToday  e.g. 7 means "one week before end_date"
+     * @return Collection<int, Membership>
+     */
+    public function getActiveMembershipsEndingInDays(int $daysFromToday): Collection
+    {
+        $target = Carbon::today()->addDays($daysFromToday)->toDateString();
+
+        return Membership::query()
+            ->where('status', 'active')
+            ->whereDate('end_date', $target)
+            ->with('user')
+            ->get();
     }
 }

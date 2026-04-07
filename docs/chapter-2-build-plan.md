@@ -54,12 +54,14 @@ Do **not** introduce new architectural layers (e.g. service classes, DTOs, API r
 
 | # | Task | Check |
 |---|------|-------|
-| 2.1 | Add Laravel scheduler entry in `routes/console.php` (or `bootstrap/app.php` schedule callback per Laravel 11 docs) — keep style minimal like existing file. | [ ] |
-| 2.2 | Implement a command (e.g. `php artisan memberships:process-expiry`) that: finds memberships past `end_date` or with `remaining_days`/status rules per business choice; sets status to `inactive` or `cancelled` as appropriate; uses a small repository or query scope method, not fat controllers. | [ ] |
-| 2.3 | Decide and document: **calendar expiry** vs **visit-based `remaining_days` only**; align `AttendanceController` and expiry job so rules do not contradict each other. | [ ] |
-| 2.4 | Configure mail (`.env`); add `Mailable` classes only if they follow project naming and are called from jobs/commands, not from controllers directly for heavy work. | [ ] |
-| 2.5 | Queue driver: ensure `jobs` table migration matches deployment; document `queue:work` for production. | [ ] |
-| 2.6 | Optional: `Notification` or simple mail for “expiring in X days” using the same user email fields as the rest of the app. | [ ] |
+| 2.1 | Add Laravel scheduler entry in `routes/console.php` (or `bootstrap/app.php` schedule callback per Laravel 11 docs) — keep style minimal like existing file. | [x] |
+| 2.2 | Implement a command (e.g. `php artisan memberships:process-expiry`) that: finds memberships past `end_date` or with `remaining_days`/status rules per business choice; sets status to `inactive` or `cancelled` as appropriate; uses a small repository or query scope method, not fat controllers. | [x] |
+| 2.3 | Decide and document: **calendar expiry** vs **visit-based `remaining_days` only**; align `AttendanceController` and expiry job so rules do not contradict each other. | [x] |
+| 2.4 | Configure mail (`.env`); add `Mailable` classes only if they follow project naming and are called from jobs/commands, not from controllers directly for heavy work. | [x] |
+| 2.5 | Queue driver: ensure `jobs` table migration matches deployment; document `queue:work` for production. | [x] |
+| 2.6 | Optional: `Notification` or simple mail for “expiring in X days” using the same user email fields as the rest of the app. | [x] |
+
+**Phase 2 implementation notes:** `bootstrap/app.php` uses `withSchedule`: `memberships:process-expiry` daily **00:05**, `memberships:notify-expiring` daily **08:00**. `MembershipRepository::processExpiry()` / `getActiveMembershipsEndingInDays()` hold the queries. Commands live under `App\Console\Commands` (same style as `GenerateMissingInvoicesCommand`). Reminder email: `App\Mail\MembershipExpiringSoonMail` + `resources/views/emails/membership-expiring-soon.blade.php`, sent only from `memberships:notify-expiring`. Config `config/membership.php` (`MEMBERSHIP_EXPIRING_NOTIFY_DAYS`). Rules documented in [`membership-expiry-rules.md`](./membership-expiry-rules.md). `.env.example` comments for cron (`schedule:run`) and queue worker. `AttendanceController` uses the same calendar rule as the batch job (date-string comparison) and replaces `dd()` with log + JSON 500.
 
 ---
 

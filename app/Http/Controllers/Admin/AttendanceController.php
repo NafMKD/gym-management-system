@@ -1,12 +1,14 @@
-<?php 
+<?php
 
 namespace App\Http\Controllers\Admin;
 
-use Illuminate\Http\Request;
-use App\Models\Membership;
 use App\Http\Controllers\Controller;
-use \Illuminate\Http\JsonResponse;
+use App\Models\Membership;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class AttendanceController extends Controller
 {
@@ -45,11 +47,12 @@ class AttendanceController extends Controller
                 return response()->json(['success' => false, 'message' => 'Membership is not active.'], 400);
             }
     
-            if (Carbon::now()->greaterThan($membership->end_date)) {
+            $endDate = Carbon::parse($membership->end_date)->toDateString();
+            if (Carbon::today()->toDateString() > $endDate) {
                 return response()->json(['success' => false, 'message' => 'Membership has expired.'], 400);
             }
     
-            if ($membership->remaining_days <= 0) {
+            if (($membership->remaining_days ?? 0) <= 0) {
                 $membership->status = 'inactive';
                 $membership->save();
                 return response()->json(['success' => false, 'message' => 'No remaining days on this membership.'], 400);
@@ -70,10 +73,11 @@ class AttendanceController extends Controller
                 'message' => 'Attendance recorded successfully.',
                 'membership' => $membership,
             ]);
-        } catch (\Throwable $e) {
-            dd($e);
+        } catch (Throwable $e) {
+            Log::error($e->getMessage(), ['exception' => $e]);
+
+            return response()->json(['success' => false, 'message' => 'Unable to record attendance.'], 500);
         }
-        
     }
 
 

@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -14,6 +15,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'user-access' => \App\Http\Middleware\UserAccess::class
         ]);
+    })
+    ->withSchedule(function (Schedule $schedule) {
+        $schedule->command('memberships:process-expiry')->dailyAt('00:05');
+        $schedule->command('memberships:notify-expiring')->dailyAt('08:00');
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
