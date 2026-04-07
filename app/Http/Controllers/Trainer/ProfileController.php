@@ -50,7 +50,6 @@ class ProfileController extends Controller
             'qualifications' => 'nullable|string|max:5000',
             'specializations' => 'nullable|string|max:5000',
             'bio' => 'nullable|string|max:5000',
-            'commission_per_session' => 'required|numeric|min:0',
         ]);
 
         if ($validator->fails()) {
@@ -62,7 +61,8 @@ class ProfileController extends Controller
             ['commission_per_session' => 0]
         );
 
-        $attributes = $request->only(['qualifications', 'specializations', 'bio', 'commission_per_session']);
+        // Commission rate is admin-only (staff trainer profile); trainers edit bio fields only.
+        $attributes = $request->only(['qualifications', 'specializations', 'bio']);
 
         try {
             $this->trainerProfileRepository->update($profile, $attributes);

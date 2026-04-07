@@ -37,9 +37,11 @@
                                         <textarea name="bio" class="form-control" rows="3" maxlength="5000">{{ old('bio', $profile->bio) }}</textarea>
                                     </div>
                                     <div class="form-group">
-                                        <label>{{ __('Commission per attended session') }} ({{ __('Birr') }})</label> <i class="text-danger">*</i>
-                                        <input type="number" step="0.01" min="0" name="commission_per_session" class="form-control" value="{{ old('commission_per_session', $profile->commission_per_session) }}" required>
-                                        <small class="text-muted">{{ __('Default rate for session commissions when a booking is marked attended.') }}</small>
+                                        <label>{{ __('Commission per attended session') }} ({{ __('Birr') }})</label>
+                                        <p class="form-control-plaintext border rounded px-2 py-2 mb-1 bg-light">
+                                            {{ number_format((float) $profile->commission_per_session, 2) }}
+                                        </p>
+                                        <small class="text-muted">{{ __('This rate is set by administration. Contact staff if it should change.') }}</small>
                                     </div>
                                 </div>
                             </div>
