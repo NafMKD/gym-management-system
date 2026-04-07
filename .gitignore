@@ -12,6 +12,7 @@
 .env.production
 .phpactor.json
 .phpunit.result.cache
+hips.n";
 Homestead.json
 Homestead.yaml
 auth.json

@@ -72,18 +72,18 @@ class UserController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $id = User::latest('id')->first();
 
         
         $attributes = $request->only(['first_name', 'last_name', 'email', 'phone', 'gender']);
         $attributes['role'] = $request->input('role', 'member');
         $attributes['password'] = $request->input('password', '12345678');
-        $attributes['email'] = 'admin'. $id->id + 1 .'@gmail.com';
+        $attributes['email'] = 'admin_' . time() . '_' . rand(1000,9999) .'@gmail.com';
 
         try {
             $this->userRepository->store($attributes);
             return redirect()->route('admin.memberships.add')->with(self::SUCCESS_, 'User'.self::SUCCESS_STORE);
         } catch (Throwable $e) {
+            dd($id,$e);
             return redirect()->back()->withInput()->with(self::ERROR_, self::ERROR_UNKNOWN);
         }
     }
