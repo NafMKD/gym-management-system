@@ -25,16 +25,16 @@
                         <input type="hidden" name="next" value="@php echo $_GET['next']  @endphp">
                     @endif
                     <div class="input-group">
-                        <input id="email" placeholder="Email" type="email"
-                               class="form-control @error('email') is-invalid @enderror" name="email"
-                               value="{{ old('email') }}" required autocomplete="email" autofocus>
+                        <input id="phone" placeholder="{{ __('07 or 09 + 8 digits') }}" type="text"
+                               class="form-control @error('phone') is-invalid @enderror" name="phone"
+                               value="{{ old('phone') }}" required maxlength="10" autocomplete="tel" inputmode="numeric" autofocus>
                         <div class="input-group-append">
                             <div class="input-group-text">
-                                <span class="fas fa-envelope"></span>
+                                <span class="fas fa-phone"></span>
                             </div>
                         </div>
                     </div>
-                    @error('email')
+                    @error('phone')
                     <span class="text-danger" role="alert">
                             {{ $message }}
                         </span>

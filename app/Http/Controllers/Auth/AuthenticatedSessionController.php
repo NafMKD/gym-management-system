@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Support\PhoneNumber;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,14 +24,25 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        $normalizedPhone = PhoneNumber::normalize($request->string('phone')->toString());
+        if ($normalizedPhone === null || ! PhoneNumber::isValid($normalizedPhone)) {
+            return redirect()->back()
+                ->withErrors(['phone' => __('Enter a valid mobile number (07 or 09 plus 8 digits).')])
+                ->withInput();
+        }
+        $request->merge(['phone' => $normalizedPhone]);
+
         $request->validate([
-            'email' => 'required|email',
-            'password' => 'required'
+            'phone' => ['required', 'string', 'regex:'.PhoneNumber::REGEX_VALIDATION],
+            'password' => ['required'],
         ]);
 
-        $input = $request->all(['email', 'password']);
-        
-        if (Auth::attempt($input)) {
+        $credentials = [
+            'phone' => $normalizedPhone,
+            'password' => $request->string('password')->toString(),
+        ];
+
+        if (Auth::attempt($credentials)) {
             $role = Auth::user()->role;
 
             if (! in_array($role, ['admin', 'trainer', 'reception', 'member'], true)) {

@@ -16,6 +16,12 @@ class User extends Authenticatable
     use HasFactory, Notifiable, HelperTrait, SoftDeletes;
 
     /**
+     * Session authentication uses the default Eloquent user provider: pass
+     * `['phone' => local 10-digit, 'password' => ...]` to Auth::attempt().
+     * The password reset broker still identifies users by email when sending links.
+     */
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>

@@ -94,7 +94,7 @@ Each phase below should **list concrete routes/pages** per role so “dashboard�
 - **Backfill:** migration maps legacy bigint `phone` to 10-char strings; `app/Console/Commands/UsersNormalizePhonesCommand.php` (`users:normalize-phones {--fix}`) validates and optionally normalizes rows post-deploy.
 - **Email uniqueness:** Laravel’s `unique:users,email` treats multiple `NULL` as distinct in MySQL; no partial index required for typical installs.
 - **Validation / helpers:** `app/Support/PhoneNumber.php` — normalize, `^(07|09)\d{8}$` validation, optional email rules for registration/admin.
-- **Login:** still **email** until Phase 2; registration and admin CRUD use phone + optional email as above.
+- **Login:** Phase 2 uses **phone + password** on `auth/login`; registration and admin CRUD remain phone + optional email as above.
 
 ---
 
@@ -104,12 +104,18 @@ Each phase below should **list concrete routes/pages** per role so “dashboard�
 
 | # | Task | Check |
 |---|------|-------|
-| 2.1 | Replace email-based login in Breeze views/controllers with **phone** credential; `AuthenticatedSessionController` / `RegisteredUserController` / `PasswordReset` as needed. | [ ] |
-| 2.2 | `User` model: implement `Fortify`/`Authenticatable` contract requirements if using custom `findForPassport` / `retrieveByCredentials` pattern appropriate for Laravel version. | [ ] |
-| 2.3 | **Password reset:** define behaviour if `email` is null (e.g. admin-only reset, or future SMS—document “out of scope” if deferred). | [ ] |
-| 2.4 | Tests: login success/failure by phone; registration with/without email. | [ ] |
+| 2.1 | Replace email-based login in Breeze views/controllers with **phone** credential; `AuthenticatedSessionController` / `RegisteredUserController` / `PasswordReset` as needed. | [x] |
+| 2.2 | `User` model: implement `Fortify`/`Authenticatable` contract requirements if using custom `findForPassport` / `retrieveByCredentials` pattern appropriate for Laravel version. | [x] |
+| 2.3 | **Password reset:** define behaviour if `email` is null (e.g. admin-only reset, or future SMS—document “out of scope” if deferred). | [x] |
+| 2.4 | Tests: login success/failure by phone; registration with/without email. | [x] |
 
-**Phase 2 implementation notes:** _(fill when done.)_
+**Phase 2 implementation notes:**
+
+- **Login:** `AuthenticatedSessionController` validates and normalizes `phone`, then `Auth::attempt(['phone' => …, 'password' => …])`. The default Eloquent user provider queries `users.phone`; no Fortify / custom provider class.
+- **Views:** `auth/login` uses `phone`; `auth/passwords/forgot-password` uses `phone` and resolves the user before calling `Password::sendResetLink(['email' => …])`.
+- **Reset token flow:** Email in the mailed link is unchanged (Laravel broker). `auth/passwords/reset-password` form action corrected to `route('password.store')` (was wrongly pointing at authenticated `password.update`).
+- **No email on account:** Forgot-password shows a clear error asking the member to contact the gym administrator; SMS reset is out of scope.
+- **Tests:** `AuthenticationTest` and `PasswordResetTest` use phone for login / forgot-password; registration with/without email remains in `RegistrationTest`.
 
 ---
 
