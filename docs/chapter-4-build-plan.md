@@ -56,7 +56,7 @@ These guide all Chapter 4 design decisions.
 
 | Area | Today |
 |------|--------|
-| **Reception “home”** | `reception.home` → `layouts.portal` + `pages/staff/reception-home.blade.php` — **already** top-nav, no sidebar. |
+| **Reception “home”** | `reception.home` → **`layouts.reception`** + `pages/staff/reception-home.blade.php` — top-nav shell, **Front desk** branding; no sidebar. |
 | **Desk work** | Links go to **`/admin/...`** pages using **`pages.admin.inc.app`** — **sidebar + `layouts.navigation`** (includes extra chrome). |
 | **Mismatch** | First screen feels **light**; deeper tasks feel like **“admin app”** — confusing for a dedicated reception role. |
 
@@ -70,7 +70,7 @@ These guide all Chapter 4 design decisions.
 |-------|-----------|
 | **Layout** | New `layouts.reception` (or extend `layouts.portal` with `@yield('desk_nav')`) — **single column**, `layout-top-nav`, **no sidebar**. |
 | **Top navigation** | Links to reception tasks: **Desk home**, **Members**, **Memberships**, **POS**, **Bookings**, **Schedules** (read-only), etc.—mirror Chapter 3 **allowed** routes only. |
-| **Routes** | Prefer **`/reception/...`** route names that **reuse existing controllers** (`UserController`, `MembershipController`, …) with `user-access:reception` (and admin where shared), **or** middleware that picks **reception layout** when `role === reception` for whitelisted route names. Second option avoids duplicating route definitions; first option is clearer in URLs. **Pick one in Phase 1.** |
+| **Routes** | **Phase 1:** reuse existing **`/admin/*`** shared routes (`admin_shared.php`); reception shell is **layout-only** on `reception.home`. Later phases may add **`/reception/...`** aliases or parameterized `@extends` for desk views. |
 | **Views** | Either: (a) **parameterize** layout in existing admin views (`@extends($layout ?? 'pages.admin.inc.app')`), or (b) **thin reception Blade** copies that `@include` shared form partials. Prefer **(a)** for forms that are identical; use **(b)** only when markup diverges. |
 | **Dashboard entry** | After login, reception already lands on `reception.home` — keep; ensure **all** desk pages feel like **extensions** of that home, not a different product. |
 
@@ -80,12 +80,12 @@ These guide all Chapter 4 design decisions.
 
 | # | Task | Check |
 |---|------|-------|
-| 1.1 | Add **`layouts/reception.blade.php`**: portal-like top nav, container, flash alerts, footer scripts; **no** `@include('pages.admin.inc.nav')`. | [ ] |
-| 1.2 | Define **reception top-nav items** (config array or Blade partial) aligned with Chapter 3 **allowed** routes—no invoice/payment/staff links. | [ ] |
-| 1.3 | Wire **`reception.home`** to use the new layout (or confirm portal is alias; unify branding: “Front desk” vs app name). | [ ] |
-| 1.4 | Document **IA** in this file or `docs/reception-nav.md` (one page: list of links + route names). | [ ] |
+| 1.1 | Add **`layouts/reception.blade.php`**: portal-like top nav, container, flash alerts, footer scripts; **no** `@include('pages.admin.inc.nav')`. | [x] |
+| 1.2 | Define **reception top-nav items** (config array or Blade partial) aligned with Chapter 3 **allowed** routes—no invoice/payment/staff links. | [x] |
+| 1.3 | Wire **`reception.home`** to use the new layout (or confirm portal is alias; unify branding: “Front desk” vs app name). | [x] |
+| 1.4 | Document **IA** in this file or `docs/reception-nav.md` (one page: list of links + route names). | [x] |
 
-**Phase 1 implementation notes:** _(fill when done.)_
+**Phase 1 implementation notes:** **`layouts.reception`** mirrors **`layouts.portal`** (flash, `layouts.footer`, `layouts.script`) but uses **`config/reception.php`** for brand (**Front desk** + logo → `reception.home`) and **`layouts/partials/reception-topnav`** for allowed **`admin.*`** desk routes. **`reception.home`** extends **`layouts.reception`**. **`layouts.portal`** no longer branches for reception (unused). **Route strategy for Phase 1:** keep existing **`/admin/*`** URLs from `admin_shared.php`; no duplicate `/reception/*` resource routes yet. IA: [`docs/reception-nav.md`](./reception-nav.md).
 
 ---
 

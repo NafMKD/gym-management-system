@@ -9,29 +9,15 @@
 <div class="wrapper">
     <nav class="main-header navbar navbar-expand-md navbar-light navbar-white">
         <div class="container">
-            <a href="{{ url('/') }}" class="navbar-brand">
+            <a href="{{ route(config('reception.brand_route', 'reception.home')) }}" class="navbar-brand">
                 <img src="{{ asset('assets/dist/img/logo.JPG') }}" alt="Logo" class="brand-image img-circle elevation-2"
                      style="opacity: .8">
-                <span class="brand-text font-weight-light">{{ config('app.name', 'My Fitness') }}</span>
+                <span class="brand-text font-weight-light">{{ __(config('reception.brand_label', 'Front desk')) }}</span>
             </a>
 
-            <div class="collapse navbar-collapse order-3" id="navbarCollapse">
+            <div class="collapse navbar-collapse order-3" id="receptionNavbarCollapse">
                 <ul class="navbar-nav">
-                    @if(Auth::user()->role === 'member')
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('member.home') }}">{{ __('Home') }}</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('member.classes.index') }}">{{ __('Group classes') }}</a>
-                        </li>
-                    @elseif(Auth::user()->role === 'trainer')
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('trainer.home') }}">{{ __('Home') }}</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('trainer.profile.edit') }}">{{ __('Profile') }}</a>
-                        </li>
-                    @endif
+                    @include('layouts.partials.reception-topnav')
                     <li class="nav-item d-flex align-items-center">
                         <span class="nav-link text-muted">{{ Auth::user()->getName() }}</span>
                     </li>

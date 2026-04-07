@@ -1,4 +1,4 @@
-@extends('layouts.portal')
+@extends('layouts.reception')
 
 @section('title')
     @include('layouts.header', ['title' => __('Front desk') . ' | ' . __('Home')])
