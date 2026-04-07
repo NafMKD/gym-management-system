@@ -8,23 +8,23 @@ use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Http\RedirectResponse;
 
-
 class UserAccess
 {
     /**
-     * Handle an incoming request.
-     *
-     * @param Request $request
-     * @param \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     * @param string $user_type
-     * @return Response|RedirectResponse
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  string  ...$roles  One or more allowed roles (e.g. admin, reception).
      */
-    public function handle(Request $request, Closure $next, string $user_type): Response|RedirectResponse
+    public function handle(Request $request, Closure $next, string ...$roles): Response|RedirectResponse
     {
-        if (Auth::user()->role === $user_type) {
-            return $next($request);
+        $userRole = Auth::user()->role;
+
+        foreach ($roles as $role) {
+            if ($userRole === $role) {
+                return $next($request);
+            }
         }
 
-        return redirect()->route(Auth::user()->role.'.home');
+        return redirect()->route($userRole.'.home')
+            ->with('error', __('You do not have permission to access this page!'));
     }
 }

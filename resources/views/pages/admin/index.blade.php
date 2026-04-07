@@ -90,6 +90,15 @@
         </div>
     </div>
 
+    <div class="row mb-2">
+        <div class="col-12">
+            <a href="{{ route('admin.merchandise.checkout') }}" class="btn btn-success btn-sm mr-1 mb-1"><i class="fas fa-cash-register"></i> {{ __('POS / Sell merchandise') }}</a>
+            <a href="{{ route('admin.memberships.list') }}" class="btn btn-outline-primary btn-sm mr-1 mb-1">{{ __('Memberships') }}</a>
+            <a href="{{ route('admin.invoices.list') }}" class="btn btn-outline-secondary btn-sm mr-1 mb-1">{{ __('Invoices') }}</a>
+            <a href="{{ route('admin.class_bookings.list') }}" class="btn btn-outline-info btn-sm mb-1">{{ __('Class bookings') }}</a>
+        </div>
+    </div>
+
     <div class="row">
         <div class="col-lg-6">
             <div class="card card-outline card-primary">

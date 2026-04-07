@@ -3,19 +3,26 @@
 namespace App\Http\Controllers\Reception;
 
 use App\Http\Controllers\Controller;
+use App\Repositories\ReceptionDeskRepository;
 use Illuminate\View\View;
 
 class HomeController extends Controller
 {
+    public function __construct(
+        protected ReceptionDeskRepository $receptionDeskRepository
+    ) {
+    }
+
     /**
-     * Display reception home.
-     *
-     * @return View
+     * Display reception (front desk) home.
      */
     public function index(): View
     {
-        return view(self::TRAINER.'home', [
-            'portalTitle' => __('Reception'),
+        $todaysBookings = $this->receptionDeskRepository->todaysBookings();
+
+        return view('pages.staff.reception-home', [
+            'portalTitle' => __('Front desk'),
+            'todaysBookings' => $todaysBookings,
         ]);
     }
 }

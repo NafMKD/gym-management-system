@@ -24,17 +24,31 @@ Route::middleware('auth')->get('/dashboard', function () {
 })->name('dashboard');
 
 /**
- * Admin Routes
+ * Admin + reception (front desk): members, memberships, POS, attendance, class ops — no invoice/payment UI routes.
  */
 Route::group([
     'middleware' => [
         'auth',
-        'user-access:admin'
+        'user-access:admin,reception',
     ],
     'prefix' => 'admin',
-    'as' => 'admin.'
+    'as' => 'admin.',
 ], function () {
-    require __DIR__.'/web/admin.php';
+    require __DIR__.'/web/admin_shared.php';
+});
+
+/**
+ * Admin-only: KPI dashboard, invoices, payments, revenue, inventory admin, staff, audits, package/class admin.
+ */
+Route::group([
+    'middleware' => [
+        'auth',
+        'user-access:admin',
+    ],
+    'prefix' => 'admin',
+    'as' => 'admin.',
+], function () {
+    require __DIR__.'/web/admin_only.php';
 });
 
 require __DIR__.'/web/portal.php';

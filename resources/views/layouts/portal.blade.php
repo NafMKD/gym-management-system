@@ -17,6 +17,25 @@
 
             <div class="collapse navbar-collapse order-3" id="navbarCollapse">
                 <ul class="navbar-nav">
+                    @if(Auth::user()->role === 'member')
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('member.home') }}">{{ __('Home') }}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('member.classes.index') }}">{{ __('Group classes') }}</a>
+                        </li>
+                    @elseif(Auth::user()->role === 'trainer')
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('trainer.home') }}">{{ __('Home') }}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('trainer.profile.edit') }}">{{ __('Profile') }}</a>
+                        </li>
+                    @elseif(Auth::user()->role === 'reception')
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('reception.home') }}">{{ __('Desk home') }}</a>
+                        </li>
+                    @endif
                     <li class="nav-item d-flex align-items-center">
                         <span class="nav-link text-muted">{{ Auth::user()->getName() }}</span>
                     </li>
@@ -37,6 +56,22 @@
             </ul>
         </div>
     </nav>
+    @if (session('error'))
+        <div class="container mt-3">
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                {{ session('error') }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+        </div>
+    @endif
+    @if (session('success'))
+        <div class="container mt-3">
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+        </div>
+    @endif
     @yield('content')
     @include('layouts.footer')
 </div>

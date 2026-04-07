@@ -147,14 +147,22 @@ Each phase below should **list concrete routes/pages** per role so “dashboard�
 
 | # | Task | Check |
 |---|------|-------|
-| 4.1 | Authoritative **role → allowed routes** map (config or middleware); align `UserAccess` / `routes/web/portal.php`. | [ ] |
-| 4.2 | **Admin** dashboard: reinforce KPIs + shortcuts (POS, memberships, invoices) as needed. | [ ] |
-| 4.3 | **Trainer** dashboard: upcoming sessions, commission snapshot, link to profile. | [ ] |
-| 4.4 | **Reception** dashboard: attendance, today’s bookings, member search—scoped to reception role. | [ ] |
-| 4.5 | **Member** dashboard: membership status, book class, read-only history. | [ ] |
-| 4.6 | Smoke tests: each role logs in and hits dashboard without 404/403 loops. | [ ] |
+| 4.1 | Authoritative **role → allowed routes** map (config or middleware); align `UserAccess` / `routes/web/portal.php`. | [x] |
+| 4.2 | **Admin** dashboard: reinforce KPIs + shortcuts (POS, memberships, invoices) as needed. | [x] |
+| 4.3 | **Trainer** dashboard: upcoming sessions, commission snapshot, link to profile. | [x] |
+| 4.4 | **Reception** dashboard: attendance, today’s bookings, member search—scoped to reception role. | [x] |
+| 4.5 | **Member** dashboard: membership status, book class, read-only history. | [x] |
+| 4.6 | Smoke tests: each role logs in and hits dashboard without 404/403 loops. | [x] |
 
-**Phase 4 implementation notes:** _(fill when done.)_
+**Phase 4 implementation notes:**
+
+- **Middleware:** `UserAccess` accepts **multiple roles** (`user-access:admin,reception`). Routes split into `routes/web/admin_shared.php` (desk + ops, no ledger UI) and `routes/web/admin_only.php` (dashboard KPIs, invoices, payments, revenue, products CRUD, staff, audit, trainer commissions, package/class **admin** mutations).
+- **Reception:** Uses AdminLTE `pages.admin.inc.app` with sidebar from `nav.blade.php` — **Front desk** branding; hidden: dashboard, invoices, payments, staff, audit, inventory admin, package/class **add** & trainer commission admin menus. Can use users, memberships, packages **list/view**, gym classes & schedules **list/view**, class bookings, attendance scan, POS checkout.
+- **Config:** `config/roles.php` documents scope; enforcement is route-level.
+- **Trainer portal:** `trainer.home` shows upcoming sessions + monthly commission total; `trainer/profile` (GET/POST) edits trainer profile via `Trainer\ProfileController` (portal layout).
+- **Reception portal:** `reception.home` shows today’s bookings table + large buttons to users, memberships, POS, attendance.
+- **Member portal:** `member.home` shows active membership summary, link to group classes, recent booking history table.
+- **Tests:** `tests/Feature/RoleAccessTest.php` — admin vs reception vs trainer/member smoke checks.
 
 ---
 

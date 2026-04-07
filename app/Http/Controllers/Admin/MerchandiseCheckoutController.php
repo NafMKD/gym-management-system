@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Repositories\MerchandiseRepository;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -92,6 +93,12 @@ class MerchandiseCheckoutController extends Controller
 
         try {
             $invoice = $this->merchandiseRepository->checkout($payload);
+
+            if (Auth::user()->role === 'reception') {
+                return redirect()
+                    ->route('reception.home')
+                    ->with(self::SUCCESS_, __('Sale recorded. Invoice #:num', ['num' => $invoice->invoice_number]));
+            }
 
             return redirect()
                 ->route('admin.invoices.view', $invoice)

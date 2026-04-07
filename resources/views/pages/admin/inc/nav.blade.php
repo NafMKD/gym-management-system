@@ -1,8 +1,11 @@
+@php
+    $navIsAdmin = Auth::user()->role === 'admin';
+@endphp
 <!-- Main Sidebar Container -->
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
-    <a href="#" class="brand-link">
-        <center><span class="brand-text font-weight-light">{{ __("Admin Dashboard") }}</span></center>
+    <a href="{{ $navIsAdmin ? route('admin.home') : route('reception.home') }}" class="brand-link">
+        <center><span class="brand-text font-weight-light">{{ $navIsAdmin ? __('Admin') : __('Front desk') }}</span></center>
     </a>
 
     <!-- Sidebar -->
@@ -34,12 +37,14 @@
         <nav class="mt-2">
             <ul class="nav nav-pills nav-sidebar flex-column nav-child-indent" data-widget="treeview" role="menu"
                 data-accordion="false">
+                @if($navIsAdmin)
                 <li class="nav-item">
                     <a href="{{ route('admin.home') }}" class="nav-link  {{ !request()->routeIs('admin.home') ?: 'active' }}">
                         <i class="nav-icon fas fa-tachometer-alt"></i>
                         <p>{{ __("Dashboard") }}</p>
                     </a>
                 </li>
+                @endif
                 <li class="nav-item  {{ !request()->routeIs('admin.users*') ?: 'menu-open' }}">
                     <a href="#" class="nav-link {{ !request()->routeIs('admin.users*') ?: 'active' }}">
                         <i class="nav-icon fas fa-users"></i>
@@ -63,6 +68,12 @@
                         </li>
                     </ul>
                 </li>
+                <li class="nav-item">
+                    <a href="{{ route('admin.attendance.scan') }}" class="nav-link {{ request()->routeIs('admin.attendance*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-qrcode"></i>
+                        <p>{{ __('Attendance') }}</p>
+                    </a>
+                </li>
                 <li class="nav-item  {{ !request()->routeIs('admin.packages*') ?: 'menu-open' }}">
                     <a href="#" class="nav-link {{ !request()->routeIs('admin.packages*') ?: 'active' }}">
                         <i class="nav-icon fas fa-box"></i>
@@ -72,12 +83,14 @@
                         </p>
                     </a>
                     <ul class="nav nav-treeview">
+                        @if($navIsAdmin)
                         <li class="nav-item">
                             <a href="{{ route('admin.packages.add') }}" class="nav-link {{ !request()->routeIs('admin.packages.add') ?: 'active' }}">
                                 <i class="fas fa-plus nav-icon"></i>
                                 <p>{{ __("Add Package") }}</p>
                             </a>
                         </li>
+                        @endif
                         <li class="nav-item">
                             <a href="{{ route('admin.packages.list') }}" class="nav-link {{ !(request()->routeIs('admin.packages.list') || request()->routeIs('admin.packages.view') || request()->routeIs('admin.packages.edit')) ?: 'active' }}">
                                 <i class="fas fa-list nav-icon"></i>
@@ -124,24 +137,28 @@
                         </p>
                     </a>
                     <ul class="nav nav-treeview">
+                        @if($navIsAdmin)
                         <li class="nav-item">
                             <a href="{{ route('admin.gym_classes.add') }}" class="nav-link {{ request()->routeIs('admin.gym_classes.add') ? 'active' : '' }}">
                                 <i class="fas fa-plus nav-icon"></i>
                                 <p>{{ __("Add class") }}</p>
                             </a>
                         </li>
+                        @endif
                         <li class="nav-item">
                             <a href="{{ route('admin.gym_classes.list') }}" class="nav-link {{ request()->routeIs('admin.gym_classes.*') && !request()->routeIs('admin.gym_classes.add') ? 'active' : '' }}">
                                 <i class="fas fa-list nav-icon"></i>
                                 <p>{{ __("Gym classes") }}</p>
                             </a>
                         </li>
+                        @if($navIsAdmin)
                         <li class="nav-item">
                             <a href="{{ route('admin.class_schedules.add') }}" class="nav-link {{ request()->routeIs('admin.class_schedules.add') ? 'active' : '' }}">
                                 <i class="fas fa-calendar-plus nav-icon"></i>
                                 <p>{{ __("Add session") }}</p>
                             </a>
                         </li>
+                        @endif
                         <li class="nav-item">
                             <a href="{{ route('admin.class_schedules.list') }}" class="nav-link {{ request()->routeIs('admin.class_schedules.*') && !request()->routeIs('admin.class_schedules.add') ? 'active' : '' }}">
                                 <i class="fas fa-calendar-alt nav-icon"></i>
@@ -154,12 +171,14 @@
                                 <p>{{ __("Bookings") }}</p>
                             </a>
                         </li>
+                        @if($navIsAdmin)
                         <li class="nav-item">
                             <a href="{{ route('admin.trainer_commissions.list') }}" class="nav-link {{ request()->routeIs('admin.trainer_commissions*') ? 'active' : '' }}">
                                 <i class="fas fa-coins nav-icon"></i>
                                 <p>{{ __("Trainer commissions") }}</p>
                             </a>
                         </li>
+                        @endif
                     </ul>
                 </li>
                 <li class="nav-item  {{ !request()->routeIs('admin.products*') && !request()->routeIs('admin.merchandise*') ?: 'menu-open' }}">
@@ -171,6 +190,7 @@
                         </p>
                     </a>
                     <ul class="nav nav-treeview">
+                        @if($navIsAdmin)
                         <li class="nav-item">
                             <a href="{{ route('admin.products.add') }}" class="nav-link {{ request()->routeIs('admin.products.add') ? 'active' : '' }}">
                                 <i class="fas fa-plus nav-icon"></i>
@@ -183,6 +203,7 @@
                                 <p>{{ __("Products") }}</p>
                             </a>
                         </li>
+                        @endif
                         <li class="nav-item">
                             <a href="{{ route('admin.merchandise.checkout') }}" class="nav-link {{ request()->routeIs('admin.merchandise*') ? 'active' : '' }}">
                                 <i class="fas fa-cash-register nav-icon"></i>
@@ -191,6 +212,7 @@
                         </li>
                     </ul>
                 </li>
+                @if($navIsAdmin)
                 <li class="nav-item">
                     <a href="{{ route('admin.invoices.list') }}" class="nav-link  {{ !request()->routeIs('admin.invoices*') ?: 'active' }}">
                         <i class="nav-icon fas fa-file-invoice"></i>
@@ -220,6 +242,8 @@
                         </li>
                     </ul>
                 </li>
+                @endif
+                @if($navIsAdmin)
                 <li class="nav-item  {{ !request()->routeIs('admin.staffs*') ?: 'menu-open' }}">
                     <a href="#" class="nav-link {{ !request()->routeIs('admin.staffs*') ?: 'active' }}">
                         <i class="nav-icon fas fa-user-tie"></i>
@@ -242,13 +266,14 @@
                             </a>
                         </li>
                     </ul>
-                </li>                
+                </li>
                 <li class="nav-item">
                     <a href="{{ route('admin.audit_trail.list') }}" class="nav-link  {{ !request()->routeIs('admin.audit_trail*') ?: 'active' }}">
                         <i class="nav-icon fas fa-history"></i>
                         <p>{{ __("Audit Trail") }}</p>
                     </a>
                 </li>
+                @endif
             </ul>
         </nav>
         <!-- /.sidebar-menu -->

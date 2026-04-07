@@ -1,95 +1,66 @@
 <?php
 
-use App\Http\Controllers\Admin\AttendanceController;
+/**
+ * Admin-only: financial visibility, inventory administration, staff, audits, KPI dashboard.
+ */
+
 use App\Http\Controllers\Admin\AuditTrailController;
-use App\Http\Controllers\Admin\ClassBookingController;
 use App\Http\Controllers\Admin\ClassScheduleController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\GymClassController;
-use App\Http\Controllers\Admin\MerchandiseCheckoutController;
-use App\Http\Controllers\Admin\MembershipExtensionRequestController;
+use App\Http\Controllers\Admin\InvoiceController;
+use App\Http\Controllers\Admin\PackageController;
+use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\TrainerCommissionController;
 use App\Http\Controllers\Admin\TrainerProfileController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\InvoiceController;
-use App\Http\Controllers\Admin\MembershipController;
-use App\Http\Controllers\Admin\PackageController;
-use App\Http\Controllers\Admin\PaymentController;
-use App\Http\Controllers\Admin\UserController;
 
 Route::get('/home', [DashboardController::class, 'index'])->name('home');
 Route::get('/export/memberships-csv', [DashboardController::class, 'exportMembershipsCsv'])->name('export.memberships_csv');
 Route::get('/export/payments-csv', [DashboardController::class, 'exportPaymentsCsv'])->name('export.payments_csv');
 
 /**
- * Group For `/admin/users/*`
- */
-Route::group([
-    'prefix' => 'users',
-    'as' => 'users.'
-], function () {
-    Route::get('/add', [UserController::class, 'create'])->name('add');
-    Route::post('/add', [UserController::class, 'store'])->name('store');
-    Route::get('/list', [UserController::class, 'index'])->name('list');
-    Route::get('/view/{user}', [UserController::class, 'show'])->name('view');
-    Route::get('/edit/{user}', [UserController::class, 'edit'])->name('edit');
-    Route::post('/update/{user}', [UserController::class, 'update'])->name('update');
-    Route::get('/delete/{user}', [UserController::class, 'destroy'])->name('delete');
-    Route::get('/list-data', [UserController::class, 'getUsersData'])->name('list.data');
-});
-
-/**
- * Group For `/admin/packages/*`
+ * Packages: create / edit / delete (read-only routes live in admin_shared.php).
  */
 Route::group([
     'prefix' => 'packages',
-    'as' => 'packages.'
+    'as' => 'packages.',
 ], function () {
     Route::get('/add', [PackageController::class, 'create'])->name('add');
     Route::post('/add', [PackageController::class, 'store'])->name('store');
-    Route::get('/list', [PackageController::class, 'index'])->name('list');
-    Route::get('/view/{package}', [PackageController::class, 'show'])->name('view');
     Route::get('/edit/{package}', [PackageController::class, 'edit'])->name('edit');
     Route::post('/update/{package}', [PackageController::class, 'update'])->name('update');
     Route::get('/delete/{package}', [PackageController::class, 'destroy'])->name('delete');
-    Route::get('/list-data', [PackageController::class, 'getPackagesData'])->name('list.data');
-    Route::get('/package-data', [PackageController::class, 'getPackageData'])->name('package.data');
 });
 
 /**
- * Group For `/admin/gym-classes/*`
+ * Gym classes: administration.
  */
 Route::group([
     'prefix' => 'gym-classes',
     'as' => 'gym_classes.',
 ], function () {
-    Route::get('/list', [GymClassController::class, 'index'])->name('list');
     Route::get('/add', [GymClassController::class, 'create'])->name('add');
     Route::post('/add', [GymClassController::class, 'store'])->name('store');
-    Route::get('/view/{gym_class}', [GymClassController::class, 'show'])->name('view');
     Route::get('/edit/{gym_class}', [GymClassController::class, 'edit'])->name('edit');
     Route::post('/update/{gym_class}', [GymClassController::class, 'update'])->name('update');
     Route::get('/delete/{gym_class}', [GymClassController::class, 'destroy'])->name('delete');
-    Route::get('/list-data', [GymClassController::class, 'getListData'])->name('list.data');
 });
 
 /**
- * Group For `/admin/class-schedules/*`
+ * Class schedules: administration.
  */
 Route::group([
     'prefix' => 'class-schedules',
     'as' => 'class_schedules.',
 ], function () {
-    Route::get('/list', [ClassScheduleController::class, 'index'])->name('list');
     Route::get('/add', [ClassScheduleController::class, 'create'])->name('add');
     Route::post('/add', [ClassScheduleController::class, 'store'])->name('store');
-    Route::get('/view/{class_schedule}', [ClassScheduleController::class, 'show'])->name('view');
     Route::get('/edit/{class_schedule}', [ClassScheduleController::class, 'edit'])->name('edit');
     Route::post('/update/{class_schedule}', [ClassScheduleController::class, 'update'])->name('update');
     Route::get('/delete/{class_schedule}', [ClassScheduleController::class, 'destroy'])->name('delete');
-    Route::get('/list-data', [ClassScheduleController::class, 'getListData'])->name('list.data');
 });
 
 /**
@@ -111,83 +82,13 @@ Route::group([
 });
 
 /**
- * Merchandise POS (unified invoice + payment)
- */
-Route::group([
-    'prefix' => 'merchandise',
-    'as' => 'merchandise.',
-], function () {
-    Route::get('/checkout', [MerchandiseCheckoutController::class, 'create'])->name('checkout');
-    Route::post('/checkout', [MerchandiseCheckoutController::class, 'store'])->name('checkout.store');
-});
-
-/**
- * Group For `/admin/class-bookings/*`
- */
-Route::group([
-    'prefix' => 'class-bookings',
-    'as' => 'class_bookings.',
-], function () {
-    Route::get('/list', [ClassBookingController::class, 'index'])->name('list');
-    Route::get('/add', [ClassBookingController::class, 'create'])->name('add');
-    Route::post('/add', [ClassBookingController::class, 'store'])->name('store');
-    Route::get('/view/{class_booking}', [ClassBookingController::class, 'show'])->name('view');
-    Route::post('/cancel/{class_booking}', [ClassBookingController::class, 'cancel'])->name('cancel');
-    Route::post('/mark-attended/{class_booking}', [ClassBookingController::class, 'markAttended'])->name('mark_attended');
-    Route::post('/feedback/{class_booking}', [ClassBookingController::class, 'storeFeedback'])->name('feedback');
-    Route::get('/list-data', [ClassBookingController::class, 'getListData'])->name('list.data');
-});
-
-/**
- * Group For `/admin/memberships/*`
- */
-Route::group([
-    'prefix' => 'memberships',
-    'as' => 'memberships.'
-], function () {
-    Route::get('/renew/{membership}', [MembershipController::class, 'renew'])->name('renew');
-    Route::get('/upgrade/{membership}', [MembershipController::class, 'showUpgrade'])->name('upgrade');
-    Route::post('/upgrade/{membership}', [MembershipController::class, 'updateUpgrade'])->name('upgrade.update');
-
-    Route::prefix('extension-requests')->as('extension_requests.')->group(function () {
-        Route::get('/list', [MembershipExtensionRequestController::class, 'index'])->name('list');
-        Route::get('/add', [MembershipExtensionRequestController::class, 'create'])->name('add');
-        Route::post('/add', [MembershipExtensionRequestController::class, 'store'])->name('store');
-        Route::get('/list-data', [MembershipExtensionRequestController::class, 'getListData'])->name('list.data');
-        Route::get('/view/{membership_extension_request}', [MembershipExtensionRequestController::class, 'show'])->name('view');
-        Route::post('/approve', [MembershipExtensionRequestController::class, 'approve'])->name('approve');
-        Route::post('/reject', [MembershipExtensionRequestController::class, 'reject'])->name('reject');
-    });
-
-    Route::get('/add', [MembershipController::class, 'create'])->name('add');
-    Route::post('/add', [MembershipController::class, 'store'])->name('store');
-    Route::get('/list', [MembershipController::class, 'index'])->name('list');
-    Route::get('/view/{membership}', [MembershipController::class, 'show'])->name('view');
-    Route::get('/{membership}/print-id-card', [MembershipController::class, 'printIdCard'])->name('print_id_card');
-    Route::get('/list-data', [MembershipController::class, 'getMembershipsData'])->name('list.data');
-    Route::post('/cancel', [MembershipController::class, 'cancel'])->name('cancel');
-    Route::post('/change-status', [MembershipController::class, 'changeStatus'])->name('change.status');
-});
-
-/**
- * Group For `/admin/attendance/*`
- */
-Route::group([
-    'prefix' => 'attendance',
-    'as' => 'attendance.'
-], function () {
-    Route::get('/scan', [AttendanceController::class, 'showScanPage'])->name('scan');
-    Route::post('/scan', [AttendanceController::class, 'recordAttendance'])->name('record');
-});
-
-/**
  * Group For `/admin/audit-trail/*`
  */
 Route::group([
     'prefix' => 'audit-trail',
-    'as' => 'audit_trail.'
+    'as' => 'audit_trail.',
 ], function () {
-    Route::get('/list', action: [AuditTrailController::class, 'index'])->name('list');
+    Route::get('/list', [AuditTrailController::class, 'index'])->name('list');
     Route::get('/view/{audit_trail}', [AuditTrailController::class, 'show'])->name('view');
     Route::get('/list-data', [AuditTrailController::class, 'getTrailsData'])->name('list.data');
 });
@@ -197,9 +98,9 @@ Route::group([
  */
 Route::group([
     'prefix' => 'invoices',
-    'as' => 'invoices.'
+    'as' => 'invoices.',
 ], function () {
-    Route::get('/list', action: [InvoiceController::class, 'index'])->name('list');
+    Route::get('/list', [InvoiceController::class, 'index'])->name('list');
     Route::get('/list-data', [InvoiceController::class, 'getInvoicesData'])->name('list.data');
     Route::get('/{invoice}/pdf', [InvoiceController::class, 'downloadPdf'])->name('pdf');
     Route::post('/{invoice}/send-email', [InvoiceController::class, 'sendEmail'])->name('send.email');
@@ -211,9 +112,9 @@ Route::group([
  */
 Route::group([
     'prefix' => 'payments',
-    'as' => 'payments.'
+    'as' => 'payments.',
 ], function () {
-    Route::get('/list', action: [PaymentController::class, 'index'])->name('list');
+    Route::get('/list', [PaymentController::class, 'index'])->name('list');
     Route::get('/revenue/list', [PaymentController::class, 'revenueOverview'])->name('revenue.list');
     Route::get('/revenue/total', [PaymentController::class, 'getTotalRevenue'])->name('revenue.total');
     Route::get('/add/{invoice}', [PaymentController::class, 'create'])->name('add');
@@ -243,7 +144,7 @@ Route::group([
  */
 Route::group([
     'prefix' => 'staffs',
-    'as' => 'staffs.'
+    'as' => 'staffs.',
 ], function () {
     Route::get('/add', [StaffController::class, 'create'])->name('add');
     Route::post('/add', [StaffController::class, 'store'])->name('store');

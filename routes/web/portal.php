@@ -4,6 +4,7 @@ use App\Http\Controllers\Member\GymClassBookingController;
 use App\Http\Controllers\Member\HomeController as MemberHomeController;
 use App\Http\Controllers\Reception\HomeController as ReceptionHomeController;
 use App\Http\Controllers\Trainer\HomeController as TrainerHomeController;
+use App\Http\Controllers\Trainer\ProfileController as TrainerProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::group([
@@ -15,6 +16,8 @@ Route::group([
     'as' => 'trainer.',
 ], function () {
     Route::get('/home', [TrainerHomeController::class, 'index'])->name('home');
+    Route::get('/profile', [TrainerProfileController::class, 'edit'])->name('profile.edit');
+    Route::post('/profile', [TrainerProfileController::class, 'update'])->name('profile.update');
 });
 
 Route::group([

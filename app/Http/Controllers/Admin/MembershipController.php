@@ -11,6 +11,7 @@ use App\Mail\InvoiceMail;
 use App\Repositories\InvoiceRepository;
 use App\Repositories\MembershipRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\RedirectResponse;
@@ -231,6 +232,12 @@ class MembershipController extends Controller
                     'invoice_id' => $invoice->id,
                     'message' => $mailException->getMessage(),
                 ]);
+            }
+
+            if (Auth::user()->role === 'reception') {
+                return redirect()
+                    ->route('admin.memberships.view', $membership)
+                    ->with(self::SUCCESS_, __('Membership and invoice created.'));
             }
 
             return redirect()->route('admin.invoices.view', $invoice);
