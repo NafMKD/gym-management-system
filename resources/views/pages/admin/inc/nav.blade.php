@@ -68,12 +68,6 @@
                         </li>
                     </ul>
                 </li>
-                <li class="nav-item">
-                    <a href="{{ route('admin.attendance.scan') }}" class="nav-link {{ request()->routeIs('admin.attendance*') ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-qrcode"></i>
-                        <p>{{ __('Attendance') }}</p>
-                    </a>
-                </li>
                 <li class="nav-item  {{ !request()->routeIs('admin.packages*') ?: 'menu-open' }}">
                     <a href="#" class="nav-link {{ !request()->routeIs('admin.packages*') ?: 'active' }}">
                         <i class="nav-icon fas fa-box"></i>
