@@ -115,8 +115,8 @@
                         </li>
                     </ul>
                 </li>
-                <li class="nav-item  {{ !request()->routeIs('admin.gym_classes*') && !request()->routeIs('admin.class_schedules*') && !request()->routeIs('admin.class_bookings*') ?: 'menu-open' }}">
-                    <a href="#" class="nav-link {{ !request()->routeIs('admin.gym_classes*') && !request()->routeIs('admin.class_schedules*') && !request()->routeIs('admin.class_bookings*') ?: 'active' }}">
+                <li class="nav-item  {{ !request()->routeIs('admin.gym_classes*') && !request()->routeIs('admin.class_schedules*') && !request()->routeIs('admin.class_bookings*') && !request()->routeIs('admin.trainer_commissions*') ?: 'menu-open' }}">
+                    <a href="#" class="nav-link {{ !request()->routeIs('admin.gym_classes*') && !request()->routeIs('admin.class_schedules*') && !request()->routeIs('admin.class_bookings*') && !request()->routeIs('admin.trainer_commissions*') ?: 'active' }}">
                         <i class="nav-icon fas fa-dumbbell"></i>
                         <p>
                             {{ __("Classes") }}
@@ -152,6 +152,12 @@
                             <a href="{{ route('admin.class_bookings.list') }}" class="nav-link {{ request()->routeIs('admin.class_bookings*') ? 'active' : '' }}">
                                 <i class="fas fa-clipboard-list nav-icon"></i>
                                 <p>{{ __("Bookings") }}</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.trainer_commissions.list') }}" class="nav-link {{ request()->routeIs('admin.trainer_commissions*') ? 'active' : '' }}">
+                                <i class="fas fa-coins nav-icon"></i>
+                                <p>{{ __("Trainer commissions") }}</p>
                             </a>
                         </li>
                     </ul>

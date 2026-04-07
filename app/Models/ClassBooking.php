@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ClassBooking extends Model
@@ -30,5 +31,18 @@ class ClassBooking extends Model
     public function bookedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'booked_by_user_id');
+    }
+
+    /**
+     * Auto-generated commission row when this booking is marked attended (if configured).
+     */
+    public function trainerCommissionEntry(): HasOne
+    {
+        return $this->hasOne(TrainerCommissionEntry::class, 'class_booking_id');
+    }
+
+    public function trainerSessionFeedback(): HasOne
+    {
+        return $this->hasOne(TrainerSessionFeedback::class, 'class_booking_id');
     }
 }

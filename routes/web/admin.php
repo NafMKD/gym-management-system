@@ -9,6 +9,8 @@ use App\Http\Controllers\Admin\MerchandiseCheckoutController;
 use App\Http\Controllers\Admin\MembershipExtensionRequestController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\StaffController;
+use App\Http\Controllers\Admin\TrainerCommissionController;
+use App\Http\Controllers\Admin\TrainerProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\InvoiceController;
@@ -131,6 +133,8 @@ Route::group([
     Route::post('/add', [ClassBookingController::class, 'store'])->name('store');
     Route::get('/view/{class_booking}', [ClassBookingController::class, 'show'])->name('view');
     Route::post('/cancel/{class_booking}', [ClassBookingController::class, 'cancel'])->name('cancel');
+    Route::post('/mark-attended/{class_booking}', [ClassBookingController::class, 'markAttended'])->name('mark_attended');
+    Route::post('/feedback/{class_booking}', [ClassBookingController::class, 'storeFeedback'])->name('feedback');
     Route::get('/list-data', [ClassBookingController::class, 'getListData'])->name('list.data');
 });
 
@@ -222,6 +226,19 @@ Route::group([
 });
 
 /**
+ * Trainer commissions (session-derived + manual)
+ */
+Route::group([
+    'prefix' => 'trainer-commissions',
+    'as' => 'trainer_commissions.',
+], function () {
+    Route::get('/list', [TrainerCommissionController::class, 'index'])->name('list');
+    Route::get('/add', [TrainerCommissionController::class, 'create'])->name('add');
+    Route::post('/add', [TrainerCommissionController::class, 'store'])->name('store');
+    Route::get('/list-data', [TrainerCommissionController::class, 'getListData'])->name('list.data');
+});
+
+/**
  * Group For `/admin/staffs/*`
  */
 Route::group([
@@ -236,4 +253,6 @@ Route::group([
     Route::post('/update/{user}', [StaffController::class, 'update'])->name('update');
     Route::get('/delete/{user}', [StaffController::class, 'destroy'])->name('delete');
     Route::get('/list-data', [StaffController::class, 'getStaffData'])->name('list.data');
+    Route::get('/trainer-profile/{user}', [TrainerProfileController::class, 'edit'])->name('trainer_profile.edit');
+    Route::post('/trainer-profile/{user}', [TrainerProfileController::class, 'update'])->name('trainer_profile.update');
 });

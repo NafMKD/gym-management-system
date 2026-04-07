@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ClassBooking;
 use App\Models\ClassSchedule;
 use App\Models\Membership;
+use App\Models\TrainerSessionFeedback;
 use App\Repositories\ClassBookingRepository;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -86,7 +87,14 @@ class ClassBookingController extends Controller
     public function show(ClassBooking $classBooking): View|RedirectResponse
     {
         try {
-            $classBooking->load(['schedule.gymClass', 'schedule.trainer', 'membership.user', 'bookedBy']);
+            $classBooking->load([
+                'schedule.gymClass',
+                'schedule.trainer',
+                'membership.user',
+                'bookedBy',
+                'trainerSessionFeedback',
+                'trainerCommissionEntry',
+            ]);
 
             return view(self::ADMIN_.'class_bookings.view', compact('classBooking'));
         } catch (Throwable $e) {
@@ -105,6 +113,60 @@ class ClassBookingController extends Controller
             return redirect()->back()->with(self::SUCCESS_, __('Booking cancelled.'));
         } catch (Throwable $e) {
             return redirect()->back()->with(self::ERROR_, $e->getMessage());
+        }
+    }
+
+    /**
+     * Mark booking as attended (triggers session commission when trainer profile rate &gt; 0).
+     *
+     * @return RedirectResponse
+     */
+    public function markAttended(ClassBooking $classBooking): RedirectResponse
+    {
+        try {
+            if ($classBooking->status === 'cancelled') {
+                return redirect()->back()->with(self::ERROR_, __('Cancelled bookings cannot be marked attended.'));
+            }
+            if ($classBooking->status === 'attended') {
+                return redirect()->back()->with(self::ERROR_, __('Already marked as attended.'));
+            }
+
+            $this->classBookingRepository->update($classBooking, ['status' => 'attended']);
+
+            return redirect()->back()->with(self::SUCCESS_, __('Marked as attended.'));
+        } catch (Throwable $e) {
+            return redirect()->back()->with(self::ERROR_, $e->getMessage());
+        }
+    }
+
+    /**
+     * Optional member feedback for this session (Phase 8.4).
+     *
+     * @return RedirectResponse
+     */
+    public function storeFeedback(Request $request, ClassBooking $classBooking): RedirectResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'rating' => 'nullable|integer|min:1|max:5',
+            'comment' => 'nullable|string|max:2000',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        try {
+            TrainerSessionFeedback::updateOrCreate(
+                ['class_booking_id' => $classBooking->id],
+                [
+                    'rating' => $request->input('rating'),
+                    'comment' => $request->input('comment'),
+                ]
+            );
+
+            return redirect()->back()->with(self::SUCCESS_, __('Feedback saved.'));
+        } catch (Throwable $e) {
+            return redirect()->back()->withInput()->with(self::ERROR_, $e->getMessage());
         }
     }
 

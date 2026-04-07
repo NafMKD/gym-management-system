@@ -173,10 +173,12 @@ Do **not** introduce new architectural layers (e.g. service classes, DTOs, API r
 
 | # | Task | Check |
 |---|------|-------|
-| 8.1 | Extend `users` (trainer-only fields) or `trainer_profiles` table — follow migration style of existing `users` migration. | [ ] |
-| 8.2 | Admin UI for trainer profile edit (reuse `StaffController` flows where possible). | [ ] |
-| 8.3 | Commission calculation from completed PT sessions or manual admin entry — repository + report; reuse DataTables for commission list. | [ ] |
-| 8.4 | Optional: feedback storage if still in scope; keep same audit/soft-delete conventions. | [ ] |
+| 8.1 | Extend `users` (trainer-only fields) or `trainer_profiles` table — follow migration style of existing `users` migration. | [x] |
+| 8.2 | Admin UI for trainer profile edit (reuse `StaffController` flows where possible). | [x] |
+| 8.3 | Commission calculation from completed PT sessions or manual admin entry — repository + report; reuse DataTables for commission list. | [x] |
+| 8.4 | Optional: feedback storage if still in scope; keep same audit/soft-delete conventions. | [x] |
+
+**Phase 8 implementation notes:** Table **`trainer_profiles`** (`user_id` unique, qualifications, specializations, bio, `commission_per_session` default 0, soft deletes). **`trainer_commission_entries`** (`trainer_id`, `source` `session`|`manual`, optional `class_booking_id` unique per booking for session rows, `amount`, `earned_at`, notes, `recorded_by_user_id`, soft deletes). **`trainer_session_feedbacks`** (optional 8.4: one row per `class_booking_id`, rating 1–5, comment). **`TrainerProfileRepository`** / **`TrainerCommissionRepository`**; **`ClassBookingRepository`** hooks commission when status transitions to/from **`attended`** (session rows use trainer’s `commission_per_session`; removal uses **`forceDelete`** so re-attendance can re-create). Admin: **`TrainerProfileController`** at `admin/staffs/trainer-profile/{user}` (trainers only), link from **Staff detail**; **`TrainerCommissionController`** list + manual add + DataTables + filters under **Classes → Trainer commissions**; booking view **`Mark attended`**, feedback form. Observers on new models. Tests: `tests/Feature/TrainerCommissionTest.php`.
 
 ---
 

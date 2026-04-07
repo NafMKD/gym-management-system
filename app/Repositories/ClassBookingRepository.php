@@ -10,6 +10,11 @@ use Illuminate\Support\Facades\DB;
 
 class ClassBookingRepository extends BaseRepository
 {
+    public function __construct(
+        protected TrainerCommissionRepository $trainerCommissionRepository
+    ) {
+    }
+
     public function store(array $attributes): mixed
     {
         return DB::transaction(function () use ($attributes) {
@@ -45,8 +50,21 @@ class ClassBookingRepository extends BaseRepository
     {
         return DB::transaction(function () use ($model, $attributes) {
             /** @var ClassBooking $model */
+            $oldStatus = $model->status;
+
             if (isset($attributes['status'])) {
                 $model->update(['status' => $attributes['status']]);
+            }
+
+            $model->refresh();
+            $newStatus = $model->status;
+
+            if ($oldStatus !== 'attended' && $newStatus === 'attended') {
+                $this->trainerCommissionRepository->recordForAttendedBooking($model);
+            }
+
+            if ($oldStatus === 'attended' && $newStatus !== 'attended') {
+                $this->trainerCommissionRepository->removeSessionCommissionForBooking($model);
             }
 
             return $model->fresh();
@@ -55,11 +73,10 @@ class ClassBookingRepository extends BaseRepository
 
     public function cancelBooking(ClassBooking $booking): ClassBooking
     {
-        return DB::transaction(function () use ($booking) {
-            $booking->update(['status' => 'cancelled']);
+        /** @var ClassBooking $updated */
+        $updated = $this->update($booking, ['status' => 'cancelled']);
 
-            return $booking->fresh();
-        });
+        return $updated;
     }
 
     protected function assertNoDuplicateActiveBooking(int $scheduleId, int $membershipId): void

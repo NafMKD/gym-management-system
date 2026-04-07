@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Authenticatable
@@ -70,6 +71,22 @@ class User extends Authenticatable
     public function memberships(): HasMany
     {
         return $this->hasMany(Membership::class, 'user_id');
+    }
+
+    /**
+     * Trainer-only extended profile (qualifications, default session commission, etc.).
+     */
+    public function trainerProfile(): HasOne
+    {
+        return $this->hasOne(TrainerProfile::class, 'user_id');
+    }
+
+    /**
+     * Commission ledger rows where this user is the trainer.
+     */
+    public function trainerCommissionEntries(): HasMany
+    {
+        return $this->hasMany(TrainerCommissionEntry::class, 'trainer_id');
     }
 
     /**

@@ -27,6 +27,11 @@
         <x-card class="card-default" title="Staff Detail" no-message>
             <x-slot:headerTools>
                 <div class="card-tools mr-5">
+                    @if($user->role === 'trainer')
+                        <a href="{{ route('admin.staffs.trainer_profile.edit', $user) }}" class="btn btn-sm btn-outline-primary mr-2">
+                            <i class="fas fa-id-card"></i> {{ __("Trainer profile") }}
+                        </a>
+                    @endif
                     <a href="{{ route('admin.staffs.list') }}"><button type="button" class="btn btn-tool"><i
                                 class="fas fa-arrow-left"></i>
                         {{ __("Back") }}

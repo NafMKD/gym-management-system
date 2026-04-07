@@ -14,6 +14,9 @@ use App\Models\Package;
 use App\Models\Payment;
 use App\Models\Product;
 use App\Models\StockMovement;
+use App\Models\TrainerCommissionEntry;
+use App\Models\TrainerProfile;
+use App\Models\TrainerSessionFeedback;
 use App\Models\User;
 use App\Observers\AuditTrailObserver;
 use Illuminate\Support\ServiceProvider;
@@ -46,5 +49,8 @@ class AppServiceProvider extends ServiceProvider
         Product::observe(AuditTrailObserver::class);
         MerchandiseSaleLine::observe(AuditTrailObserver::class);
         StockMovement::observe(AuditTrailObserver::class);
+        TrainerProfile::observe(AuditTrailObserver::class);
+        TrainerCommissionEntry::observe(AuditTrailObserver::class);
+        TrainerSessionFeedback::observe(AuditTrailObserver::class);
     }
 }
