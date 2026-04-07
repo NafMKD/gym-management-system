@@ -17,7 +17,10 @@
         </section>
         <section class="content">
             <div class="container-fluid">
-                <p class="text-muted">{{ __('Coming soon.') }}</p>
+                <p class="mb-2">
+                    <a href="{{ route('member.classes.index') }}" class="btn btn-primary">{{ __('Group classes') }}</a>
+                </p>
+                <p class="text-muted">{{ __('More features coming soon.') }}</p>
             </div>
         </section>
     </div>

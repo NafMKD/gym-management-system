@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\AuditTrailController;
+use App\Http\Controllers\Admin\ClassBookingController;
+use App\Http\Controllers\Admin\ClassScheduleController;
+use App\Http\Controllers\Admin\GymClassController;
 use App\Http\Controllers\Admin\MembershipExtensionRequestController;
 use App\Http\Controllers\Admin\StaffController;
 use Illuminate\Support\Facades\Route;
@@ -49,6 +52,55 @@ Route::group([
     Route::get('/delete/{package}', [PackageController::class, 'destroy'])->name('delete');
     Route::get('/list-data', [PackageController::class, 'getPackagesData'])->name('list.data');
     Route::get('/package-data', [PackageController::class, 'getPackageData'])->name('package.data');
+});
+
+/**
+ * Group For `/admin/gym-classes/*`
+ */
+Route::group([
+    'prefix' => 'gym-classes',
+    'as' => 'gym_classes.',
+], function () {
+    Route::get('/list', [GymClassController::class, 'index'])->name('list');
+    Route::get('/add', [GymClassController::class, 'create'])->name('add');
+    Route::post('/add', [GymClassController::class, 'store'])->name('store');
+    Route::get('/view/{gym_class}', [GymClassController::class, 'show'])->name('view');
+    Route::get('/edit/{gym_class}', [GymClassController::class, 'edit'])->name('edit');
+    Route::post('/update/{gym_class}', [GymClassController::class, 'update'])->name('update');
+    Route::get('/delete/{gym_class}', [GymClassController::class, 'destroy'])->name('delete');
+    Route::get('/list-data', [GymClassController::class, 'getListData'])->name('list.data');
+});
+
+/**
+ * Group For `/admin/class-schedules/*`
+ */
+Route::group([
+    'prefix' => 'class-schedules',
+    'as' => 'class_schedules.',
+], function () {
+    Route::get('/list', [ClassScheduleController::class, 'index'])->name('list');
+    Route::get('/add', [ClassScheduleController::class, 'create'])->name('add');
+    Route::post('/add', [ClassScheduleController::class, 'store'])->name('store');
+    Route::get('/view/{class_schedule}', [ClassScheduleController::class, 'show'])->name('view');
+    Route::get('/edit/{class_schedule}', [ClassScheduleController::class, 'edit'])->name('edit');
+    Route::post('/update/{class_schedule}', [ClassScheduleController::class, 'update'])->name('update');
+    Route::get('/delete/{class_schedule}', [ClassScheduleController::class, 'destroy'])->name('delete');
+    Route::get('/list-data', [ClassScheduleController::class, 'getListData'])->name('list.data');
+});
+
+/**
+ * Group For `/admin/class-bookings/*`
+ */
+Route::group([
+    'prefix' => 'class-bookings',
+    'as' => 'class_bookings.',
+], function () {
+    Route::get('/list', [ClassBookingController::class, 'index'])->name('list');
+    Route::get('/add', [ClassBookingController::class, 'create'])->name('add');
+    Route::post('/add', [ClassBookingController::class, 'store'])->name('store');
+    Route::get('/view/{class_booking}', [ClassBookingController::class, 'show'])->name('view');
+    Route::post('/cancel/{class_booking}', [ClassBookingController::class, 'cancel'])->name('cancel');
+    Route::get('/list-data', [ClassBookingController::class, 'getListData'])->name('list.data');
 });
 
 /**

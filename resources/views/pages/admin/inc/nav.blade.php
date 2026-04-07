@@ -115,6 +115,47 @@
                         </li>
                     </ul>
                 </li>
+                <li class="nav-item  {{ !request()->routeIs('admin.gym_classes*') && !request()->routeIs('admin.class_schedules*') && !request()->routeIs('admin.class_bookings*') ?: 'menu-open' }}">
+                    <a href="#" class="nav-link {{ !request()->routeIs('admin.gym_classes*') && !request()->routeIs('admin.class_schedules*') && !request()->routeIs('admin.class_bookings*') ?: 'active' }}">
+                        <i class="nav-icon fas fa-dumbbell"></i>
+                        <p>
+                            {{ __("Classes") }}
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{{ route('admin.gym_classes.add') }}" class="nav-link {{ request()->routeIs('admin.gym_classes.add') ? 'active' : '' }}">
+                                <i class="fas fa-plus nav-icon"></i>
+                                <p>{{ __("Add class") }}</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.gym_classes.list') }}" class="nav-link {{ request()->routeIs('admin.gym_classes.*') && !request()->routeIs('admin.gym_classes.add') ? 'active' : '' }}">
+                                <i class="fas fa-list nav-icon"></i>
+                                <p>{{ __("Gym classes") }}</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.class_schedules.add') }}" class="nav-link {{ request()->routeIs('admin.class_schedules.add') ? 'active' : '' }}">
+                                <i class="fas fa-calendar-plus nav-icon"></i>
+                                <p>{{ __("Add session") }}</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.class_schedules.list') }}" class="nav-link {{ request()->routeIs('admin.class_schedules.*') && !request()->routeIs('admin.class_schedules.add') ? 'active' : '' }}">
+                                <i class="fas fa-calendar-alt nav-icon"></i>
+                                <p>{{ __("Schedules") }}</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.class_bookings.list') }}" class="nav-link {{ request()->routeIs('admin.class_bookings*') ? 'active' : '' }}">
+                                <i class="fas fa-clipboard-list nav-icon"></i>
+                                <p>{{ __("Bookings") }}</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
                 <li class="nav-item">
                     <a href="{{ route('admin.invoices.list') }}" class="nav-link  {{ !request()->routeIs('admin.invoices*') ?: 'active' }}">
                         <i class="nav-icon fas fa-file-invoice"></i>

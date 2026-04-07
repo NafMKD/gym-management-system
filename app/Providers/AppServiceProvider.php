@@ -3,6 +3,9 @@
 namespace App\Providers;
 
 use App\Models\Attendance;
+use App\Models\ClassBooking;
+use App\Models\ClassSchedule;
+use App\Models\GymClass;
 use App\Models\Invoice;
 use App\Models\Membership;
 use App\Models\MembershipExtensionRequest;
@@ -34,5 +37,8 @@ class AppServiceProvider extends ServiceProvider
         Payment::observe(AuditTrailObserver::class);
         User::observe(AuditTrailObserver::class);
         MembershipExtensionRequest::observe(AuditTrailObserver::class);
+        GymClass::observe(AuditTrailObserver::class);
+        ClassSchedule::observe(AuditTrailObserver::class);
+        ClassBooking::observe(AuditTrailObserver::class);
     }
 }

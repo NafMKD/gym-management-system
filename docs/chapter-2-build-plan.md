@@ -133,12 +133,14 @@ Do **not** introduce new architectural layers (e.g. service classes, DTOs, API r
 
 | # | Task | Check |
 |---|------|-------|
-| 6.1 | Migrations: classes, schedules, bookings (or equivalent names) with foreign keys to `users` for trainer and member where applicable; indexes for time-range queries. | [ ] |
-| 6.2 | Models + relationships; register observers for audit if tables are auditable. | [ ] |
-| 6.3 | Repositories + admin controllers + `routes/web/admin.php` groups following existing naming. | [ ] |
-| 6.4 | Validation: no overlapping trainer assignments for the same slot (resolve conflicts in repository layer or Form Request if project adopts them consistently). | [ ] |
-| 6.5 | Admin UI: list/add/edit/view Blades under `pages/admin/...` with DataTables for lists. | [ ] |
-| 6.6 | If member booking is required: use Phase 1 member home + booking actions; otherwise admin-only booking for members. | [ ] |
+| 6.1 | Migrations: classes, schedules, bookings (or equivalent names) with foreign keys to `users` for trainer and member where applicable; indexes for time-range queries. | [x] |
+| 6.2 | Models + relationships; register observers for audit if tables are auditable. | [x] |
+| 6.3 | Repositories + admin controllers + `routes/web/admin.php` groups following existing naming. | [x] |
+| 6.4 | Validation: no overlapping trainer assignments for the same slot (resolve conflicts in repository layer or Form Request if project adopts them consistently). | [x] |
+| 6.5 | Admin UI: list/add/edit/view Blades under `pages/admin/...` with DataTables for lists. | [x] |
+| 6.6 | If member booking is required: use Phase 1 member home + booking actions; otherwise admin-only booking for members. | [x] |
+
+**Phase 6 implementation notes:** Tables `gym_classes` (class catalogue: capacity, duration, active flag), `class_schedules` (trainer `users.id`, `starts_at`/`ends_at`, optional `capacity_override`), `class_bookings` (`membership_id`, optional `booked_by_user_id`, status `pending|confirmed|cancelled|attended`). Models `GymClass`, `ClassSchedule`, `ClassBooking`; overlap enforced in `ClassScheduleRepository` (trainer double-booking); capacity + active membership enforced in `ClassBookingRepository`. Admin: `GymClassController`, `ClassScheduleController`, `ClassBookingController` + DataTables + sidebar **Classes**. Member: `GymClassBookingController`, routes `member.classes.*`, button from `member.home`. Audit observers registered for all three models. Tests: `tests/Feature/ClassScheduleTrainerOverlapTest.php`.
 
 ---
 
