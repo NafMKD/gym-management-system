@@ -9,8 +9,11 @@ use App\Models\GymClass;
 use App\Models\Invoice;
 use App\Models\Membership;
 use App\Models\MembershipExtensionRequest;
+use App\Models\MerchandiseSaleLine;
 use App\Models\Package;
 use App\Models\Payment;
+use App\Models\Product;
+use App\Models\StockMovement;
 use App\Models\User;
 use App\Observers\AuditTrailObserver;
 use Illuminate\Support\ServiceProvider;
@@ -40,5 +43,8 @@ class AppServiceProvider extends ServiceProvider
         GymClass::observe(AuditTrailObserver::class);
         ClassSchedule::observe(AuditTrailObserver::class);
         ClassBooking::observe(AuditTrailObserver::class);
+        Product::observe(AuditTrailObserver::class);
+        MerchandiseSaleLine::observe(AuditTrailObserver::class);
+        StockMovement::observe(AuditTrailObserver::class);
     }
 }

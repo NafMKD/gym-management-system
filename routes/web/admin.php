@@ -5,7 +5,9 @@ use App\Http\Controllers\Admin\AuditTrailController;
 use App\Http\Controllers\Admin\ClassBookingController;
 use App\Http\Controllers\Admin\ClassScheduleController;
 use App\Http\Controllers\Admin\GymClassController;
+use App\Http\Controllers\Admin\MerchandiseCheckoutController;
 use App\Http\Controllers\Admin\MembershipExtensionRequestController;
+use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\StaffController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\DashboardController;
@@ -86,6 +88,35 @@ Route::group([
     Route::post('/update/{class_schedule}', [ClassScheduleController::class, 'update'])->name('update');
     Route::get('/delete/{class_schedule}', [ClassScheduleController::class, 'destroy'])->name('delete');
     Route::get('/list-data', [ClassScheduleController::class, 'getListData'])->name('list.data');
+});
+
+/**
+ * Group For `/admin/products/*` (inventory)
+ */
+Route::group([
+    'prefix' => 'products',
+    'as' => 'products.',
+], function () {
+    Route::get('/list', [ProductController::class, 'index'])->name('list');
+    Route::get('/add', [ProductController::class, 'create'])->name('add');
+    Route::post('/add', [ProductController::class, 'store'])->name('store');
+    Route::get('/view/{product}', [ProductController::class, 'show'])->name('view');
+    Route::get('/edit/{product}', [ProductController::class, 'edit'])->name('edit');
+    Route::post('/update/{product}', [ProductController::class, 'update'])->name('update');
+    Route::post('/stock/{product}', [ProductController::class, 'updateStock'])->name('stock');
+    Route::get('/delete/{product}', [ProductController::class, 'destroy'])->name('delete');
+    Route::get('/list-data', [ProductController::class, 'getListData'])->name('list.data');
+});
+
+/**
+ * Merchandise POS (unified invoice + payment)
+ */
+Route::group([
+    'prefix' => 'merchandise',
+    'as' => 'merchandise.',
+], function () {
+    Route::get('/checkout', [MerchandiseCheckoutController::class, 'create'])->name('checkout');
+    Route::post('/checkout', [MerchandiseCheckoutController::class, 'store'])->name('checkout.store');
 });
 
 /**

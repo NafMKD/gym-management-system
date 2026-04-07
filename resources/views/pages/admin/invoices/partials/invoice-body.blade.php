@@ -4,6 +4,8 @@
     $logoSrc = (!empty($forPdf) && is_file($logoPath))
         ? 'data:image/jpeg;base64,' . base64_encode((string) file_get_contents($logoPath))
         : asset('assets/dist/img/logo.JPG');
+    $isMerchandise = ($invoice->invoice_source ?? 'membership') === 'merchandise';
+    $billTo = $isMerchandise ? $invoice->customer : $invoice->membership?->user;
 @endphp
 <div class="invoice p-3 mb-3">
     <div class="row">
@@ -28,15 +30,24 @@
         <div class="col-sm-4 invoice-col">
             To
             <address>
-                <strong>{{ $invoice->membership->user->getName() }}</strong><br>
-                Phone: (251) {{ substr((string) $invoice->membership->user->phone, 0, 3) . '-' . substr((string) $invoice->membership->user->phone, 3, 2) . '-' . substr((string) $invoice->membership->user->phone, 5) }}<br>
+                @if($billTo)
+                    <strong>{{ $billTo->getName() }}</strong><br>
+                    @php $phone = (string) $billTo->phone; @endphp
+                    Phone: (251) {{ strlen($phone) >= 9 ? substr($phone, 0, 3) . '-' . substr($phone, 3, 2) . '-' . substr($phone, 5) : $phone }}<br>
+                @else
+                    <strong>—</strong>
+                @endif
             </address>
         </div>
         <div class="col-sm-4 invoice-col">
             <b>Invoice:</b> <em>{{ $invoice->invoice_number }}</em><br>
             <br>
             <b>Payment Due:</b> {{ \Carbon\Carbon::parse($invoice->due_date)->setTimezone('Africa/Addis_Ababa')->format('d/m/Y') }}<br>
-            <b>Membership ID:</b> {{ $invoice->membership->id }}
+            @if($isMerchandise)
+                <b>{{ __('Type') }}:</b> {{ __('Merchandise') }}<br>
+            @else
+                <b>Membership ID:</b> {{ $invoice->membership?->id ?? '—' }}
+            @endif
         </div>
     </div>
     <div class="row">
@@ -45,20 +56,41 @@
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>Full Name</th>
-                        <th>Package</th>
-                        <th>Description</th>
-                        <th>Subtotal</th>
+                        @if($isMerchandise)
+                            <th>{{ __('Product') }}</th>
+                            <th>{{ __('SKU') }}</th>
+                            <th>{{ __('Qty') }}</th>
+                            <th class="text-right">{{ __('Unit price') }}</th>
+                            <th class="text-right">{{ __('Line total') }}</th>
+                        @else
+                            <th>Full Name</th>
+                            <th>Package</th>
+                            <th>Description</th>
+                            <th>Subtotal</th>
+                        @endif
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>{{ $invoice->membership->user->getName() }}</td>
-                        <td>{{ is_null($invoice->membership->package?->name) ? __("Custom") : ucwords($invoice->membership->package?->name) }}</td>
-                        <td>{{ is_null($invoice->membership->package?->decription) ? '-' : ucfirst($invoice->membership->package?->decription) }}</td>
-                        <td>{{ __('Birr') }} {{ number_format($invoice->amount, 2) }}</td>
-                    </tr>
+                    @if($isMerchandise)
+                        @foreach($invoice->merchandiseSaleLines as $i => $line)
+                            <tr>
+                                <td>{{ $i + 1 }}</td>
+                                <td>{{ $line->product?->name }}</td>
+                                <td>{{ $line->product?->sku ?? '—' }}</td>
+                                <td>{{ $line->quantity }}</td>
+                                <td class="text-right">{{ __('Birr') }} {{ number_format((float) $line->unit_price, 2) }}</td>
+                                <td class="text-right">{{ __('Birr') }} {{ number_format((float) $line->line_total, 2) }}</td>
+                            </tr>
+                        @endforeach
+                    @else
+                        <tr>
+                            <td>1</td>
+                            <td>{{ $invoice->membership?->user?->getName() }}</td>
+                            <td>{{ is_null($invoice->membership?->package?->name) ? __("Custom") : ucwords($invoice->membership->package?->name) }}</td>
+                            <td>{{ is_null($invoice->membership?->package?->decription) ? '-' : ucfirst($invoice->membership->package?->decription) }}</td>
+                            <td>{{ __('Birr') }} {{ number_format($invoice->amount, 2) }}</td>
+                        </tr>
+                    @endif
                 </tbody>
             </table>
         </div>

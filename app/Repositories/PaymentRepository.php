@@ -36,8 +36,14 @@ class PaymentRepository extends BaseRepository
                 'notes' => $attributes['notes'] ?? null,
             ];
 
-            if (! isset($validatedAttributes['invoice_id'], $validatedAttributes['membership_id'], $validatedAttributes['amount'], $validatedAttributes['payment_date'], $validatedAttributes['payment_method'], $validatedAttributes['status'])) {
+            if (! isset($validatedAttributes['invoice_id'], $validatedAttributes['amount'], $validatedAttributes['payment_date'], $validatedAttributes['payment_method'], $validatedAttributes['status'])) {
                 throw new \Exception('Missing required attributes.');
+            }
+
+            /** @var Invoice $invoice */
+            $invoice = Invoice::query()->findOrFail($validatedAttributes['invoice_id']);
+            if ($validatedAttributes['membership_id'] === null || $validatedAttributes['membership_id'] === '') {
+                $validatedAttributes['membership_id'] = $invoice->membership_id;
             }
 
             $payment = Payment::create($validatedAttributes);
@@ -163,6 +169,7 @@ class PaymentRepository extends BaseRepository
     public function getFilteredPaymentsQuery(array $filters)
     {
         return Payment::query()
+            ->with(['invoice.customer', 'membership.user'])
             ->when(isset($filters['start_date']) && isset($filters['end_date']), function ($query) use ($filters) {
                 $query->whereBetween('payment_date', [$filters['start_date'], $filters['end_date']]);
             })

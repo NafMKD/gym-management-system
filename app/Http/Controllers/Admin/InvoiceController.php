@@ -41,7 +41,13 @@ class InvoiceController extends Controller
     public function show(Invoice $invoice): View|RedirectResponse
     {
         try {
-            $invoice->load(['membership.user', 'membership.package', 'payments']);
+            $invoice->load([
+                'membership.user',
+                'membership.package',
+                'customer',
+                'merchandiseSaleLines.product',
+                'payments',
+            ]);
 
             return view(self::ADMIN_.'invoices.view', compact('invoice'));
         } catch (Throwable $e) {
@@ -57,10 +63,14 @@ class InvoiceController extends Controller
     public function sendEmail(Invoice $invoice): RedirectResponse
     {
         try {
-            $invoice->loadMissing(['membership.user']);
-            $email = $invoice->membership?->user?->email;
+            $invoice->loadMissing(['membership.user', 'customer', 'merchandiseSaleLines.product']);
+            if (($invoice->invoice_source ?? 'membership') === 'merchandise') {
+                $email = $invoice->customer?->email;
+            } else {
+                $email = $invoice->membership?->user?->email;
+            }
             if (! $email) {
-                return redirect()->back()->with(self::ERROR_, __('Member has no email address.'));
+                return redirect()->back()->with(self::ERROR_, __('No email address on file for this invoice.'));
             }
 
             Mail::to($email)->send(new InvoiceMail($invoice));
@@ -79,7 +89,12 @@ class InvoiceController extends Controller
     public function downloadPdf(Invoice $invoice)
     {
         try {
-            $invoice->load(['membership.user', 'membership.package']);
+            $invoice->load([
+                'membership.user',
+                'membership.package',
+                'customer',
+                'merchandiseSaleLines.product',
+            ]);
 
             return Pdf::loadView('pages.admin.invoices.pdf', ['invoice' => $invoice])
                 ->download('invoice-'.$invoice->invoice_number.'.pdf');
@@ -95,15 +110,23 @@ class InvoiceController extends Controller
      */
     public function getInvoicesData(): JsonResponse
     {
-        $query = Invoice::query(); 
+        $query = Invoice::query()->with(['membership.user', 'membership.package', 'customer']);
 
         return DataTables::of($query)
-            ->addIndexColumn() 
+            ->addIndexColumn()
             ->editColumn('name', function ($row) {
-                return $row->membership?->user?->getName() ?? 'N/A';;
+                if (($row->invoice_source ?? 'membership') === 'merchandise') {
+                    return $row->customer?->getName() ?? 'N/A';
+                }
+
+                return $row->membership?->user?->getName() ?? 'N/A';
             })
             ->editColumn('package', function ($row) {
-                return is_null($row->membership->package?->name) ? __("Custom") :ucwords($row->membership->package?->name);
+                if (($row->invoice_source ?? 'membership') === 'merchandise') {
+                    return __('Merchandise');
+                }
+
+                return is_null($row->membership?->package?->name) ? __('Custom') : ucwords((string) $row->membership->package?->name);
             })
             ->editColumn('amount', function ($row) {
                 return number_format($row->amount, 2); 

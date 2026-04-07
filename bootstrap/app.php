@@ -19,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withSchedule(function (Schedule $schedule) {
         $schedule->command('memberships:process-expiry')->dailyAt('00:05');
         $schedule->command('memberships:notify-expiring')->dailyAt('08:00');
+        $schedule->command('inventory:notify-low-stock')->dailyAt('07:30');
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

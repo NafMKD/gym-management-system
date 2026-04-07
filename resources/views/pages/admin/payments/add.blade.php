@@ -40,10 +40,16 @@
                     <div class="row">
                         <div class="col-md-4">
                             <div class="form-group">
-                                <label>{{ __("Membership ID") }}</label> <i class="text-danger font-weight-bold">*</i>
-                                <input id="membership_id" type="text"
-                                    class="form-control" name="membership_id"
-                                    value="{{ $invoice->membership_id }}" readonly>
+                                @if(($invoice->invoice_source ?? 'membership') === 'merchandise')
+                                    <label>{{ __("Customer") }}</label>
+                                    <input type="text" class="form-control" value="{{ $invoice->customer?->getName() ?? '—' }}" readonly>
+                                    <input type="hidden" name="membership_id" value="">
+                                @else
+                                    <label>{{ __("Membership ID") }}</label> <i class="text-danger font-weight-bold">*</i>
+                                    <input id="membership_id" type="text"
+                                        class="form-control" name="membership_id"
+                                        value="{{ $invoice->membership_id }}" readonly>
+                                @endif
                             </div>
                         </div>
                         <div class="col-md-4">

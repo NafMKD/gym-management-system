@@ -21,20 +21,30 @@ class InvoiceRepository extends BaseRepository
             return DB::transaction(function () use ($attributes) {
                 $validatedAttributes = [
                     'membership_id' => $attributes['membership_id'] ?? null,
-                    'amount' => $attributes['amount'] ?? null
+                    'user_id' => $attributes['user_id'] ?? null,
+                    'amount' => $attributes['amount'] ?? null,
+                    'invoice_source' => $attributes['invoice_source'] ?? 'membership',
                 ];
 
-                if (!isset($validatedAttributes['membership_id'], $validatedAttributes['amount'])) {
-                    throw new \Exception("Missing required attributes.");
+                if (! isset($validatedAttributes['amount'])) {
+                    throw new \Exception('Missing required attributes.');
                 }
 
-                $year = now()->format('y'); 
+                $source = $validatedAttributes['invoice_source'];
+                if ($source === 'membership' && empty($validatedAttributes['membership_id'])) {
+                    throw new \Exception('Membership is required for membership invoices.');
+                }
+                if ($source === 'merchandise' && empty($validatedAttributes['user_id'])) {
+                    throw new \Exception('Customer is required for merchandise invoices.');
+                }
+
+                $year = now()->format('y');
                 $lastInvoice = Invoice::where('invoice_number', 'like', "INV-$year-%")->latest('id')->first();
                 $nextNumber = $lastInvoice
                     ? intval(substr($lastInvoice->invoice_number, -5)) + 1
-                    : 1; 
-                $validatedAttributes['invoice_number'] = 'INV-' . $year . '-' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
-                
+                    : 1;
+                $validatedAttributes['invoice_number'] = 'INV-'.$year.'-'.str_pad((string) $nextNumber, 5, '0', STR_PAD_LEFT);
+
                 $validatedAttributes['status'] = 'unpaid';
                 $validatedAttributes['issued_date'] = Carbon::now();
                 $validatedAttributes['due_date'] = Carbon::now()->addDays(7);

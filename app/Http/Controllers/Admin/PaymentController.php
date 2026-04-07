@@ -90,7 +90,24 @@ class PaymentController extends Controller
                     }
                 },
             ],
-            'membership_id' => 'required|exists:memberships,id',
+            'membership_id' => [
+                Rule::requiredIf(function () use ($request) {
+                    $inv = Invoice::find($request->input('invoice_id'));
+
+                    return $inv && ($inv->invoice_source ?? 'membership') === 'membership';
+                }),
+                'nullable',
+                'exists:memberships,id',
+                function ($attribute, $value, $fail) use ($request) {
+                    $invoice = Invoice::find($request->input('invoice_id'));
+                    if (! $invoice || ($invoice->invoice_source ?? 'membership') !== 'membership') {
+                        return;
+                    }
+                    if ((string) $value !== (string) $invoice->membership_id) {
+                        $fail(__('The membership does not match this invoice.'));
+                    }
+                },
+            ],
             'amount' => [
                 'required',
                 'numeric',
@@ -204,11 +221,15 @@ class PaymentController extends Controller
      */
     public function getPaymentsData(): JsonResponse
     {
-        $query = Payment::query(); 
+        $query = Payment::query()->with(['invoice.customer', 'membership.user']);
 
         return DataTables::of($query)
             ->addIndexColumn() 
             ->editColumn('name', function ($row) {
+                if (($row->invoice?->invoice_source ?? 'membership') === 'merchandise') {
+                    return $row->invoice?->customer?->getName() ?? 'N/A';
+                }
+
                 return $row->membership?->user?->getName() ?? 'N/A';
             })
             ->editColumn('invoice', function ($row) {
@@ -349,6 +370,10 @@ class PaymentController extends Controller
                 return DataTables::of($query)
                     ->addIndexColumn()
                     ->editColumn('membership_id', function ($row) {
+                        if (($row->invoice?->invoice_source ?? 'membership') === 'merchandise') {
+                            return $row->invoice?->customer?->getName() ?? 'N/A';
+                        }
+
                         return $row->membership?->user?->getName() ?? 'N/A';
                     })
                     ->editColumn('invoice', function ($row) {

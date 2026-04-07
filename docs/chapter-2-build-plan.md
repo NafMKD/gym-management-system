@@ -154,10 +154,12 @@ Do **not** introduce new architectural layers (e.g. service classes, DTOs, API r
 
 | # | Task | Check |
 |---|------|-------|
-| 7.1 | Migrations: products, stock movements or quantities, sales lines. | [ ] |
-| 7.2 | Repositories and admin CRUD consistent with `PackageController` / `UserController` patterns. | [ ] |
-| 7.3 | Low-stock threshold flag or scheduled check notification (reuse Phase 2 mail/queue). | [ ] |
-| 7.4 | Integrate merchandise checkout with `Invoice`/`Payment` models or document separate cash path — avoid parallel payment systems. | [ ] |
+| 7.1 | Migrations: products, stock movements or quantities, sales lines. | [x] |
+| 7.2 | Repositories and admin CRUD consistent with `PackageController` / `UserController` patterns. | [x] |
+| 7.3 | Low-stock threshold flag or scheduled check notification (reuse Phase 2 mail/queue). | [x] |
+| 7.4 | Integrate merchandise checkout with `Invoice`/`Payment` models or document separate cash path — avoid parallel payment systems. | [x] |
+
+**Phase 7 implementation notes:** Tables `products` (SKU, pricing, `stock_quantity`, `low_stock_threshold`, soft deletes), `merchandise_sale_lines` (per-invoice lines), `stock_movements` (`restock` / `sale` / `adjustment`). Invoices gained nullable `membership_id`, `user_id` (customer), `invoice_source` (`membership` \| `merchandise`); payments `membership_id` nullable. **Single billing path:** merchandise checkout uses `InvoiceRepository` + `PaymentRepository` (completed payment) in `MerchandiseRepository::checkout()`; stock decremented and sale movements recorded in one transaction. Admin: `ProductController` (DataTables, CRUD, restock/adjust on product view), `MerchandiseCheckoutController` (POS-style sale to a member user), sidebar **Inventory**. Low stock: `inventory:notify-low-stock` daily **07:30** in `bootstrap/app.php`, `LowStockProductsMail`, `config/inventory.php` (`INVENTORY_LOW_STOCK_NOTIFY_ENABLED`, `INVENTORY_LOW_STOCK_MAIL_TO`). `PaymentController` / listings resolve customer vs membership for display. Invoice PDF/email bodies support merchandise line items via `invoice-body` partial. Migration `2026_04_09_100001_*` drops FKs by querying `information_schema` when needed (MySQL naming). Tests: `tests/Feature/MerchandiseInventoryTest.php`.
 
 ---
 

@@ -14,11 +14,13 @@ class Invoice extends Model
 
     protected $fillable = [
         'membership_id',
+        'user_id',
         'invoice_number',
         'amount',
         'status',
         'issued_date',
         'due_date',
+        'invoice_source',
     ];
 
     /**
@@ -29,6 +31,22 @@ class Invoice extends Model
     public function membership(): BelongsTo
     {
         return $this->belongsTo(Membership::class, 'membership_id');
+    }
+
+    /**
+     * Customer (walk-in / merchandise buyer) when not tied to a membership row.
+     */
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * Line items for merchandise invoices.
+     */
+    public function merchandiseSaleLines(): HasMany
+    {
+        return $this->hasMany(MerchandiseSaleLine::class, 'invoice_id');
     }
 
     /**

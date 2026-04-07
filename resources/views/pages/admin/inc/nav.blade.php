@@ -156,6 +156,35 @@
                         </li>
                     </ul>
                 </li>
+                <li class="nav-item  {{ !request()->routeIs('admin.products*') && !request()->routeIs('admin.merchandise*') ?: 'menu-open' }}">
+                    <a href="#" class="nav-link {{ !request()->routeIs('admin.products*') && !request()->routeIs('admin.merchandise*') ?: 'active' }}">
+                        <i class="nav-icon fas fa-warehouse"></i>
+                        <p>
+                            {{ __("Inventory") }}
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{{ route('admin.products.add') }}" class="nav-link {{ request()->routeIs('admin.products.add') ? 'active' : '' }}">
+                                <i class="fas fa-plus nav-icon"></i>
+                                <p>{{ __("Add product") }}</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.products.list') }}" class="nav-link {{ request()->routeIs('admin.products.list') || request()->routeIs('admin.products.view') || request()->routeIs('admin.products.edit') ? 'active' : '' }}">
+                                <i class="fas fa-list nav-icon"></i>
+                                <p>{{ __("Products") }}</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.merchandise.checkout') }}" class="nav-link {{ request()->routeIs('admin.merchandise*') ? 'active' : '' }}">
+                                <i class="fas fa-cash-register nav-icon"></i>
+                                <p>{{ __("Sell merchandise") }}</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
                 <li class="nav-item">
                     <a href="{{ route('admin.invoices.list') }}" class="nav-link  {{ !request()->routeIs('admin.invoices*') ?: 'active' }}">
                         <i class="nav-icon fas fa-file-invoice"></i>

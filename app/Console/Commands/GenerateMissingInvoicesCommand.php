@@ -36,7 +36,8 @@ class GenerateMissingInvoicesCommand extends Command
 
             $invoice = $invoiceRepository->store([
                 'membership_id' => $membership->id,
-                'amount' => $membership->price, 
+                'amount' => $membership->price,
+                'invoice_source' => 'membership',
             ]);
             
             $this->info("Invoice {$invoice->invoice_number} generated for membership {$membership->id}.");

@@ -215,6 +215,7 @@ class MembershipController extends Controller
             $invoiceAttributes = [
                 'membership_id' => $membership->id,
                 'amount' => $attributes['price'],
+                'invoice_source' => 'membership',
             ];
             
             $invoice = $this->invoiceRepository->store($invoiceAttributes);
