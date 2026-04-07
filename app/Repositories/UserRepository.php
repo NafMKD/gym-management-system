@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\User;
+use App\Support\PhoneNumber;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 
@@ -18,18 +19,27 @@ class UserRepository extends BaseRepository {
     {
         try {
             DB::transaction(function () use ($attributes) {
+                $email = $attributes['email'] ?? null;
+                if ($email === '') {
+                    $email = null;
+                }
+
                 $validatedAttributes = [
                     'first_name' => $attributes['first_name'] ?? null,
                     'last_name' => $attributes['last_name'] ?? null,
-                    'email' => $attributes['email'] ?? null,
+                    'email' => $email,
                     'password' => $attributes['password'] ?? null,
                     'phone' => $attributes['phone'] ?? null,
                     'role' => $attributes['role'] ?? null,
                     'gender' => $attributes['gender'] ?? null,
                 ];
 
-                if (! isset($validatedAttributes['first_name'], $validatedAttributes['last_name'], $validatedAttributes['email'], $validatedAttributes['password'], $validatedAttributes['phone'], $validatedAttributes['role'], $validatedAttributes['gender'])) {
-                    throw new \Exception("Missing required attributes.");
+                if (! isset($validatedAttributes['first_name'], $validatedAttributes['last_name'], $validatedAttributes['password'], $validatedAttributes['phone'], $validatedAttributes['role'], $validatedAttributes['gender'])) {
+                    throw new \Exception('Missing required attributes.');
+                }
+
+                if (! PhoneNumber::isValid((string) $validatedAttributes['phone'])) {
+                    throw new \Exception(__('Invalid phone number format.'));
                 }
 
                 $validatedAttributes['password'] = Hash::make($validatedAttributes['password']);
@@ -51,13 +61,42 @@ class UserRepository extends BaseRepository {
     public function update(mixed $model, array $attributes): mixed
     {
         try {
-            $originalAttributes = $model->only(['first_name', 'last_name', 'email', 'phone', 'role', 'gender']);
+            /** @var User $model */
+            $updateData = [];
 
-            $updateData = array_filter(
-                $attributes,
-                fn($value, $key) => array_key_exists($key, $originalAttributes) && $value != $originalAttributes[$key],
-                ARRAY_FILTER_USE_BOTH
-            );
+            foreach (['first_name', 'last_name', 'email', 'phone', 'role', 'gender'] as $key) {
+                if (! array_key_exists($key, $attributes)) {
+                    continue;
+                }
+
+                $value = $attributes[$key];
+                if ($key === 'email') {
+                    $value = $value === '' ? null : $value;
+                    if ($model->email === $value) {
+                        continue;
+                    }
+                    $updateData['email'] = $value;
+
+                    continue;
+                }
+
+                if ($key === 'phone') {
+                    if (! PhoneNumber::isValid((string) $value)) {
+                        throw new \Exception(__('Invalid phone number format.'));
+                    }
+                    if ((string) $model->phone === (string) $value) {
+                        continue;
+                    }
+                    $updateData['phone'] = $value;
+
+                    continue;
+                }
+
+                if ($model->{$key} == $value) {
+                    continue;
+                }
+                $updateData[$key] = $value;
+            }
 
             if (isset($attributes['password'])) {
                 $updateData['password'] = Hash::make($attributes['password']);

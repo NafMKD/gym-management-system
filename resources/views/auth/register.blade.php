@@ -46,9 +46,9 @@
                     @enderror
 
                     <div class="input-group mt-3">
-                        <input id="email" placeholder="{{ __('Email') }}" type="email"
+                        <input id="email" placeholder="{{ __('Email (optional)') }}" type="email"
                                class="form-control @error('email') is-invalid @enderror" name="email"
-                               value="{{ old('email') }}" required autocomplete="email">
+                               value="{{ old('email') }}" autocomplete="email">
                         <div class="input-group-append">
                             <div class="input-group-text"><span class="fas fa-envelope"></span></div>
                         </div>
@@ -58,9 +58,9 @@
                     @enderror
 
                     <div class="input-group mt-3">
-                        <input id="phone" placeholder="{{ __('Phone (10 digits)') }}" type="text"
+                        <input id="phone" placeholder="{{ __('Mobile (07 or 09 + 8 digits)') }}" type="text"
                                class="form-control @error('phone') is-invalid @enderror" name="phone"
-                               value="{{ old('phone') }}" required autocomplete="tel" maxlength="10">
+                               value="{{ old('phone') }}" required autocomplete="tel" maxlength="10" inputmode="numeric">
                         <div class="input-group-append">
                             <div class="input-group-text"><span class="fas fa-phone"></span></div>
                         </div>

@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Repositories\UserRepository;
 use App\Models\User;
+use App\Support\PhoneNumber;
 use App\Exceptions\NoUpdateNeededException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use Throwable;
@@ -40,11 +42,19 @@ class StaffController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $normalizedPhone = PhoneNumber::normalize($request->string('phone')->toString());
+        if ($normalizedPhone === null || ! PhoneNumber::isValid($normalizedPhone)) {
+            return redirect()->back()
+                ->withErrors(['phone' => __('Enter a valid mobile number (07 or 09 plus 8 digits).')])
+                ->withInput();
+        }
+        $request->merge(['phone' => $normalizedPhone]);
+
         $validator = Validator::make($request->all(), [
-            'email' => 'required|string|email|max:255|unique:users',
+            'email' => PhoneNumber::optionalEmailRules(),
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'phone' => 'required|numeric|digits:10',
+            'phone' => ['required', 'string', 'regex:'.PhoneNumber::REGEX_VALIDATION, Rule::unique('users', 'phone')],
             'gender' => 'required|in:Female,Male',
         ]);
 
@@ -55,6 +65,9 @@ class StaffController extends Controller
         $attributes = $request->only(['first_name', 'last_name', 'email', 'phone', 'gender']);
         $attributes['role'] = $request->input('role', 'trainer');
         $attributes['password'] = $request->input('password', '12345678');
+        if (($attributes['email'] ?? '') === '') {
+            $attributes['email'] = null;
+        }
         try {
             $this->userRepository->store($attributes);
             return redirect()->route('admin.staffs.add')->with(self::SUCCESS_, 'Staff'.self::SUCCESS_STORE);
@@ -91,12 +104,20 @@ class StaffController extends Controller
 
     public function update(Request $request, User $user): RedirectResponse
     {
+        $normalizedPhone = PhoneNumber::normalize($request->string('phone')->toString());
+        if ($normalizedPhone === null || ! PhoneNumber::isValid($normalizedPhone)) {
+            return redirect()->back()
+                ->withErrors(['phone' => __('Enter a valid mobile number (07 or 09 plus 8 digits).')])
+                ->withInput();
+        }
+        $request->merge(['phone' => $normalizedPhone]);
+
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'email' => 'sometimes|string|email|max:255|unique:users,email,' . $user->id,
+            'email' => PhoneNumber::optionalEmailRules($user->id),
             'password' => 'sometimes|string|min:8',
-            'phone' => 'required|numeric|digits:10',
+            'phone' => ['required', 'string', 'regex:'.PhoneNumber::REGEX_VALIDATION, Rule::unique('users', 'phone')->ignore($user->id)],
             'role' => 'sometimes|in:admin,trainer,reception',
             'gender' => 'sometimes|in:Female,Male',
         ]);
@@ -106,6 +127,9 @@ class StaffController extends Controller
         }
 
         $attributes = $request->only(['first_name', 'last_name', 'email', 'password', 'phone', 'role', 'gender']);
+        if (array_key_exists('email', $attributes) && $attributes['email'] === '') {
+            $attributes['email'] = null;
+        }
 
         try {
             $this->userRepository->update($user, $attributes);
@@ -142,7 +166,7 @@ class StaffController extends Controller
                 return $row?->getName() ?? 'N/A';
             })
             ->editColumn('email', function ($row) {
-                return $row->email;
+                return $row->email ?: '—';
             })
             ->editColumn('phone', function ($row) {
                 return $row->phone;

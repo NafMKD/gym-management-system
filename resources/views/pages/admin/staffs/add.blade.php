@@ -57,10 +57,10 @@
                     </div>
                     
                     <div class="form-group">
-                        <label>{{ __("Email") }}</label> <i class="text-danger font-weight-bold">*</i>
-                        <input id="email" placeholder="{{ __("Enter Email") }}" type="email"
+                        <label>{{ __("Email") }}</label>
+                        <input id="email" placeholder="{{ __("Optional") }}" type="email"
                             class="form-control @error('email') is-invalid @enderror" name="email"
-                            value="{{ old('email') }}" required autocomplete="email">
+                            value="{{ old('email') }}" autocomplete="email">
                         @error('email')
                         <span class="text-danger" role="alert">
                             {{ $message }}
@@ -72,9 +72,9 @@
                         <div class="col-md-8">
                             <div class="form-group">
                                 <label>{{ __("Phone") }}</label> <i class="text-danger font-weight-bold">*</i>
-                                <input id="phone" placeholder="{{ __("Enter Phone") }}" type="text"
+                                <input id="phone" placeholder="{{ __('07 or 09 + 8 digits') }}" type="text"
                                     class="form-control @error('phone') is-invalid @enderror" name="phone"
-                                    value="{{ old('phone') }}" maxlength="10" required autocomplete="phone">
+                                    value="{{ old('phone') }}" maxlength="10" required autocomplete="tel" inputmode="numeric">
                                 @error('phone')
                                 <span class="text-danger" role="alert">
                                     {{ $message }}

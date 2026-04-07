@@ -46,7 +46,7 @@
                         <dt class="col-sm-3">{{ __("Full Name") }}:</dt>
                         <dd class="col-sm-9">{{ $user->getName() }}</dd>
                         <dt class="col-sm-3">{{ __("Email") }}:</dt>
-                        <dd class="col-sm-9">{{ $user->email }}</dd>
+                        <dd class="col-sm-9">{{ $user->email ?: '—' }}</dd>
                         <dt class="col-sm-3">{{ __("Phone") }}:</dt>
                         <dd class="col-sm-9">{{ $user->phone }}</dd>
                         <dt class="col-sm-3">{{ __("Role") }}:</dt>

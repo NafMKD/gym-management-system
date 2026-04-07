@@ -82,13 +82,19 @@ Each phase below should **list concrete routes/pages** per role so “dashboard�
 
 | # | Task | Check |
 |---|------|-------|
-| 1.1 | Migration: alter `users` — `phone` → `VARCHAR(10)`; enforce **nullable(false)** for phone after backfill (or keep nullable only during migration script). | [ ] |
-| 1.2 | Migration / artisan command: **normalize existing** `phone` values to 10-digit local format where possible; flag or admin-review rows that fail. | [ ] |
-| 1.3 | `email` **nullable**; unique index on `email` only where `email` IS NOT NULL (MySQL 8+ functional / partial unique, or app-level uniqueness validation—document choice). | [ ] |
-| 1.4 | Update `User` model: `$fillable`, casts, factories, seeders, Breeze registration, `UserRepository` to match. | [ ] |
-| 1.5 | Update **all** forms and DataTables that show or edit phone/email validation messages consistently. | [ ] |
+| 1.1 | Migration: alter `users` — `phone` → `VARCHAR(10)`; enforce **nullable(false)** for phone after backfill (or keep nullable only during migration script). | [x] |
+| 1.2 | Migration / artisan command: **normalize existing** `phone` values to 10-digit local format where possible; flag or admin-review rows that fail. | [x] |
+| 1.3 | `email` **nullable**; unique index on `email` only where `email` IS NOT NULL (MySQL 8+ functional / partial unique, or app-level uniqueness validation—document choice). | [x] |
+| 1.4 | Update `User` model: `$fillable`, casts, factories, seeders, Breeze registration, `UserRepository` to match. | [x] |
+| 1.5 | Update **all** forms and DataTables that show or edit phone/email validation messages consistently. | [x] |
 
-**Phase 1 implementation notes:** _(fill when done—include migration filenames, backfill strategy, and any `.env` flags.)_
+**Phase 1 implementation notes:**
+
+- **Migration:** `database/migrations/2026_04_11_100000_chapter3_phase1_users_phone_string_email_nullable.php` — `phone` as `VARCHAR(10)` NOT NULL UNIQUE; `email` nullable; drops/re-adds unique on `email` after backfill; `down()` is intentionally non-reversible.
+- **Backfill:** migration maps legacy bigint `phone` to 10-char strings; `app/Console/Commands/UsersNormalizePhonesCommand.php` (`users:normalize-phones {--fix}`) validates and optionally normalizes rows post-deploy.
+- **Email uniqueness:** Laravel’s `unique:users,email` treats multiple `NULL` as distinct in MySQL; no partial index required for typical installs.
+- **Validation / helpers:** `app/Support/PhoneNumber.php` — normalize, `^(07|09)\d{8}$` validation, optional email rules for registration/admin.
+- **Login:** still **email** until Phase 2; registration and admin CRUD use phone + optional email as above.
 
 ---
 

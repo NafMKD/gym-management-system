@@ -67,9 +67,9 @@
                     
                     <div class="form-group">
                         <label>{{ __("Email") }}</label>
-                        <input id="email" placeholder="{{ __("Enter Email") }}" type="email"
+                        <input id="email" placeholder="{{ __("Optional") }}" type="email"
                             class="form-control @error('email') is-invalid @enderror" name="email"
-                            value="{{ $user->email }}" required autocomplete="email">
+                            value="{{ old('email', $user->email) }}" autocomplete="email">
                         @error('email')
                         <span class="text-danger" role="alert">
                             {{ $message }}
@@ -81,9 +81,9 @@
                         <div class="col-md-8">
                             <div class="form-group">
                                 <label>{{ __("Phone") }}</label>
-                                <input id="phone" placeholder="{{ __("Enter Phone") }}" type="text"
+                                <input id="phone" placeholder="{{ __('07 or 09 + 8 digits') }}" type="text"
                                     class="form-control @error('phone') is-invalid @enderror" name="phone"
-                                    value="{{ $user->phone }}" maxlength="10" required autocomplete="phone">
+                                    value="{{ old('phone', $user->phone) }}" maxlength="10" required autocomplete="tel" inputmode="numeric">
                                 @error('phone')
                                 <span class="text-danger" role="alert">
                                     {{ $message }}
