@@ -91,7 +91,8 @@ class DashboardController extends Controller
                 fputcsv($out, [
                     'ID',
                     __('Invoice'),
-                    __('Member'),
+                    __('Invoice source'),
+                    __('Customer'),
                     __('Amount'),
                     __('Type'),
                     __('Method'),
@@ -100,14 +101,26 @@ class DashboardController extends Controller
                 ]);
 
                 Payment::query()
-                    ->with(['invoice:id,invoice_number', 'membership.user:id,first_name,last_name'])
+                    ->with([
+                        'invoice:id,invoice_number,invoice_source,user_id',
+                        'invoice.customer:id,first_name,last_name',
+                        'membership.user:id,first_name,last_name',
+                    ])
                     ->orderByDesc('payment_date')
                     ->chunk(200, function ($chunk) use ($out) {
                         foreach ($chunk as $p) {
+                            $source = $p->invoice?->invoice_source ?? 'membership';
+                            if ($source === 'merchandise') {
+                                $customer = $p->invoice?->customer?->getName() ?? __('Walk-in');
+                            } else {
+                                $customer = $p->membership?->user?->getName() ?? '';
+                            }
+
                             fputcsv($out, [
                                 $p->id,
                                 $p->invoice?->invoice_number ?? '',
-                                $p->membership?->user?->getName() ?? '',
+                                $source,
+                                $customer,
                                 $p->amount,
                                 $p->payment_type ?? 'payment',
                                 $p->payment_method,

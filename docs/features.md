@@ -190,6 +190,10 @@ Rough map of **core tables** vs SRS modules:
 | `audit_trails` | Change history |
 | `jobs`, `cache`, `sessions` | Laravel infrastructure |
 
+### Revenue ledger
+
+All recorded sales follow one pattern: an **Invoice** (`invoice_source` is **membership** or **merchandise**) plus **Payment** rows. **Completed** payments drive revenue in the admin dashboard and CSV exports; membership fees and POS merchandise share this single ledger (no duplicate cash book).
+
 ---
 
 ## 6. Suggested priority order when resuming development

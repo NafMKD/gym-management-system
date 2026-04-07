@@ -20,3 +20,13 @@ test('admin can download memberships csv', function () {
     $response->assertOk();
     $response->assertHeader('content-type', 'text/csv; charset=UTF-8');
 });
+
+test('admin payments csv includes invoice source column', function () {
+    $admin = User::factory()->admin()->create();
+
+    $response = $this->actingAs($admin)->get(route('admin.export.payments_csv'));
+
+    $response->assertOk();
+    $content = $response->streamedContent();
+    expect($content)->toContain('Invoice source');
+});

@@ -67,6 +67,10 @@
                 <div class="info-box-content">
                     <span class="info-box-text">{{ __('Revenue this month') }} ({{ __('completed payments') }})</span>
                     <span class="info-box-number">{{ __('Birr') }} {{ number_format($summary['revenue_this_month'] ?? 0, 2) }}</span>
+                    <small class="text-muted d-block">
+                        {{ __('Membership') }}: {{ __('Birr') }} {{ number_format($summary['revenue_this_month_membership'] ?? 0, 2) }}
+                        · {{ __('Merchandise') }}: {{ __('Birr') }} {{ number_format($summary['revenue_this_month_merchandise'] ?? 0, 2) }}
+                    </small>
                 </div>
             </div>
         </div>
@@ -76,6 +80,10 @@
                 <div class="info-box-content">
                     <span class="info-box-text">{{ __('Total revenue (all time)') }}</span>
                     <span class="info-box-number">{{ __('Birr') }} {{ number_format($summary['revenue_all_time'] ?? 0, 2) }}</span>
+                    <small class="text-muted d-block">
+                        {{ __('Membership') }}: {{ __('Birr') }} {{ number_format($summary['revenue_all_time_membership'] ?? 0, 2) }}
+                        · {{ __('Merchandise') }}: {{ __('Birr') }} {{ number_format($summary['revenue_all_time_merchandise'] ?? 0, 2) }}
+                    </small>
                 </div>
             </div>
         </div>
@@ -85,6 +93,9 @@
                 <div class="info-box-content">
                     <span class="info-box-text">{{ __('Unpaid invoices') }}</span>
                     <span class="info-box-number">{{ number_format($summary['unpaid_invoices_count'] ?? 0) }}</span>
+                    @if(($summary['unpaid_merchandise_invoices_count'] ?? 0) > 0)
+                        <small class="text-warning d-block">{{ __('Unpaid merchandise') }}: {{ number_format($summary['unpaid_merchandise_invoices_count']) }} ({{ __('POS sales should usually be paid immediately') }})</small>
+                    @endif
                 </div>
             </div>
         </div>
@@ -113,7 +124,7 @@
         <div class="col-lg-6">
             <div class="card card-outline card-success">
                 <div class="card-header">
-                    <h3 class="card-title">{{ __('Completed payment revenue by month') }}</h3>
+                    <h3 class="card-title">{{ __('Completed payment revenue by month') }} ({{ __('membership vs merchandise') }})</h3>
                 </div>
                 <div class="card-body" style="min-height: 260px;">
                     <canvas id="revenueByMonthChart"></canvas>
@@ -172,7 +183,8 @@
                         <thead>
                             <tr>
                                 <th>{{ __('Invoice') }}</th>
-                                <th>{{ __('Member') }}</th>
+                                <th>{{ __('Source') }}</th>
+                                <th>{{ __('Customer') }}</th>
                                 <th>{{ __('Amount') }}</th>
                                 <th>{{ __('Date') }}</th>
                             </tr>
@@ -183,12 +195,19 @@
                                 <td>
                                     <a href="{{ route('admin.invoices.view', $p->invoice_id) }}">{{ $p->invoice?->invoice_number ?? '—' }}</a>
                                 </td>
-                                <td>{{ $p->membership?->user?->getName() ?? '—' }}</td>
+                                <td>{{ ($p->invoice?->invoice_source ?? 'membership') === 'merchandise' ? __('Merchandise') : __('Membership') }}</td>
+                                <td>
+                                    @if(($p->invoice?->invoice_source ?? 'membership') === 'merchandise')
+                                        {{ $p->invoice?->customer?->getName() ?? __('Walk-in') }}
+                                    @else
+                                        {{ $p->membership?->user?->getName() ?? '—' }}
+                                    @endif
+                                </td>
                                 <td>{{ number_format($p->amount, 2) }}</td>
                                 <td>{{ \Carbon\Carbon::parse($p->payment_date)->format('d/m/Y') }}</td>
                             </tr>
                             @empty
-                            <tr><td colspan="4" class="text-center text-muted">{{ __('No records') }}</td></tr>
+                            <tr><td colspan="5" class="text-center text-muted">{{ __('No records') }}</td></tr>
                             @endforelse
                         </tbody>
                     </table>
@@ -245,20 +264,31 @@ $(function () {
         type: 'bar',
         data: {
             labels: revenueByMonth.map(function (r) { return r.label; }),
-            datasets: [{
-                label: @json(__('Birr')),
-                data: revenueByMonth.map(function (r) { return r.total; }),
-                backgroundColor: 'rgba(40, 167, 69, 0.6)',
-                borderColor: 'rgba(40, 167, 69, 1)',
-                borderWidth: 1
-            }]
+            datasets: [
+                {
+                    label: @json(__('Membership')),
+                    data: revenueByMonth.map(function (r) { return r.membership_total; }),
+                    backgroundColor: 'rgba(40, 167, 69, 0.75)',
+                    borderColor: 'rgba(40, 167, 69, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: @json(__('Merchandise')),
+                    data: revenueByMonth.map(function (r) { return r.merchandise_total; }),
+                    backgroundColor: 'rgba(0, 123, 255, 0.65)',
+                    borderColor: 'rgba(0, 123, 255, 1)',
+                    borderWidth: 1
+                }
+            ]
         },
         options: {
-            legend: { display: false },
+            legend: { display: true, position: 'bottom' },
             maintainAspectRatio: false,
             responsive: true,
             scales: {
+                xAxes: [{ stacked: true }],
                 yAxes: [{
+                    stacked: true,
                     ticks: { beginAtZero: true }
                 }]
             }

@@ -172,11 +172,16 @@ Each phase below should **list concrete routes/pages** per role so “dashboard�
 
 | # | Task | Check |
 |---|------|-------|
-| 5.1 | Dashboard / export: include merchandise invoices in revenue breakdown where appropriate (`invoice_source` filter). | [ ] |
-| 5.2 | Documentation: one short paragraph in [`features.md`](./features.md) or here—**all recorded sales → invoice + payment**. | [ ] |
-| 5.3 | Optional: reconcile report for “unpaid merchandise” if any flow allows it—should be none for POS cash-style completion. | [ ] |
+| 5.1 | Dashboard / export: include merchandise invoices in revenue breakdown where appropriate (`invoice_source` filter). | [x] |
+| 5.2 | Documentation: one short paragraph in [`features.md`](./features.md) or here—**all recorded sales → invoice + payment**. | [x] |
+| 5.3 | Optional: reconcile report for “unpaid merchandise” if any flow allows it—should be none for POS cash-style completion. | [x] |
 
-**Phase 5 implementation notes:** _(fill when done.)_
+**Phase 5 implementation notes:**
+
+- **Dashboard (`DashboardRepository`):** Revenue this month / all time are computed as **membership** + **merchandise** from completed `Payment` rows joined to `invoices.invoice_source`. Monthly chart data is **stacked** (membership vs merchandise). Recent payments table shows **Source** and **Customer** (member name, merchandise buyer, or Walk-in).
+- **CSV exports:** Payments export includes **invoice_source** and **Customer** columns (same rules as the dashboard table).
+- **Unpaid merchandise:** `unpaid_merchandise_invoices_count` is surfaced on the dashboard when &gt; 0 (POS is expected to leave merchandise paid immediately).
+- **Ledger principle:** Every recorded sale is represented as an **Invoice** plus **Payment** (completed for POS); see the **Revenue ledger** subsection in [`features.md`](./features.md).
 
 ---
 
