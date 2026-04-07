@@ -52,7 +52,7 @@
                                 <select name="payment_method" id="payment_method"
                                         class="form-control @error('payment_method') is-invalid @enderror">
                                     <option value="cash">{{ __("Cash") }}</option>
-                                    <option value="bank">{{ __("Bank") }}</option>
+                                    <option value="bank" @selected(old('payment_method') === 'bank')>{{ __("Bank") }}</option>
                                 </select>
                                 @error('payment_method')
                                 <span class="text-danger" role="alert">
@@ -64,13 +64,44 @@
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label>{{ __("Amount") }}</label> <i class="text-danger font-weight-bold">*</i>
+                                @php
+                                    $remaining = (float) $invoice->amount - (float) $invoice->payments()->where('status', 'completed')->sum('amount');
+                                @endphp
                                 <input id="amount" type="number" step="0.01"
                                     class="form-control @error('amount') is-invalid @enderror" name="amount"
-                                    value="{{ $invoice->amount - $invoice->payments()->where('status', 'completed')->sum('amount') }}" required autocomplete="amount">
+                                    value="{{ old('amount', number_format(max(0, $remaining), 2, '.', '')) }}" required autocomplete="amount">
                                 @error('amount')
                                 <span class="text-danger" role="alert">
                                     {{ $message }}
                                 </span>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row payment-bank-fields" style="display:none;">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>{{ __("Bank") }}</label> <i class="text-danger font-weight-bold">*</i>
+                                <select name="payment_bank" id="payment_bank"
+                                        class="form-control @error('payment_bank') is-invalid @enderror">
+                                    <option value="">{{ __("Select bank") }}</option>
+                                    <option value="telebirr" @selected(old('payment_bank') === 'telebirr')>Telebirr</option>
+                                    <option value="cbe" @selected(old('payment_bank') === 'cbe')>CBE</option>
+                                    <option value="boa" @selected(old('payment_bank') === 'boa')>BOA</option>
+                                </select>
+                                @error('payment_bank')
+                                <span class="text-danger" role="alert">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>{{ __("Transaction number") }}</label>
+                                <input type="text" name="bank_transaction_number" id="bank_transaction_number" maxlength="50"
+                                    class="form-control @error('bank_transaction_number') is-invalid @enderror"
+                                    value="{{ old('bank_transaction_number') }}">
+                                @error('bank_transaction_number')
+                                <span class="text-danger" role="alert">{{ $message }}</span>
                                 @enderror
                             </div>
                         </div>
@@ -83,4 +114,18 @@
             </x-slot:footer>
         </x-card>
     </x-content>
+@endsection
+
+@section('script')
+<script>
+$(function () {
+    function toggleBankFields() {
+        var bank = $('#payment_method').val() === 'bank';
+        $('.payment-bank-fields').toggle(bank);
+        $('#payment_bank').prop('required', bank);
+    }
+    $('#payment_method').on('change', toggleBankFields);
+    toggleBankFields();
+});
+</script>
 @endsection

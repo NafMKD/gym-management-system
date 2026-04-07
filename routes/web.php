@@ -34,9 +34,9 @@ Route::group([
     'prefix' => 'admin',
     'as' => 'admin.'
 ], function () {
-    require_once 'web/admin.php';
+    require __DIR__.'/web/admin.php';
 });
 
-require_once 'web/portal.php';
+require __DIR__.'/web/portal.php';
 
 require __DIR__.'/auth.php';

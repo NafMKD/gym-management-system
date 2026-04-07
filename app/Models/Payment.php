@@ -21,6 +21,8 @@ class Payment extends Model
         'payment_bank',
         'bank_transaction_number',
         'status',
+        'payment_type',
+        'notes',
     ];
 
     /**

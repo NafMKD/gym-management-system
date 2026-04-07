@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\InvoiceMail;
 use App\Models\Invoice;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 use Throwable;
 use Yajra\DataTables\Facades\DataTables;
@@ -38,9 +41,50 @@ class InvoiceController extends Controller
     public function show(Invoice $invoice): View|RedirectResponse
     {
         try {
+            $invoice->load(['membership.user', 'membership.package', 'payments']);
+
             return view(self::ADMIN_.'invoices.view', compact('invoice'));
         } catch (Throwable $e) {
             return redirect()->back()->withInput()->with(self::ERROR_, self::ERROR_UNKNOWN);
+        }
+    }
+
+    /**
+     * Email the invoice summary to the member.
+     *
+     * @return RedirectResponse
+     */
+    public function sendEmail(Invoice $invoice): RedirectResponse
+    {
+        try {
+            $invoice->loadMissing(['membership.user']);
+            $email = $invoice->membership?->user?->email;
+            if (! $email) {
+                return redirect()->back()->with(self::ERROR_, __('Member has no email address.'));
+            }
+
+            Mail::to($email)->send(new InvoiceMail($invoice));
+
+            return redirect()->back()->with(self::SUCCESS_, __('Invoice email sent.'));
+        } catch (Throwable $e) {
+            return redirect()->back()->with(self::ERROR_, $e->getMessage());
+        }
+    }
+
+    /**
+     * Download invoice as PDF (DomPDF).
+     *
+     * @return \Symfony\Component\HttpFoundation\Response|RedirectResponse
+     */
+    public function downloadPdf(Invoice $invoice)
+    {
+        try {
+            $invoice->load(['membership.user', 'membership.package']);
+
+            return Pdf::loadView('pages.admin.invoices.pdf', ['invoice' => $invoice])
+                ->download('invoice-'.$invoice->invoice_number.'.pdf');
+        } catch (Throwable $e) {
+            return redirect()->back()->with(self::ERROR_, $e->getMessage());
         }
     }
 

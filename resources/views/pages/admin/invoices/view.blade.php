@@ -24,119 +24,136 @@
 @endsection
 
 @section('content')
+@php
+    $netPaid = (float) $invoice->payments()->where('status', 'completed')->sum('amount');
+    $remaining = max(0, (float) $invoice->amount - $netPaid);
+@endphp
 <section class="content">
     <div class="container-fluid">
-        <div class="invoice p-3 mb-3">
-            <!-- title row -->
-            <div class="row">
-                <div class="col-12">
-                    <h4>
-                        <img src="{{ asset('assets/dist/img/logo.JPG') }}" class="img-circle img-sm mr-2" alt="User Image"> MyFitness
-                        <small class="float-right">Date: {{ Carbon\Carbon::parse($invoice->issued_date)->setTimezone('Africa/Addis_Ababa')->format('d/m/Y') }}</small>
-                    </h4>
-                </div>
-                <!-- /.col -->
-            </div>
-            <!-- info row -->
-            <div class="row invoice-info">
-                <div class="col-sm-4 invoice-col">
-                    From
-                    <address>
-                        <strong>MyFitness GYM</strong><br>
-                        Jimma, Merkato<br>
-                        Tsinat Building, 4<sup>th</sup> Flor <br>
-                        Phone: (251) 917-55-3839<br>
-                        Email: myfitness743@gmail.com
-                    </address>
-                </div>
-                <!-- /.col -->
-                <div class="col-sm-4 invoice-col">
-                    To
-                    <address>
-                        <strong>{{ $invoice->membership->user->getName() }}</strong><br>
-                        Phone: (251) {{ substr($invoice->membership->user->phone, 0, 3) . '-' . substr($invoice->membership->user->phone, 3, 2) . '-' . substr($invoice->membership->user->phone, 5) }}<br>
-                    </address>
-                </div>
-                <!-- /.col -->
-                <div class="col-sm-4 invoice-col">
-                    <b>Invoice:</b> <em>{{ $invoice->invoice_number }}</em><br>
-                    <br>
-                    <b>Payment Due:</b> {{ Carbon\Carbon::parse($invoice->due_date)->setTimezone('Africa/Addis_Ababa')->format('d/m/Y') }}<br>
-                    <b>Membership ID:</b> {{ $invoice->membership->id }}
-                </div>
-                <!-- /.col -->
-            </div>
-            <!-- /.row -->
+        @include('pages.admin.invoices.partials.invoice-body', ['invoice' => $invoice])
 
-            <!-- Table row -->
-            <div class="row">
-                <div class="col-12 table-responsive">
-                    <table class="table table-striped">
+        @if($invoice->payments->isNotEmpty())
+        <div class="row no-print mb-3">
+            <div class="col-12">
+                <h5>{{ __("Payment history") }}</h5>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered">
                         <thead>
                             <tr>
-                                <th>#</th>
-                                <th>Full Name</th>
-                                <th>Package</th>
-                                <th>Description</th>
-                                <th>Subtotal</th>
+                                <th>{{ __("Date") }}</th>
+                                <th>{{ __("Type") }}</th>
+                                <th>{{ __("Method") }}</th>
+                                <th class="text-right">{{ __("Amount") }}</th>
                             </tr>
                         </thead>
                         <tbody>
+                            @foreach($invoice->payments->sortByDesc('payment_date') as $p)
                             <tr>
-                                <td>1</td>
-                                <td>{{ $invoice->membership->user->getName() }}</td>
-                                <td>{{ is_null($invoice->membership->package?->name) ? __("Custom") :ucwords($invoice->membership->package?->name)}}</td>
-                                <td>{{ is_null($invoice->membership->package?->decription) ? '-' : ucfirst($invoice->membership->package?->decription)}}</td>
-                                <td>{{ __('Birr')}} {{ number_format($invoice->amount, 2) }}</td>
+                                <td>{{ \Carbon\Carbon::parse($p->payment_date)->format('d/m/Y H:i') }}</td>
+                                <td>{{ ($p->payment_type ?? 'payment') === 'refund' ? __('Refund') : __('Payment') }}</td>
+                                <td>{{ ucfirst($p->payment_method) }}</td>
+                                <td class="text-right">{{ number_format($p->amount, 2) }}</td>
                             </tr>
+                            @endforeach
                         </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="3">{{ __("Net paid") }}</th>
+                                <th class="text-right">{{ number_format($netPaid, 2) }}</th>
+                            </tr>
+                            <tr>
+                                <th colspan="3">{{ __("Remaining") }}</th>
+                                <th class="text-right">{{ number_format($remaining, 2) }}</th>
+                            </tr>
+                        </tfoot>
                     </table>
                 </div>
-                <!-- /.col -->
             </div>
-            <!-- /.row -->
+        </div>
+        @endif
 
-            <div class="row">
-                <!-- accepted payments column -->
-                <div class="col-6">
-                    <p class="lead">
-                        Payment Status: 
-                        <span class="badge {{ $invoice->status == 'paid' ? 'badge-success' : 'badge-warning' }}">
-                            {{ ucfirst($invoice->status) }}
-                        </span>
-                    </p>
-                </div>
-                <!-- /.col -->
-                <div class="col-6">
-                    <p class="lead">Amount Due {{ Carbon\Carbon::parse($invoice->due_date)->setTimezone('Africa/Addis_Ababa')->format('d/m/Y') }}</p>
+        <div class="row no-print">
+            <div class="col-12">
+                <form action="{{ route('admin.invoices.send.email', $invoice) }}" method="post" class="d-inline">
+                    @csrf
+                    <button type="submit" class="btn btn-outline-primary"><i class="fas fa-envelope"></i> {{ __("Email invoice") }}</button>
+                </form>
+                <a href="{{ route('admin.invoices.pdf', $invoice) }}" class="btn btn-outline-secondary" target="_blank" rel="noopener"><i class="fas fa-file-pdf"></i> {{ __("Download PDF") }}</a>
 
-                    <div class="table-responsive">
-                        <table class="table">
-                            <tr>
-                                <th>Tax (0%)</th>
-                                <td>{{ __('Birr')}} 0.00</td>
-                            </tr>
-                            <tr>
-                                <th>Total:</th>
-                                <td>{{ __('Birr')}} {{ number_format($invoice->amount, 2) }}</td>
-                            </tr>
-                        </table>
-                    </div>
-                </div>
-                <!-- /.col -->
-            </div>
-            <!-- /.row -->
+                @if ($invoice->status == 'unpaid' && $remaining > 0)
+                    <a href="{{ route('admin.payments.add', $invoice->id) }}" class="btn btn-success float-right"><i class="far fa-credit-card"></i> {{ __("Submit Payment") }}</a>
+                @endif
 
-            <!-- this row will not appear when printing -->
-            <div class="row no-print">
-                <div class="col-12">
-                    {{-- <a href="invoice-print.html" rel="noopener" target="_blank" class="btn btn-default"><i class="fas fa-print"></i> Print</a> --}}
-                    @if ($invoice->status == 'unpaid')
-                        <a href="{{ route('admin.payments.add', $invoice->id) }}" class="btn btn-success float-right"><i class="far fa-credit-card"></i> Submit Payment </a>
-                    @endif
-                </div>
+                @if ($netPaid > 0)
+                    <button type="button" class="btn btn-warning float-right mr-2" data-toggle="modal" data-target="#refundModal"><i class="fas fa-undo"></i> {{ __("Record refund") }}</button>
+                @endif
             </div>
         </div>
     </div>
 </section>
+
+<div class="modal fade no-print" id="refundModal" tabindex="-1" role="dialog" aria-labelledby="refundModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form action="{{ route('admin.payments.refund') }}" method="post">
+                @csrf
+                <input type="hidden" name="invoice_id" value="{{ $invoice->id }}">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="refundModalLabel">{{ __("Record refund") }}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted">{{ __("Maximum refund") }}: <strong>{{ number_format($netPaid, 2) }}</strong></p>
+                    <div class="form-group">
+                        <label for="refund_amount">{{ __("Amount") }}</label>
+                        <input type="number" step="0.01" min="0.01" max="{{ $netPaid }}" class="form-control" name="amount" id="refund_amount" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="refund_method">{{ __("Payment method") }}</label>
+                        <select name="payment_method" id="refund_method" class="form-control refund-method">
+                            <option value="cash">{{ __("Cash") }}</option>
+                            <option value="bank">{{ __("Bank") }}</option>
+                        </select>
+                    </div>
+                    <div class="form-group refund-bank-fields" style="display:none;">
+                        <label for="refund_payment_bank">{{ __("Bank") }}</label>
+                        <select name="payment_bank" id="refund_payment_bank" class="form-control">
+                            <option value="telebirr">Telebirr</option>
+                            <option value="cbe">CBE</option>
+                            <option value="boa">BOA</option>
+                        </select>
+                    </div>
+                    <div class="form-group refund-bank-fields" style="display:none;">
+                        <label for="refund_bank_transaction_number">{{ __("Transaction number") }}</label>
+                        <input type="text" name="bank_transaction_number" id="refund_bank_transaction_number" class="form-control" maxlength="50">
+                    </div>
+                    <div class="form-group">
+                        <label for="refund_notes">{{ __("Notes") }} ({{ __("optional") }})</label>
+                        <textarea name="notes" id="refund_notes" class="form-control" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __("Cancel") }}</button>
+                    <button type="submit" class="btn btn-warning">{{ __("Record refund") }}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endsection
+
+@section('script')
+<script>
+$(function () {
+    function toggleRefundBank() {
+        var bank = $('.refund-method').val() === 'bank';
+        $('.refund-bank-fields').toggle(bank);
+        $('#refund_payment_bank').prop('required', bank);
+    }
+    $('.refund-method').on('change', toggleRefundBank);
+    toggleRefundBank();
+});
+</script>
 @endsection

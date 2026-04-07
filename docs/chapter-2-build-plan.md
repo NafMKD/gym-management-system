@@ -95,10 +95,12 @@ Do **not** introduce new architectural layers (e.g. service classes, DTOs, API r
 
 | # | Task | Check |
 |---|------|-------|
-| 4.1 | Invoice email: send after invoice creation or on button from invoice view — use `Mailable` + existing invoice Blade or a dedicated mail view mirroring print layout. | [ ] |
-| 4.2 | PDF export using already-installed `barryvdh/laravel-dompdf`: add controller action from invoice show, reuse invoice HTML, match branding already in `invoices/view.blade.php`. | [ ] |
-| 4.3 | Refunds: define whether refund is negative `Payment`, new `refunds` table, or invoice status — implement in `PaymentRepository` / `InvoiceRepository` with same transaction style as `store`. | [ ] |
-| 4.4 | Payment UI: ensure bank fields (`payment_bank`, `bank_transaction_number`) match validation in `PaymentController@store` and forms. | [ ] |
+| 4.1 | Invoice email: send after invoice creation or on button from invoice view — use `Mailable` + existing invoice Blade or a dedicated mail view mirroring print layout. | [x] |
+| 4.2 | PDF export using already-installed `barryvdh/laravel-dompdf`: add controller action from invoice show, reuse invoice HTML, match branding already in `invoices/view.blade.php`. | [x] |
+| 4.3 | Refunds: define whether refund is negative `Payment`, new `refunds` table, or invoice status — implement in `PaymentRepository` / `InvoiceRepository` with same transaction style as `store`. | [x] |
+| 4.4 | Payment UI: ensure bank fields (`payment_bank`, `bank_transaction_number`) match validation in `PaymentController@store` and forms. | [x] |
+
+**Phase 4 implementation notes:** Refunds are **`payments` rows** with `payment_type = refund` and **negative `amount`**; `InvoiceRepository::syncInvoiceStatusFromPayments()` keeps `paid` / `unpaid` aligned with net completed payments. `PaymentRepository::recordRefund()` + `POST admin/payments/refund`. Invoice email: `InvoiceMail` + `emails/invoice-mail` (Markdown); **send on membership create** (try/catch + log) and **“Email invoice”** on invoice detail. PDF: `InvoiceController@downloadPdf`, shared `invoices/partials/invoice-body.blade.php`, DomPDF-friendly logo. Add payment form: bank requires `payment_bank` (`telebirr` / `cbe` / `boa`), optional `bank_transaction_number`. **`routes/web.php`** uses `require` (not `require_once`) for `web/admin.php` / `web/portal.php` so route names stay available when the test app is refreshed. Tests: `BillingRefundTest`, `BillingEmailTest`, `BillingPdfTest`.
 
 ---
 

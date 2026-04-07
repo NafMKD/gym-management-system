@@ -11,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Throwable;
 use Yajra\DataTables\Facades\DataTables;
@@ -61,7 +62,7 @@ class PaymentController extends Controller
     public function create(Invoice $invoice): View|RedirectResponse
     {
         try {
-            if ($invoice->status !== 'unpaid') {
+            if ($this->invoiceRepository->isInvoicePaid($invoice)) {
                 return redirect()->route('admin.payments.list')->with(self::ERROR_, __('This invoice is already paid'));
             }
             return view(self::ADMIN_.'payments.add', compact('invoice'));
@@ -84,8 +85,8 @@ class PaymentController extends Controller
                 'exists:invoices,id',
                 function ($attribute, $value, $fail) {
                     $invoice = Invoice::find($value);
-                    if ($invoice && $invoice->status === 'paid') {
-                        $fail(__("The selected invoice is already paid and cannot accept further payments."));
+                    if ($invoice && $this->invoiceRepository->isInvoicePaid($invoice)) {
+                        $fail(__('The selected invoice is already paid and cannot accept further payments.'));
                     }
                 },
             ],
@@ -96,14 +97,23 @@ class PaymentController extends Controller
                 'min:0.01',
                 function ($attribute, $value, $fail) use ($request) {
                     $invoice = Invoice::find($request->input('invoice_id'));
-                    if ($invoice && $value > $invoice->amount - $invoice->payments()->where('status', 'completed')->sum('amount')) {
-                        $fail(__("The payment amount cannot exceed the remaining amount of the invoice (maximum: :amount).", [
-                            'amount' => $invoice->amount - $invoice->payments()->where('status', 'completed')->sum('amount'),
-                        ]));
+                    if ($invoice) {
+                        $remaining = (float) $invoice->amount - (float) $invoice->payments()->where('status', 'completed')->sum('amount');
+                        if ((float) $value > $remaining) {
+                            $fail(__('The payment amount cannot exceed the remaining amount of the invoice (maximum: :amount).', [
+                                'amount' => number_format(max(0, $remaining), 2),
+                            ]));
+                        }
                     }
                 },
             ],
-            'payment_method' => 'required|in:cash,bank'
+            'payment_method' => 'required|in:cash,bank',
+            'payment_bank' => [
+                Rule::requiredIf(fn () => $request->input('payment_method') === 'bank'),
+                'nullable',
+                'in:telebirr,cbe,boa',
+            ],
+            'bank_transaction_number' => 'nullable|string|max:50',
         ]);
 
         if ($validator->fails()) {
@@ -115,21 +125,71 @@ class PaymentController extends Controller
             'membership_id',
             'amount',
             'payment_method',
+            'payment_bank',
+            'bank_transaction_number',
         ]);
 
         try {
             $attributes['status'] = 'completed';
-
-            // Store the payment
-            $this->paymentRepository->store($attributes);
-
-            // Update the invoice's status
-            $invoice = Invoice::find($attributes['invoice_id']);
-            if ($this->invoiceRepository->isInvoicePaid($invoice)) {
-                $this->invoiceRepository->markAsPaid($invoice);
+            if (($attributes['payment_method'] ?? '') === 'cash') {
+                $attributes['payment_bank'] = null;
             }
 
+            $this->paymentRepository->store($attributes);
+
             return redirect()->route('admin.payments.list')->with(self::SUCCESS_, 'Payment'.self::SUCCESS_STORE);
+        } catch (Throwable $e) {
+            return redirect()->back()->withInput()->with(self::ERROR_, $e->getMessage());
+        }
+    }
+
+    /**
+     * Record a refund against a paid (or partially paid) invoice.
+     *
+     * @return RedirectResponse
+     */
+    public function storeRefund(Request $request): RedirectResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'invoice_id' => 'required|exists:invoices,id',
+            'amount' => [
+                'required',
+                'numeric',
+                'min:0.01',
+                function ($attribute, $value, $fail) use ($request) {
+                    $invoice = Invoice::find($request->input('invoice_id'));
+                    if ($invoice) {
+                        $netPaid = (float) $invoice->payments()->where('status', 'completed')->sum('amount');
+                        if ((float) $value > $netPaid) {
+                            $fail(__('Refund cannot exceed net paid (:max).', ['max' => number_format($netPaid, 2)]));
+                        }
+                    }
+                },
+            ],
+            'payment_method' => 'required|in:cash,bank',
+            'payment_bank' => [
+                Rule::requiredIf(fn () => $request->input('payment_method') === 'bank'),
+                'nullable',
+                'in:telebirr,cbe,boa',
+            ],
+            'bank_transaction_number' => 'nullable|string|max:50',
+            'notes' => 'nullable|string|max:2000',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        try {
+            $payload = $request->only(['invoice_id', 'amount', 'payment_method', 'payment_bank', 'bank_transaction_number', 'notes']);
+            if (($payload['payment_method'] ?? '') === 'cash') {
+                $payload['payment_bank'] = null;
+            }
+            $this->paymentRepository->recordRefund($payload);
+
+            return redirect()
+                ->route('admin.invoices.view', $request->input('invoice_id'))
+                ->with(self::SUCCESS_, __('Refund recorded.'));
         } catch (Throwable $e) {
             return redirect()->back()->withInput()->with(self::ERROR_, $e->getMessage());
         }
@@ -155,7 +215,7 @@ class PaymentController extends Controller
                 return $row->invoice->invoice_number;
             })
             ->editColumn('amount', function ($row) {
-                return number_format($row->amount, 2); 
+                return number_format((float) $row->amount, 2);
             })
             ->editColumn('status', function ($row) {
                 $badgeClass = '';

@@ -112,8 +112,10 @@ Route::group([
     'as' => 'invoices.'
 ], function () {
     Route::get('/list', action: [InvoiceController::class, 'index'])->name('list');
-    Route::get('/view/{invoice}', [InvoiceController::class, 'show'])->name('view');
     Route::get('/list-data', [InvoiceController::class, 'getInvoicesData'])->name('list.data');
+    Route::get('/{invoice}/pdf', [InvoiceController::class, 'downloadPdf'])->name('pdf');
+    Route::post('/{invoice}/send-email', [InvoiceController::class, 'sendEmail'])->name('send.email');
+    Route::get('/view/{invoice}', [InvoiceController::class, 'show'])->name('view');
 });
 
 /**
@@ -128,6 +130,7 @@ Route::group([
     Route::get('/revenue/total', [PaymentController::class, 'getTotalRevenue'])->name('revenue.total');
     Route::get('/add/{invoice}', [PaymentController::class, 'create'])->name('add');
     Route::post('/add', [PaymentController::class, 'store'])->name('store');
+    Route::post('/refund', [PaymentController::class, 'storeRefund'])->name('refund');
     Route::get('/view/{payment}', [PaymentController::class, 'show'])->name('view');
     Route::get('/list-data', [PaymentController::class, 'getPaymentsData'])->name('list.data');
     Route::post('/mark-failed', [PaymentController::class, 'markFailed'])->name('mark.failed');

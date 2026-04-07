@@ -42,6 +42,8 @@
                         <dd class="col-sm-9"><a href="{{ route('admin.memberships.view', $payment->membership->id) }}">{{ $payment->membership->id }}</a></dd>
                         <dt class="col-sm-3">{{ __("Payment Date") }}:</dt>
                         <dd class="col-sm-9">{{ $payment->payment_date }}</dd>
+                        <dt class="col-sm-3">{{ __("Type") }}:</dt>
+                        <dd class="col-sm-9">{{ ($payment->payment_type ?? 'payment') === 'refund' ? __('Refund') : __('Payment') }}</dd>
                         <dt class="col-sm-3">{{ __("Amount") }}:</dt>
                         <dd class="col-sm-9">{{ number_format($payment->amount, 2, '.', ',') }}</dd>
                     </dl>
@@ -58,6 +60,8 @@
                         <dd class="col-sm-9 {{ $payment->status === 'completed' ? 'text-success' : ($payment->status === 'failed' ? 'text-danger' : 'text-warning') }}">
                             {{ ucfirst($payment->status) }}
                         </dd>
+                        <dt class="col-sm-3">{{ __("Notes") }}:</dt>
+                        <dd class="col-sm-9">{{ $payment->notes ?? __("N/A") }}</dd>
                     </dl>
                 </div>
             </div>

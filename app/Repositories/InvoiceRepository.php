@@ -94,6 +94,28 @@ class InvoiceRepository extends BaseRepository
             ->where('status', 'completed')
             ->sum('amount');
 
-    return $totalPaid >= $invoice->amount;
+        return (float) $totalPaid >= (float) $invoice->amount;
+    }
+
+    /**
+     * Set invoice paid/unpaid from net completed payments (payments minus refunds).
+     */
+    public function syncInvoiceStatusFromPayments(Invoice $invoice): void
+    {
+        $invoice->refresh();
+        $net = (float) $invoice->payments()->where('status', 'completed')->sum('amount');
+        $due = (float) $invoice->amount;
+
+        if ($net >= $due && $due > 0) {
+            if ($invoice->status !== 'paid') {
+                $this->markAsPaid($invoice);
+            }
+
+            return;
+        }
+
+        if ($invoice->status === 'paid') {
+            $invoice->update(['status' => 'unpaid']);
+        }
     }
 }

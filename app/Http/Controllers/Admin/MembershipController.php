@@ -7,9 +7,12 @@ use App\Models\Membership;
 use App\Models\Package;
 use App\Models\PrintBatch;
 use App\Models\User;
+use App\Mail\InvoiceMail;
 use App\Repositories\InvoiceRepository;
 use App\Repositories\MembershipRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
 use Throwable;
@@ -215,6 +218,19 @@ class MembershipController extends Controller
             ];
             
             $invoice = $this->invoiceRepository->store($invoiceAttributes);
+
+            try {
+                $invoice->loadMissing('membership.user');
+                $email = $invoice->membership?->user?->email;
+                if ($email) {
+                    Mail::to($email)->send(new InvoiceMail($invoice));
+                }
+            } catch (Throwable $mailException) {
+                Log::warning('invoice_email_after_membership_store_failed', [
+                    'invoice_id' => $invoice->id,
+                    'message' => $mailException->getMessage(),
+                ]);
+            }
 
             return redirect()->route('admin.invoices.view', $invoice);
         } catch (Throwable $e) {
