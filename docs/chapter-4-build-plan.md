@@ -113,11 +113,11 @@ Priority order (typical shift):
 
 | # | Task | Check |
 |---|------|-------|
-| 3.1 | Remove or **gate** `layouts.navigation` **Scan ID** / duplicate chrome if reception no longer loads `pages.admin.inc.app`. | [ ] |
-| 3.2 | **Reception user** should not need **AdminLTE sidebar** anywhere in normal work; **admin** users unchanged. | [ ] |
-| 3.3 | Smoke test: full **shift script** (add member → membership → POS → booking) only using reception shell. | [ ] |
+| 3.1 | Remove or **gate** `layouts.navigation` **Scan ID** / duplicate chrome if reception no longer loads `pages.admin.inc.app`. | [x] |
+| 3.2 | **Reception user** should not need **AdminLTE sidebar** anywhere in normal work; **admin** users unchanged. | [x] |
+| 3.3 | Smoke test: full **shift script** (add member → membership → POS → booking) only using reception shell. | [x] |
 
-**Phase 3 implementation notes:** _(fill when done.)_
+**Phase 3 implementation notes:** **`layouts.navigation`**: **Scan ID** is shown only when **`Auth::user()->role === 'admin'`** (reception reaches attendance via **`layouts.reception`** + **Desk** menu, not the AdminLTE top bar). Fixed **`target="_blank"`** + **`rel="noopener noreferrer"`**. **3.2:** Desk routes already use **`View::composer`** → **`layouts.reception`** for reception (Phase 2); admin-only pages stay on **`pages.admin.inc.app`**. **`tests/Feature/ReceptionDeskFlowTest.php`**: asserts HTML has no **`main-sidebar`** / **pushmenu** on **`admin.users.list`** as reception; sequential **GET** smoke for **`reception.home`**, users list/add, memberships list, merchandise checkout, class bookings list, attendance scan; admin dashboard still contains **Scan ID**.
 
 ---
 

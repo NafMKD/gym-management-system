@@ -7,14 +7,16 @@
         </li>
     </ul>
 
-    <!-- Right navbar links -->
+    <!-- Right navbar links (AdminLTE + sidebar: reception uses layouts.reception + Desk menu for scan) -->
     <ul class="navbar-nav ml-auto">
 
-        <li class="nav-item">
-            <a class="nav-link text-default" href="{{ route('admin.attendance.scan') }}" target="__blank">
-                <i class="fas fa-qrcode ml-1"></i> {{ __('Scan ID') }} 
-            </a>
-        </li>
+        @if(Auth::user()->role === 'admin')
+            <li class="nav-item">
+                <a class="nav-link text-default" href="{{ route('admin.attendance.scan') }}" target="_blank" rel="noopener noreferrer">
+                    <i class="fas fa-qrcode ml-1"></i> {{ __('Scan ID') }}
+                </a>
+            </li>
+        @endif
 
         <li class="nav-item">
             <a class="nav-link text-danger" href="{{ route('logout') }}"

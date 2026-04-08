@@ -23,9 +23,11 @@
 @section('content')
     <x-content class="content">
         <x-card title="{{ __('Gym classes') }}">
+            @if(Auth::user()->role === 'admin')
             <x-slot:headerTools>
                 <a href="{{ route('admin.gym_classes.add') }}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> {{ __('Add class') }}</a>
             </x-slot:headerTools>
+            @endif
             <div class="table-responsive">
             <table id="gymClassesTable" class="table table-bordered table-striped">
                 <thead>

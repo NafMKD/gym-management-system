@@ -25,6 +25,11 @@
 @section('content')
     <x-content class="content">
         <x-card title="Packages List">
+            @if(Auth::user()->role === 'admin')
+            <x-slot:headerTools>
+                <a href="{{ route('admin.packages.add') }}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> {{ __('Add Package') }}</a>
+            </x-slot:headerTools>
+            @endif
             <div class="table-responsive">
             <table id="packagesTable" class="table table-bordered table-striped">
                 <thead>

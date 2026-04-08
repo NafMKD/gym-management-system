@@ -21,9 +21,11 @@
 @section('content')
     <x-content class="content">
         <x-card title="{{ __('Sessions') }}">
+            @if(Auth::user()->role === 'admin')
             <x-slot:headerTools>
                 <a href="{{ route('admin.class_schedules.add') }}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> {{ __('Add session') }}</a>
             </x-slot:headerTools>
+            @endif
             <div class="table-responsive">
             <table id="schedulesTable" class="table table-bordered table-striped">
                 <thead>

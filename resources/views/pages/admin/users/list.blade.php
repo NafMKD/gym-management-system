@@ -25,6 +25,10 @@
 @section('content')
     <x-content class="content">
         <x-card title="Users List">
+            <x-slot:headerTools>
+                <a href="{{ route('admin.users.add') }}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> {{ __('Add User') }}</a>
+            </x-slot:headerTools>
+            <div class="table-responsive">
             <table id="usersTable" class="table table-bordered table-striped">
                 <thead>
                 <tr>

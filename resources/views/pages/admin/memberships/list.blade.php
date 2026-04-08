@@ -26,12 +26,7 @@
     <x-content class="content">
         <x-card title="Membership List">
             <x-slot:headerTools>
-                <div class="card-tools mr-5">
-                    <a href="{{ route('admin.memberships.add') }}"><button type="button" class="btn btn-primary"><i
-                                class="fas fa-plus"></i>
-                        {{ __("Add Membership") }}
-                        </button></a>
-                </div>
+                <a href="{{ route('admin.memberships.add') }}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> {{ __('Add Membership') }}</a>
             </x-slot:headerTools>
             <table id="membershipsTable" class="table table-bordered table-striped">
                 <thead>

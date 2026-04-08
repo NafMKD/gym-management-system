@@ -24,6 +24,9 @@
 @section('content')
     <x-content class="content">
         <x-card title="Staff List">
+            <x-slot:headerTools>
+                <a href="{{ route('admin.staffs.add') }}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> {{ __('Add Staff') }}</a>
+            </x-slot:headerTools>
             <table id="staffTable" class="table table-bordered table-striped">
                 <thead>
                 <tr>

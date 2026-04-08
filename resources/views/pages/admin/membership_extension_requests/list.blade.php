@@ -25,11 +25,7 @@
     <x-content class="content">
         <x-card title="{{ __('Extension requests') }}">
             <x-slot:headerTools>
-                <div class="card-tools mr-5">
-                    <a href="{{ route('admin.memberships.extension_requests.add') }}">
-                        <button type="button" class="btn btn-primary"><i class="fas fa-plus"></i> {{ __("Add request") }}</button>
-                    </a>
-                </div>
+                <a href="{{ route('admin.memberships.extension_requests.add') }}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> {{ __('Add request') }}</a>
             </x-slot:headerTools>
             <div class="table-responsive">
             <table id="extensionRequestsTable" class="table table-bordered table-striped">
