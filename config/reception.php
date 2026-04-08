@@ -10,64 +10,72 @@ return [
     'brand_label' => 'Front desk',
 
     /**
-     * Top navigation items (order = display order).
+     * Top navigation. Use a dropdown to avoid crowded horizontal links on small screens.
      *
-     * @var list<array{route: string, label: string, icon?: string, active: array<int, string>}>
+     * @var list<array{type?: string, route?: string, label: string, active?: array<int, string>, items?: list<array{route: string, label: string, active: array<int, string>}>}>
      */
     'nav' => [
         [
+            'type' => 'link',
             'route' => 'reception.home',
-            'label' => 'Desk home',
-            'icon' => 'fa-home',
+            'label' => 'Home',
             'active' => ['reception.home'],
         ],
         [
-            'route' => 'admin.users.list',
-            'label' => 'Members',
-            'icon' => 'fa-users',
-            'active' => ['admin.users.*'],
-        ],
-        [
-            'route' => 'admin.memberships.list',
-            'label' => 'Memberships',
-            'icon' => 'fa-id-card',
-            'active' => ['admin.memberships.*'],
-        ],
-        [
-            'route' => 'admin.merchandise.checkout',
-            'label' => 'POS',
-            'icon' => 'fa-cash-register',
-            'active' => ['admin.merchandise.*'],
-        ],
-        [
-            'route' => 'admin.class_bookings.list',
-            'label' => 'Bookings',
-            'icon' => 'fa-calendar-check',
-            'active' => ['admin.class_bookings.*'],
-        ],
-        [
-            'route' => 'admin.packages.list',
-            'label' => 'Packages',
-            'icon' => 'fa-box',
-            'active' => ['admin.packages.*'],
-        ],
-        [
-            'route' => 'admin.gym_classes.list',
-            'label' => 'Classes',
-            'icon' => 'fa-dumbbell',
-            'active' => ['admin.gym_classes.*'],
-        ],
-        [
-            'route' => 'admin.class_schedules.list',
-            'label' => 'Schedule',
-            'icon' => 'fa-calendar-alt',
-            'active' => ['admin.class_schedules.*'],
-        ],
-        [
-            'route' => 'admin.attendance.scan',
-            'label' => 'Attendance',
-            'icon' => 'fa-qrcode',
-            'active' => ['admin.attendance.*'],
+            'type' => 'dropdown',
+            'label' => 'Desk',
+            'active' => [
+                'admin.users.*',
+                'admin.memberships.*',
+                'admin.merchandise.*',
+                'admin.class_bookings.*',
+                'admin.packages.*',
+                'admin.gym_classes.*',
+                'admin.class_schedules.*',
+                'admin.attendance.*',
+            ],
+            'items' => [
+                [
+                    'route' => 'admin.users.list',
+                    'label' => 'Members',
+                    'active' => ['admin.users.*'],
+                ],
+                [
+                    'route' => 'admin.memberships.list',
+                    'label' => 'Memberships',
+                    'active' => ['admin.memberships.*'],
+                ],
+                [
+                    'route' => 'admin.merchandise.checkout',
+                    'label' => 'POS',
+                    'active' => ['admin.merchandise.*'],
+                ],
+                [
+                    'route' => 'admin.class_bookings.list',
+                    'label' => 'Bookings',
+                    'active' => ['admin.class_bookings.*'],
+                ],
+                [
+                    'route' => 'admin.packages.list',
+                    'label' => 'Packages',
+                    'active' => ['admin.packages.*'],
+                ],
+                [
+                    'route' => 'admin.gym_classes.list',
+                    'label' => 'Classes',
+                    'active' => ['admin.gym_classes.*'],
+                ],
+                [
+                    'route' => 'admin.class_schedules.list',
+                    'label' => 'Schedule',
+                    'active' => ['admin.class_schedules.*'],
+                ],
+                [
+                    'route' => 'admin.attendance.scan',
+                    'label' => 'Attendance',
+                    'active' => ['admin.attendance.*'],
+                ],
+            ],
         ],
     ],
 ];

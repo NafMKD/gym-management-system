@@ -2,7 +2,12 @@
 <html lang="en">
 
 <head>
-    @yield('title')
+    @hasSection('header')
+        @yield('header')
+    @else
+        @yield('title')
+    @endif
+    <link rel="stylesheet" href="{{ asset('assets/css/reception-shell.css') }}">
 </head>
 
 <body class="hold-transition sidebar-collapse layout-top-nav layout-footer-fixed">
@@ -18,9 +23,6 @@
             <div class="collapse navbar-collapse order-3" id="receptionNavbarCollapse">
                 <ul class="navbar-nav">
                     @include('layouts.partials.reception-topnav')
-                    <li class="nav-item d-flex align-items-center">
-                        <span class="nav-link text-muted">{{ Auth::user()->getName() }}</span>
-                    </li>
                 </ul>
             </div>
 
@@ -29,7 +31,7 @@
                     <a class="nav-link text-danger" href="{{ route('logout') }}"
                        onclick="event.preventDefault();
                         document.getElementById('logout-form').submit();">
-                        {{ __('Log out') }} <i class="fas fa-sign-out-alt ml-1"></i>
+                        {{ __('Log out') }}
                     </a>
                     <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                         @csrf
@@ -54,7 +56,10 @@
             </div>
         </div>
     @endif
-    @yield('content')
+    <div class="content-wrapper" style="margin-left: 0;">
+        @yield('content-header')
+        @yield('content')
+    </div>
     @include('layouts.footer')
 </div>
 

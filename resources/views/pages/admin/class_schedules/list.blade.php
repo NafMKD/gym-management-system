@@ -1,7 +1,7 @@
-@extends('pages.admin.inc.app')
+@extends($shellLayout ?? 'pages.admin.inc.app')
 
 @section('header')
-    @include('layouts.header', ['title' => 'Admin | Class schedules'])
+    @include('layouts.header', ['title' => ($deskShellTitlePrefix ?? 'Admin') . ' | Class schedules'])
 @endsection
 
 @section('content-header')
@@ -24,6 +24,7 @@
             <x-slot:headerTools>
                 <a href="{{ route('admin.class_schedules.add') }}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> {{ __('Add session') }}</a>
             </x-slot:headerTools>
+            <div class="table-responsive">
             <table id="schedulesTable" class="table table-bordered table-striped">
                 <thead>
                     <tr>
@@ -37,6 +38,7 @@
                 </thead>
                 <tbody></tbody>
             </table>
+            </div>
         </x-card>
     </x-content>
 @endsection

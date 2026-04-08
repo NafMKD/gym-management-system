@@ -1,7 +1,7 @@
-@extends('pages.admin.inc.app')
+@extends($shellLayout ?? 'pages.admin.inc.app')
 
 @section('header')
-    @include('layouts.header', ['title' => 'Admin | Extension requests'])
+    @include('layouts.header', ['title' => ($deskShellTitlePrefix ?? 'Admin') . ' | Extension requests'])
 @endsection
 
 @section('content-header')
@@ -31,6 +31,7 @@
                     </a>
                 </div>
             </x-slot:headerTools>
+            <div class="table-responsive">
             <table id="extensionRequestsTable" class="table table-bordered table-striped">
                 <thead>
                 <tr>
@@ -46,6 +47,7 @@
                 </thead>
                 <tbody></tbody>
             </table>
+            </div>
         </x-card>
     </x-content>
 @endsection

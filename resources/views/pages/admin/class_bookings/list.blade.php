@@ -1,7 +1,7 @@
-@extends('pages.admin.inc.app')
+@extends($shellLayout ?? 'pages.admin.inc.app')
 
 @section('header')
-    @include('layouts.header', ['title' => 'Admin | Class bookings'])
+    @include('layouts.header', ['title' => ($deskShellTitlePrefix ?? 'Admin') . ' | Class bookings'])
 @endsection
 
 @section('content-header')
@@ -24,6 +24,7 @@
             <x-slot:headerTools>
                 <a href="{{ route('admin.class_bookings.add') }}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> {{ __('Add booking') }}</a>
             </x-slot:headerTools>
+            <div class="table-responsive">
             <table id="bookingsTable" class="table table-bordered table-striped">
                 <thead>
                     <tr>
@@ -36,6 +37,7 @@
                 </thead>
                 <tbody></tbody>
             </table>
+            </div>
         </x-card>
     </x-content>
 @endsection

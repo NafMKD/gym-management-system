@@ -32,9 +32,6 @@
                             <a class="nav-link" href="{{ route('trainer.profile.edit') }}">{{ __('Profile') }}</a>
                         </li>
                     @endif
-                    <li class="nav-item d-flex align-items-center">
-                        <span class="nav-link text-muted">{{ Auth::user()->getName() }}</span>
-                    </li>
                 </ul>
             </div>
 

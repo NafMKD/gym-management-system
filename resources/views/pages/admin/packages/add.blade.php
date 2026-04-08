@@ -1,7 +1,7 @@
-@extends('pages.admin.inc.app')
+@extends($shellLayout ?? 'pages.admin.inc.app')
 
 @section('header')
-    @include('layouts.header', ['title' => 'Admin | Add Package'])
+    @include('layouts.header', ['title' => ($deskShellTitlePrefix ?? 'Admin') . ' | Add Package'])
 @endsection
 
 @section('content-header')

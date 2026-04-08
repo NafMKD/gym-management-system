@@ -1,8 +1,8 @@
 
-@extends('pages.admin.inc.app')
+@extends($shellLayout ?? 'pages.admin.inc.app')
 
 @section('header')
-    @include('layouts.header', ['title' => 'Admin | Packages | List'])
+    @include('layouts.header', ['title' => ($deskShellTitlePrefix ?? 'Admin') . ' | Packages | List'])
 @endsection
 
 @section('content-header')
@@ -25,6 +25,7 @@
 @section('content')
     <x-content class="content">
         <x-card title="Packages List">
+            <div class="table-responsive">
             <table id="packagesTable" class="table table-bordered table-striped">
                 <thead>
                 <tr>
@@ -39,6 +40,7 @@
                     
                 </tbody>
             </table>
+            </div>
         </x-card>
     </x-content>
 @endsection

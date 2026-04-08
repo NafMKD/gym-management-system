@@ -19,6 +19,8 @@ use App\Models\TrainerProfile;
 use App\Models\TrainerSessionFeedback;
 use App\Models\User;
 use App\Observers\AuditTrailObserver;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -52,5 +54,30 @@ class AppServiceProvider extends ServiceProvider
         TrainerProfile::observe(AuditTrailObserver::class);
         TrainerCommissionEntry::observe(AuditTrailObserver::class);
         TrainerSessionFeedback::observe(AuditTrailObserver::class);
+
+        $deskShellViews = [
+            'pages.admin.users.*',
+            'pages.admin.memberships.*',
+            'pages.admin.membership_extension_requests.*',
+            'pages.admin.merchandise.*',
+            'pages.admin.class_bookings.*',
+            'pages.admin.packages.*',
+            'pages.admin.gym_classes.*',
+            'pages.admin.class_schedules.*',
+        ];
+
+        View::composer($deskShellViews, function (\Illuminate\View\View $view): void {
+            $user = Auth::user();
+            $isReception = $user && $user->role === 'reception';
+            $view->with('shellLayout', $isReception ? 'layouts.reception' : 'pages.admin.inc.app');
+            $view->with('deskShellTitlePrefix', $isReception ? __('Front desk') : 'Admin');
+        });
+
+        View::composer('pages.admin.attendance.*', function (\Illuminate\View\View $view): void {
+            $user = Auth::user();
+            $isReception = $user && $user->role === 'reception';
+            $view->with('shellLayout', $isReception ? 'layouts.reception' : 'layouts.auth');
+            $view->with('deskShellTitlePrefix', $isReception ? __('Front desk') : 'Admin');
+        });
     }
 }

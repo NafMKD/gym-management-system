@@ -1,7 +1,7 @@
-@extends('layouts.auth')
+@extends($shellLayout ?? 'layouts.auth')
 
 @section('title')
-    @include('layouts.header', ['title' => 'Attendance | Scan ID'])
+    @include('layouts.header', ['title' => ($deskShellTitlePrefix ?? 'Admin') . ' | ' . __('Attendance') . ' | ' . __('Scan ID')])
 @endsection
 
 @section('content')

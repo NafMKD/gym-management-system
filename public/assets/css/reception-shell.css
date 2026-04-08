@@ -1,0 +1,13 @@
+/**
+ * Reception: Desk dropdown menu only (navbar matches default AdminLTE sizing).
+ */
+
+.reception-nav-dropdown {
+    font-size: 0.875rem;
+    min-width: 11rem;
+}
+
+.reception-nav-dropdown .dropdown-item {
+    padding-top: 0.4rem;
+    padding-bottom: 0.4rem;
+}

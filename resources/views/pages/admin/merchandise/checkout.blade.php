@@ -1,17 +1,21 @@
-@extends('pages.admin.inc.app')
+@extends($shellLayout ?? 'pages.admin.inc.app')
 
 @section('header')
-    @include('layouts.header', ['title' => 'Admin | Sell merchandise'])
+    @include('layouts.header', ['title' => ($deskShellTitlePrefix ?? 'Admin') . ' | Sell merchandise'])
+    <link rel="stylesheet" href="{{ asset('assets/css/desk-shell.css') }}">
 @endsection
 
 @section('content-header')
     <x-content class="content-header">
-        <div class="row mb-2">
-            <div class="col-sm-6"><h1 class="m-0">{{ __('POS — Sell merchandise') }}</h1></div>
-            <div class="col-sm-6">
-                <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item">{{ __('Home') }}</li>
-                    <li class="breadcrumb-item active">{{ __('Merchandise') }}</li>
+        <div class="row mb-1 mb-sm-2 align-items-center">
+            <div class="col">
+                <h1 class="m-0 h4">{{ __('POS') }}</h1>
+                <p class="text-muted small mb-0 d-none d-sm-block">{{ __('Sell merchandise') }}</p>
+            </div>
+            <div class="col-auto d-none d-sm-block">
+                <ol class="breadcrumb float-sm-right mb-0 bg-transparent p-0 small">
+                    <li class="breadcrumb-item">{{ __('Desk') }}</li>
+                    <li class="breadcrumb-item active">{{ __('POS') }}</li>
                 </ol>
             </div>
         </div>
@@ -20,121 +24,113 @@
 
 @section('content')
     <x-content class="content">
-        <div class="card card-default pos-checkout">
-            <div class="card-header">
-                <h3 class="card-title">{{ __('Checkout') }}</h3>
-                <p class="card-text text-muted mb-0 small">{{ __('Customer is optional — use Walk-in for counter sales without a member.') }}</p>
-            </div>
-            <form method="POST" action="{{ route('admin.merchandise.checkout.store') }}" id="checkoutForm">
-                @csrf
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-lg-5 col-md-6 mb-3">
-                            <div class="form-group mb-0">
-                                <label class="font-weight-bold">{{ __('Customer (member)') }}</label>
-                                <select name="user_id" id="user_id" class="form-control form-control-lg @error('user_id') is-invalid @enderror">
-                                    <option value="" @selected(old('user_id', '') === '' || old('user_id', '') === null)>{{ __('Walk-in') }}</option>
-                                    @foreach($customers as $u)
-                                        <option value="{{ $u->id }}" @selected((string) old('user_id') === (string) $u->id)>
-                                            {{ $u->getName() }} — {{ $u->phone }}@if($u->email) ({{ $u->email }})@endif
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('user_id')<span class="text-danger d-block mt-1">{{ $message }}</span>@enderror
-                            </div>
+        <div class="pos-terminal-shell">
+            <div class="card card-default pos-checkout pos-compact shadow">
+                <div class="card-header">
+                    <h3 class="card-title">{{ __('Checkout') }}</h3>
+                    <p class="card-text text-muted mb-0 small">{{ __('Walk-in = no linked member.') }}</p>
+                </div>
+                <form method="POST" action="{{ route('admin.merchandise.checkout.store') }}" id="checkoutForm">
+                    @csrf
+                    <div class="card-body">
+                        <div class="form-group mb-2">
+                            <label class="font-weight-bold small mb-1">{{ __('Customer') }}</label>
+                            <select name="user_id" id="user_id" class="form-control form-control-sm @error('user_id') is-invalid @enderror">
+                                <option value="" @selected(old('user_id', '') === '' || old('user_id', '') === null)>{{ __('Walk-in') }}</option>
+                                @foreach($customers as $u)
+                                    <option value="{{ $u->id }}" @selected((string) old('user_id') === (string) $u->id)>
+                                        {{ $u->getName() }} — {{ $u->phone }}@if($u->email) ({{ $u->email }})@endif
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('user_id')<span class="text-danger d-block mt-1 small">{{ $message }}</span>@enderror
                         </div>
-                        <div class="col-lg-3 col-md-3 mb-3">
-                            <div class="form-group mb-0">
-                                <label class="font-weight-bold">{{ __('Payment method') }}</label> <i class="text-danger">*</i>
-                                <select name="payment_method" id="payment_method" class="form-control form-control-lg">
-                                    <option value="cash">{{ __('Cash') }}</option>
-                                    <option value="bank" @selected(old('payment_method') === 'bank')>{{ __('Bank') }}</option>
-                                </select>
-                            </div>
+                        <div class="form-group mb-2">
+                            <label class="font-weight-bold small mb-1">{{ __('Payment') }} <span class="text-danger">*</span></label>
+                            <select name="payment_method" id="payment_method" class="form-control form-control-sm">
+                                <option value="cash">{{ __('Cash') }}</option>
+                                <option value="bank" @selected(old('payment_method') === 'bank')>{{ __('Bank') }}</option>
+                            </select>
                         </div>
-                        <div class="col-lg-4 col-md-3 mb-3">
-                            <div class="form-group mb-0 checkout-bank-fields" style="display:none;">
-                                <label class="font-weight-bold">{{ __('Bank') }}</label> <i class="text-danger">*</i>
-                                <select name="payment_bank" class="form-control form-control-lg">
+                        <div class="form-row checkout-bank-fields" style="display:none;">
+                            <div class="form-group col-12 mb-2">
+                                <label class="font-weight-bold small mb-1">{{ __('Bank') }} <span class="text-danger">*</span></label>
+                                <select name="payment_bank" class="form-control form-control-sm">
                                     <option value="">{{ __('Select bank') }}</option>
                                     <option value="telebirr" @selected(old('payment_bank') === 'telebirr')>Telebirr</option>
                                     <option value="cbe" @selected(old('payment_bank') === 'cbe')>CBE</option>
                                     <option value="boa" @selected(old('payment_bank') === 'boa')>BOA</option>
                                 </select>
                             </div>
-                        </div>
-                    </div>
-                    <div class="row checkout-bank-fields" style="display:none;">
-                        <div class="col-md-6 mb-3">
-                            <div class="form-group mb-0">
-                                <label>{{ __('Transaction number') }}</label>
-                                <input type="text" name="bank_transaction_number" class="form-control form-control-lg" maxlength="50" value="{{ old('bank_transaction_number') }}" placeholder="{{ __('Optional') }}">
+                            <div class="form-group col-12 mb-2">
+                                <label class="small mb-1">{{ __('Transaction number') }}</label>
+                                <input type="text" name="bank_transaction_number" class="form-control form-control-sm" maxlength="50" value="{{ old('bank_transaction_number') }}" placeholder="{{ __('Optional') }}">
                             </div>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label>{{ __('Notes') }}</label>
-                        <input type="text" name="notes" class="form-control" maxlength="500" value="{{ old('notes') }}" placeholder="{{ __('Optional') }}">
-                    </div>
-
-                    @if($products->isNotEmpty())
-                        <div class="form-group">
-                            <label class="font-weight-bold">{{ __('Quick add') }}</label>
-                            <p class="text-muted small mb-2">{{ __('Tap a product to add a line (or use the table below).') }}</p>
-                            <div class="d-flex flex-wrap pos-quick-pick">
-                                @foreach($products as $p)
-                                    <button type="button" class="btn btn-outline-secondary btn-sm m-1 pos-quick-add py-2 px-3"
-                                            data-product-id="{{ $p->id }}"
-                                            title="{{ $p->name }} — {{ __('Stock') }}: {{ $p->stock_quantity }}">
-                                        {{ \Illuminate\Support\Str::limit($p->name, 28) }}
-                                    </button>
-                                @endforeach
-                            </div>
+                        <div class="form-group mb-2">
+                            <label class="small mb-1">{{ __('Notes') }}</label>
+                            <input type="text" name="notes" class="form-control form-control-sm" maxlength="500" value="{{ old('notes') }}" placeholder="{{ __('Optional') }}">
                         </div>
-                    @endif
 
-                    <h5 class="mt-3 font-weight-bold">{{ __('Lines') }}</h5>
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-hover" id="linesTable">
-                            <thead class="thead-light">
-                                <tr>
-                                    <th>{{ __('Product') }}</th>
-                                    <th style="min-width:110px">{{ __('Qty') }}</th>
-                                    <th style="width:56px"></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach(old('lines', [['product_id' => '', 'quantity' => '']]) as $idx => $line)
-                                    <tr class="line-row">
-                                        <td>
-                                            <select name="lines[{{ $idx }}][product_id]" class="form-control form-control-lg product-select">
-                                                <option value="">{{ __('Select product') }}</option>
-                                                @foreach($products as $p)
-                                                    <option value="{{ $p->id }}" data-price="{{ $p->unit_price }}" @selected(($line['product_id'] ?? '') == $p->id)>{{ $p->name }} ({{ __('Stock') }}: {{ $p->stock_quantity }})</option>
-                                                @endforeach
-                                            </select>
-                                        </td>
-                                        <td>
-                                            <input type="number" name="lines[{{ $idx }}][quantity]" class="form-control form-control-lg text-center" min="1" value="{{ $line['quantity'] ?? '' }}" placeholder="1">
-                                        </td>
-                                        <td class="text-center align-middle">
-                                            <button type="button" class="btn btn-danger btn-lg line-remove px-3" title="{{ __('Remove') }}" aria-label="{{ __('Remove') }}">&times;</button>
-                                        </td>
+                        @if($products->isNotEmpty())
+                            <div class="form-group mb-2">
+                                <label class="font-weight-bold small mb-1">{{ __('Quick add') }}</label>
+                                <p class="text-muted small mb-1">{{ __('Tap to add a line') }}</p>
+                                <div class="d-flex flex-wrap pos-quick-pick">
+                                    @foreach($products as $p)
+                                        <button type="button" class="btn btn-outline-secondary btn-sm m-0 pos-quick-add"
+                                                data-product-id="{{ $p->id }}"
+                                                title="{{ $p->name }} — {{ __('Stock') }}: {{ $p->stock_quantity }}">
+                                            {{ \Illuminate\Support\Str::limit($p->name, 22) }}
+                                        </button>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+
+                        <h6 class="lines-heading font-weight-bold mb-1">{{ __('Lines') }}</h6>
+                        <div class="table-responsive mb-1">
+                            <table class="table table-sm table-bordered table-hover mb-0 pos-lines-table" id="linesTable">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th class="small pos-line-product-th">{{ __('Product') }}</th>
+                                        <th class="small text-center pos-line-qty-th">{{ __('Qty') }}</th>
+                                        <th class="p-1 pos-line-remove-th"></th>
                                     </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    @foreach(old('lines', [['product_id' => '', 'quantity' => '']]) as $idx => $line)
+                                        <tr class="line-row">
+                                            <td>
+                                                <select name="lines[{{ $idx }}][product_id]" class="form-control form-control-sm product-select">
+                                                    <option value="">{{ __('Product') }}</option>
+                                                    @foreach($products as $p)
+                                                        <option value="{{ $p->id }}" data-price="{{ $p->unit_price }}" @selected(($line['product_id'] ?? '') == $p->id)>{{ $p->name }} ({{ $p->stock_quantity }})</option>
+                                                    @endforeach
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <input type="number" name="lines[{{ $idx }}][quantity]" class="form-control form-control-sm text-center" min="1" value="{{ $line['quantity'] ?? '' }}" placeholder="1">
+                                            </td>
+                                            <td class="text-center align-middle p-1">
+                                                <button type="button" class="btn btn-outline-danger btn-sm line-remove px-2 py-0" title="{{ __('Remove') }}" aria-label="{{ __('Remove') }}">&times;</button>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        <button type="button" class="btn btn-outline-secondary btn-sm mb-0" id="addLine">
+                            <i class="fas fa-plus"></i> {{ __('Line') }}
+                        </button>
                     </div>
-                    <button type="button" class="btn btn-outline-secondary btn-lg mb-2" id="addLine">
-                        <i class="fas fa-plus"></i> {{ __('Add line') }}
-                    </button>
-                </div>
-                <div class="card-footer">
-                    <button type="submit" class="btn btn-primary btn-lg btn-block loading-button py-3">
-                        <i class="fas fa-check"></i> {{ __('Complete sale') }}
-                    </button>
-                </div>
-            </form>
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary btn-block loading-button font-weight-bold py-2">
+                            <i class="fas fa-check"></i> {{ __('Complete sale') }}
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </x-content>
 @endsection

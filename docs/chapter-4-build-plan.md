@@ -101,11 +101,11 @@ Priority order (typical shift):
 
 | # | Task | Check |
 |---|------|-------|
-| 2.1 | For each priority area: render with **`layouts.reception`** (via layout variable, `@extends`, or `/reception/*` wrapper views). | [ ] |
-| 2.2 | Replace **breadcrumb** / page titles with **short, desk-friendly** copy (avoid “Admin \| …” in `<title>` for reception). | [ ] |
-| 2.3 | Ensure **mobile width** doesn’t break tables (responsive wrappers, optional card layout for tiny screens). | [ ] |
+| 2.1 | For each priority area: render with **`layouts.reception`** (via layout variable, `@extends`, or `/reception/*` wrapper views). | [x] |
+| 2.2 | Replace **breadcrumb** / page titles with **short, desk-friendly** copy (avoid “Admin \| …” in `<title>` for reception). | [x] |
+| 2.3 | Ensure **mobile width** doesn’t break tables (responsive wrappers, optional card layout for tiny screens). | [x] |
 
-**Phase 2 implementation notes:** _(fill when done.)_
+**Phase 2 implementation notes:** **`AppServiceProvider`** registers **`View::composer`** for desk view patterns (`pages.admin.users.*`, `memberships.*`, `membership_extension_requests.*`, `merchandise.*`, `class_bookings.*`, `packages.*`, `gym_classes.*`, `class_schedules.*`) setting **`$shellLayout`** to **`layouts.reception`** when `role === reception`, else **`pages.admin.inc.app`**. **`pages.admin.attendance.*`** uses **`layouts.reception`** vs **`layouts.auth`** (admin scan keeps minimal chrome). Desk blades use **`@extends($shellLayout ?? …)`** and **`$deskShellTitlePrefix`** in **`layouts.header`** titles (**Front desk** instead of **Admin** for reception). **DataTables** list pages wrap **`<table>`** in **`.table-responsive`**; POS checkout already had a responsive lines table. **`reception-home`** refactored to **`content-header`** + **`content`** to match the shell’s single **`content-wrapper`**. See also [`docs/reception-nav.md`](./reception-nav.md).
 
 ---
 

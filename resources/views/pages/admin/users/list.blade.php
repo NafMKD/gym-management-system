@@ -1,8 +1,8 @@
 
-@extends('pages.admin.inc.app')
+@extends($shellLayout ?? 'pages.admin.inc.app')
 
 @section('header')
-    @include('layouts.header', ['title' => 'Admin | Users | List'])
+    @include('layouts.header', ['title' => ($deskShellTitlePrefix ?? 'Admin') . ' | Users | List'])
 @endsection
 
 @section('content-header')
@@ -39,6 +39,7 @@
                     
                 </tbody>
             </table>
+            </div>
         </x-card>
     </x-content>
 @endsection
