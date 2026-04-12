@@ -68,6 +68,21 @@
                         @enderror
                     </div>
 
+                    <div class="form-group">
+                        <label>{{ __("Role") }}</label> <i class="text-danger font-weight-bold">*</i>
+                        <select name="role" id="role"
+                                class="form-control @error('role') is-invalid @enderror" required>
+                            <option value="trainer" {{ old('role', 'trainer') === 'trainer' ? 'selected' : '' }}>{{ __("Trainer") }}</option>
+                            <option value="reception" {{ old('role') === 'reception' ? 'selected' : '' }}>{{ __("Reception") }}</option>
+                            <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>{{ __("Admin") }}</option>
+                        </select>
+                        @error('role')
+                        <span class="text-danger" role="alert">
+                            {{ $message }}
+                        </span>
+                        @enderror
+                    </div>
+
                     <div class="row">
                         <div class="col-md-8">
                             <div class="form-group">

@@ -18,6 +18,9 @@ use Yajra\DataTables\Facades\DataTables;
 
 class StaffController extends Controller
 {
+    /** Roles that appear in staff management (non-member). */
+    public const STAFF_ROLES = ['admin', 'trainer', 'reception'];
+
     public function __construct(
         protected UserRepository $userRepository
     ) {}
@@ -25,7 +28,15 @@ class StaffController extends Controller
     public function index(): View|RedirectResponse
     {
         try {
-            return view(self::ADMIN_.'staffs.list');
+            $base = User::query()->whereIn('role', self::STAFF_ROLES);
+            $staffCounts = [
+                'all' => (clone $base)->count(),
+                'admin' => User::where('role', 'admin')->count(),
+                'trainer' => User::where('role', 'trainer')->count(),
+                'reception' => User::where('role', 'reception')->count(),
+            ];
+
+            return view(self::ADMIN_.'staffs.list', compact('staffCounts'));
         } catch (Throwable $e) {
             return redirect()->back()->with(self::ERROR_, self::ERROR_UNKNOWN);
         }
@@ -56,14 +67,14 @@ class StaffController extends Controller
             'last_name' => 'required|string|max:255',
             'phone' => ['required', 'string', 'regex:'.PhoneNumber::REGEX_VALIDATION, Rule::unique('users', 'phone')],
             'gender' => 'required|in:Female,Male',
+            'role' => 'required|in:admin,trainer,reception',
         ]);
 
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $attributes = $request->only(['first_name', 'last_name', 'email', 'phone', 'gender']);
-        $attributes['role'] = $request->input('role', 'trainer');
+        $attributes = $request->only(['first_name', 'last_name', 'email', 'phone', 'gender', 'role']);
         $attributes['password'] = $request->input('password', '12345678');
         if (($attributes['email'] ?? '') === '') {
             $attributes['email'] = null;
@@ -72,7 +83,6 @@ class StaffController extends Controller
             $this->userRepository->store($attributes);
             return redirect()->route('admin.staffs.add')->with(self::SUCCESS_, 'Staff'.self::SUCCESS_STORE);
         } catch (Throwable $e) {
-            dd($e);
             return redirect()->back()->withInput()->with(self::ERROR_, self::ERROR_UNKNOWN);
         }
     }
@@ -88,7 +98,6 @@ class StaffController extends Controller
         try {
             return view(self::ADMIN_.'staffs.view', compact('user'));
         } catch (Throwable $e) {
-            dd($e);
             return redirect()->back()->withInput()->with(self::ERROR_, self::ERROR_UNKNOWN);
         }
     }
@@ -118,7 +127,7 @@ class StaffController extends Controller
             'email' => PhoneNumber::optionalEmailRules($user->id),
             'password' => 'sometimes|string|min:8',
             'phone' => ['required', 'string', 'regex:'.PhoneNumber::REGEX_VALIDATION, Rule::unique('users', 'phone')->ignore($user->id)],
-            'role' => 'sometimes|in:admin,trainer,reception',
+            'role' => 'required|in:admin,trainer,reception',
             'gender' => 'sometimes|in:Female,Male',
         ]);
 
@@ -156,14 +165,24 @@ class StaffController extends Controller
      *
      * @return JsonResponse
      */
-    public function getStaffData(): JsonResponse
+    public function getStaffData(Request $request): JsonResponse
     {
-        $query = User::where('role', 'trainer');
+        $roleFilter = $request->input('role_filter');
+        if (! is_string($roleFilter) || ! in_array($roleFilter, self::STAFF_ROLES, true)) {
+            $roleFilter = null;
+        }
+
+        $query = User::query()->whereIn('role', self::STAFF_ROLES);
+        if ($roleFilter !== null) {
+            $query->where('role', $roleFilter);
+        }
 
         return DataTables::of($query)
-            ->addIndexColumn()
             ->editColumn('name', function ($row) {
                 return $row?->getName() ?? 'N/A';
+            })
+            ->editColumn('role', function ($row) {
+                return $row->role ? __(ucfirst($row->role)) : '—';
             })
             ->editColumn('email', function ($row) {
                 return $row->email ?: '—';
