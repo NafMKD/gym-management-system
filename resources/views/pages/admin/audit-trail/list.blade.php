@@ -50,6 +50,7 @@
             $('#trailsTable').DataTable({
                 processing: true,
                 serverSide: true,
+                order: [[0, 'desc']],
                 ajax: "{{ route('admin.audit_trail.list.data') }}", 
                 columns: [
                     { data: 'id', name: 'id' },

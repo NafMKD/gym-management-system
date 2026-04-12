@@ -54,6 +54,7 @@
             const table = $('#extensionRequestsTable').DataTable({
                 processing: true,
                 serverSide: true,
+                order: [[6, 'desc']],
                 ajax: "{{ route('admin.memberships.extension_requests.list.data') }}",
                 columns: [
                     {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},

@@ -50,6 +50,7 @@
             $('#invoicesTable').DataTable({
                 processing: true,
                 serverSide: true,
+                order: [[0, 'desc']],
                 ajax: "{{ route('admin.invoices.list.data') }}", 
                 columns: [
                     { data: 'id', name: 'id' },

@@ -52,7 +52,7 @@ $(function () {
         processing: true,
         serverSide: true,
         ajax: "{{ route('admin.class_schedules.list.data') }}",
-        order: [[3, 'desc']],
+        order: [[0, 'desc']],
         columns: [
             { data: 'id', name: 'id' },
             { data: 'class_name', name: 'class_name', orderable: false },

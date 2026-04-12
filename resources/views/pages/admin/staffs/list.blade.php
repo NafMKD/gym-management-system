@@ -106,6 +106,7 @@
             var staffTable = $('#staffTable').DataTable({
                 processing: true,
                 serverSide: true,
+                order: [[0, 'desc']],
                 ajax: {
                     url: "{{ route('admin.staffs.list.data') }}",
                     data: function (d) {

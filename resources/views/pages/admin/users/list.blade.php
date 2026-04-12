@@ -54,6 +54,7 @@
             $('#usersTable').DataTable({
                 processing: true,
                 serverSide: true,
+                order: [[0, 'desc']],
                 ajax: "{{ route('admin.users.list.data') }}", 
                 columns: [
                     { data: 'id', name: 'id' },

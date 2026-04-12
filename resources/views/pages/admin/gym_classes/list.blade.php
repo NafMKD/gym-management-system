@@ -53,6 +53,7 @@ $(function () {
     $('#gymClassesTable').DataTable({
         processing: true,
         serverSide: true,
+        order: [[0, 'desc']],
         ajax: "{{ route('admin.gym_classes.list.data') }}",
         columns: [
             { data: 'id', name: 'id' },

@@ -48,6 +48,7 @@ $(function () {
     $('#bookingsTable').DataTable({
         processing: true,
         serverSide: true,
+        order: [[0, 'desc']],
         ajax: "{{ route('admin.class_bookings.list.data') }}",
         columns: [
             { data: 'id', name: 'id' },

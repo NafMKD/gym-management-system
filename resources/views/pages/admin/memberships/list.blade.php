@@ -55,6 +55,7 @@
             $('#membershipsTable').DataTable({
                 processing: true,
                 serverSide: true,
+                order: [[0, 'desc']],
                 ajax: "{{ route('admin.memberships.list.data') }}", 
                 columns: [
                     { data: 'id', name: 'id' },

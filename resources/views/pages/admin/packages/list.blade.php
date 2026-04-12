@@ -56,6 +56,7 @@
             $('#packagesTable').DataTable({
                 processing: true,
                 serverSide: true,
+                order: [[0, 'desc']],
                 ajax: "{{ route('admin.packages.list.data') }}", 
                 columns: [
                     { data: 'id', name: 'id' },

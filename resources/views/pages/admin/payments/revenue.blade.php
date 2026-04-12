@@ -119,6 +119,7 @@
             let table = $('#paymentsTable').DataTable({
                 processing: true,
                 serverSide: true,
+                order: [[6, 'desc']],
                 ajax: {
                     url: "{{ route('admin.payments.revenue.list') }}",
                     data: function (d) {
@@ -147,12 +148,12 @@
                 },
                 columns: [
                     { data: 'DT_RowIndex', orderable: false, searchable: false },
-                    { data: 'membership_id' },
-                    { data: 'invoice' },
-                    { data: 'amount' },
-                    { data: 'payment_method' },
-                    { data: 'status' },
-                    { data: 'payment_date' }
+                    { data: 'membership_id', name: 'membership_id' },
+                    { data: 'invoice', name: 'invoice' },
+                    { data: 'amount', name: 'amount' },
+                    { data: 'payment_method', name: 'payment_method' },
+                    { data: 'status', name: 'status' },
+                    { data: 'payment_date', name: 'payment_date' }
                 ],
                 drawCallback: function(settings) {
                     fetchTotalRevenue();
