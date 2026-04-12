@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\TrainerCommissionEntry;
 use App\Models\User;
 use App\Repositories\TrainerCommissionRepository;
+use App\Support\DataTables\UserNameSearch;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -112,6 +113,26 @@ class TrainerCommissionController extends Controller
             ->orderColumn('session', false)
             ->addColumn('recorded_by', fn ($row) => e($row->recordedBy?->getName() ?? '—'))
             ->orderColumn('recorded_by', false)
+            ->filterColumn('trainer', function ($query, $keyword) {
+                $query->whereHas('trainer', function ($q) use ($keyword) {
+                    UserNameSearch::applyToUserQuery($q, $keyword);
+                });
+            })
+            ->filterColumn('session', function ($query, $keyword) {
+                $kw = '%'.UserNameSearch::escapeLike($keyword).'%';
+                $query->where(function ($q) use ($kw, $keyword) {
+                    $q->whereHas('classBooking.schedule.gymClass', fn ($gc) => $gc->where('name', 'like', $kw))
+                        ->orWhereHas('classBooking.schedule', fn ($s) => $s->where('starts_at', 'like', $kw));
+                    if (ctype_digit(trim((string) $keyword))) {
+                        $q->orWhere('class_booking_id', $keyword);
+                    }
+                });
+            })
+            ->filterColumn('recorded_by', function ($query, $keyword) {
+                $query->whereHas('recordedBy', function ($q) use ($keyword) {
+                    UserNameSearch::applyToUserQuery($q, $keyword);
+                });
+            })
             ->rawColumns(['source'])
             ->make(true);
     }

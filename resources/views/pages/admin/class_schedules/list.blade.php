@@ -55,8 +55,8 @@ $(function () {
         order: [[3, 'desc']],
         columns: [
             { data: 'id', name: 'id' },
-            { data: 'class_name', name: 'class_name', orderable: false, searchable: false },
-            { data: 'trainer_name', name: 'trainer_name', orderable: false, searchable: false },
+            { data: 'class_name', name: 'class_name', orderable: false },
+            { data: 'trainer_name', name: 'trainer_name', orderable: false },
             { data: 'starts_at', name: 'starts_at' },
             { data: 'ends_at', name: 'ends_at' },
             { data: 'action', name: 'action', orderable: false, searchable: false }

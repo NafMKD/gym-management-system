@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Mail\InvoiceMail;
 use App\Repositories\InvoiceRepository;
 use App\Repositories\MembershipRepository;
+use App\Support\DataTables\UserNameSearch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -268,7 +269,7 @@ class MembershipController extends Controller
      */
     public function getMembershipsData(): JsonResponse
     {
-        $query = Membership::query(); 
+        $query = Membership::query()->with('user');
 
         return DataTables::of($query)
             ->addIndexColumn() 
@@ -312,6 +313,9 @@ class MembershipController extends Controller
                         <i class="fas fa-eye"></i> View
                     </a>
                 ';
+            })
+            ->filterColumn('name', function ($query, $keyword) {
+                UserNameSearch::applyToUserRelation($query, $keyword, 'user');
             })
             ->rawColumns(['action', 'status'])
             ->make(true);

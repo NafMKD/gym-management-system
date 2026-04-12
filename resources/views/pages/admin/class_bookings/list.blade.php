@@ -51,9 +51,9 @@ $(function () {
         ajax: "{{ route('admin.class_bookings.list.data') }}",
         columns: [
             { data: 'id', name: 'id' },
-            { data: 'session', name: 'session', orderable: false, searchable: false },
-            { data: 'member', name: 'member', orderable: false, searchable: false },
-            { data: 'status', name: 'status', orderable: false, searchable: false },
+            { data: 'session', name: 'session', orderable: false },
+            { data: 'member', name: 'member', orderable: false },
+            { data: 'status', name: 'status', orderable: false },
             { data: 'action', name: 'action', orderable: false, searchable: false }
         ],
     });

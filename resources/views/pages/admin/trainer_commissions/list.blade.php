@@ -82,11 +82,11 @@ $(function () {
         columns: [
             { data: 'id', name: 'id' },
             { data: 'earned_at', name: 'earned_at' },
-            { data: 'trainer', name: 'trainer_id', orderable: false, searchable: false },
-            { data: 'source', name: 'source', orderable: false, searchable: false },
+            { data: 'trainer', name: 'trainer', orderable: false },
+            { data: 'source', name: 'source', orderable: false },
             { data: 'amount', name: 'amount' },
-            { data: 'session', name: 'class_booking_id', orderable: false, searchable: false },
-            { data: 'recorded_by', name: 'recorded_by_user_id', orderable: false, searchable: false }
+            { data: 'session', name: 'session', orderable: false },
+            { data: 'recorded_by', name: 'recorded_by', orderable: false }
         ],
     });
     $('#applyFilters').on('click', function () {

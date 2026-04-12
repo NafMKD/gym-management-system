@@ -10,6 +10,9 @@ class TrainerSessionFeedback extends Model
 {
     use SoftDeletes;
 
+    /** @var string Laravel's inflector does not pluralize "Feedback" → use explicit table name. */
+    protected $table = 'trainer_session_feedbacks';
+
     protected $fillable = [
         'class_booking_id',
         'rating',

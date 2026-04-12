@@ -7,6 +7,7 @@ use App\Models\ClassSchedule;
 use App\Models\GymClass;
 use App\Models\User;
 use App\Repositories\ClassScheduleRepository;
+use App\Support\DataTables\UserNameSearch;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -158,6 +159,15 @@ class ClassScheduleController extends Controller
                         <i class="fas fa-trash"></i> '.__('Delete').'
                     </a>
                 ';
+            })
+            ->filterColumn('class_name', function ($query, $keyword) {
+                $kw = '%'.UserNameSearch::escapeLike($keyword).'%';
+                $query->whereHas('gymClass', fn ($gc) => $gc->where('name', 'like', $kw));
+            })
+            ->filterColumn('trainer_name', function ($query, $keyword) {
+                $query->whereHas('trainer', function ($q) use ($keyword) {
+                    UserNameSearch::applyToUserQuery($q, $keyword);
+                });
             })
             ->rawColumns(['action'])
             ->make(true);

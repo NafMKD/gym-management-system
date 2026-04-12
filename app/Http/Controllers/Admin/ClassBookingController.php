@@ -8,6 +8,7 @@ use App\Models\ClassSchedule;
 use App\Models\Membership;
 use App\Models\TrainerSessionFeedback;
 use App\Repositories\ClassBookingRepository;
+use App\Support\DataTables\UserNameSearch;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -204,6 +205,21 @@ class ClassBookingController extends Controller
                 }
 
                 return $html;
+            })
+            ->filterColumn('member', function ($query, $keyword) {
+                $query->whereHas('membership.user', function ($q) use ($keyword) {
+                    UserNameSearch::applyToUserQuery($q, $keyword);
+                });
+            })
+            ->filterColumn('session', function ($query, $keyword) {
+                $kw = '%'.UserNameSearch::escapeLike($keyword).'%';
+                $query->where(function ($q) use ($kw, $keyword) {
+                    $q->whereHas('schedule.gymClass', fn ($gc) => $gc->where('name', 'like', $kw))
+                        ->orWhereHas('schedule', fn ($s) => $s->where('starts_at', 'like', $kw));
+                    if (ctype_digit(trim((string) $keyword))) {
+                        $q->orWhere('id', $keyword);
+                    }
+                });
             })
             ->rawColumns(['action', 'status'])
             ->make(true);

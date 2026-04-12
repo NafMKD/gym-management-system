@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Support\DataTables\UserNameSearch;
 use App\Mail\InvoiceMail;
 use App\Models\Invoice;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -166,6 +167,12 @@ class InvoiceController extends Controller
                 }
 
                 return $action;
+            })
+            ->filterColumn('name', function ($query, $keyword) {
+                UserNameSearch::applyForInvoicePersonName($query, $keyword);
+            })
+            ->filterColumn('package', function ($query, $keyword) {
+                UserNameSearch::applyForInvoicePackageDisplay($query, $keyword);
             })
             ->rawColumns(['action', 'status'])
             ->make(true);

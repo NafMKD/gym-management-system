@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Membership;
 use App\Models\MembershipExtensionRequest;
 use App\Repositories\MembershipExtensionRequestRepository;
+use App\Support\DataTables\UserNameSearch;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -205,6 +206,11 @@ class MembershipExtensionRequestController extends Controller
                 }
 
                 return $view;
+            })
+            ->filterColumn('member', function ($query, $keyword) {
+                $query->whereHas('membership.user', function ($q) use ($keyword) {
+                    UserNameSearch::applyToUserQuery($q, $keyword);
+                });
             })
             ->rawColumns(['action', 'status'])
             ->make(true);

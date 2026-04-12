@@ -57,7 +57,7 @@
                 ajax: "{{ route('admin.memberships.extension_requests.list.data') }}",
                 columns: [
                     {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
-                    {data: 'member', name: 'member', orderable: false, searchable: false},
+                    {data: 'member', name: 'member', orderable: false},
                     {data: 'membership_id', name: 'membership_id'},
                     {data: 'requested_days', name: 'requested_days'},
                     {data: 'reason', name: 'reason'},

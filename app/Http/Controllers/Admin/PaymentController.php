@@ -7,6 +7,7 @@ use App\Models\Invoice;
 use App\Models\Payment;
 use App\Repositories\InvoiceRepository;
 use App\Repositories\PaymentRepository;
+use App\Support\DataTables\UserNameSearch;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -266,6 +267,14 @@ class PaymentController extends Controller
                     </a>
                 ';
             })
+            ->filterColumn('name', function ($query, $keyword) {
+                UserNameSearch::applyForPaymentPersonName($query, $keyword);
+            })
+            ->filterColumn('invoice', function ($query, $keyword) {
+                $query->whereHas('invoice', function ($q) use ($keyword) {
+                    $q->where('invoice_number', 'like', '%'.UserNameSearch::escapeLike($keyword).'%');
+                });
+            })
             ->rawColumns(['action', 'status'])
             ->make(true);
     }
@@ -396,6 +405,14 @@ class PaymentController extends Controller
                             default => '',
                         };
                         return '<span class="badge ' . $badgeClass . '">' . ucfirst($row->status) . '</span>';
+                    })
+                    ->filterColumn('membership_id', function ($query, $keyword) {
+                        UserNameSearch::applyForPaymentPersonName($query, $keyword);
+                    })
+                    ->filterColumn('invoice', function ($query, $keyword) {
+                        $query->whereHas('invoice', function ($q) use ($keyword) {
+                            $q->where('invoice_number', 'like', '%'.UserNameSearch::escapeLike($keyword).'%');
+                        });
                     })
                     ->rawColumns(['status'])
                     ->make(true);
