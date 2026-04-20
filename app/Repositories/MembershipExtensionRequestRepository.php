@@ -42,11 +42,6 @@ class MembershipExtensionRequestRepository extends BaseRepository
                 throw new \Exception(__('Extension requests require an active membership.'));
             }
 
-            $today = \Carbon\Carbon::today()->toDateString();
-            if ($today > \Carbon\Carbon::parse($membership->end_date)->toDateString()) {
-                throw new \Exception(__('This membership calendar has already expired.'));
-            }
-
             if (
                 $membership->extensionRequests()
                     ->where('status', 'pending')

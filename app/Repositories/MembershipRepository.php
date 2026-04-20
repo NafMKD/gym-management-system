@@ -176,11 +176,6 @@ class MembershipRepository extends BaseRepository {
             throw new \Exception(__('Only active memberships can be extended.'));
         }
 
-        $today = Carbon::today()->toDateString();
-        if ($today > Carbon::parse($membership->end_date)->toDateString()) {
-            throw new \Exception(__('This membership is past its calendar end date; extend only while still valid.'));
-        }
-
         DB::transaction(function () use ($membership, $days) {
             $membership->end_date = Carbon::parse($membership->end_date)->addDays($days)->toDateString();
             $membership->remaining_days = ($membership->remaining_days ?? 0) + $days;

@@ -47,7 +47,6 @@ class MembershipExtensionRequestController extends Controller
         try {
             $memberships = Membership::query()
                 ->where('status', 'active')
-                ->whereDate('end_date', '>=', now()->toDateString())
                 ->with('user')
                 ->orderBy('id', 'desc')
                 ->get();
