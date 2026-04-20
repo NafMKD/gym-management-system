@@ -1,12 +1,13 @@
 <?php
 
+use App\Http\Controllers\PublicSiteController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
-// redirecting `/` route to `/login` route
-Route::get('/', function () {
-    return redirect()->route('login');
-});
+Route::get('/', [PublicSiteController::class, 'home'])->name('home');
+
+Route::get('/gallery', [PublicSiteController::class, 'gallery'])->name('gallery');
+Route::get('/trainers', [PublicSiteController::class, 'trainers'])->name('trainers');
 
 /**
  * Role-based dashboard entry (used after login, verification, etc.)
