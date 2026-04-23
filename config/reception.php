@@ -48,7 +48,12 @@ return [
                 [
                     'route' => 'admin.merchandise.checkout',
                     'label' => 'POS',
-                    'active' => ['admin.merchandise.*'],
+                    'active' => ['admin.merchandise.checkout', 'admin.merchandise.checkout.store'],
+                ],
+                [
+                    'route' => 'admin.merchandise.history',
+                    'label' => 'Sales history',
+                    'active' => ['admin.merchandise.history'],
                 ],
                 [
                     'route' => 'admin.class_bookings.list',

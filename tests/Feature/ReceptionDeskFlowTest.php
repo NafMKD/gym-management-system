@@ -29,6 +29,7 @@ test('reception can open typical shift desk route sequence', function () {
         'admin.users.add',
         'admin.memberships.list',
         'admin.merchandise.checkout',
+        'admin.merchandise.history',
         'admin.class_bookings.list',
         'admin.attendance.scan',
     ];

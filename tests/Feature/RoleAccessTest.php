@@ -15,6 +15,7 @@ test('reception can open desk routes but not financial admin routes', function (
     $this->actingAs($reception)->get(route('reception.home'))->assertOk()->assertSee(__('Front desk'));
     $this->actingAs($reception)->get(route('admin.users.list'))->assertOk()->assertSee(__('Front desk'));
     $this->actingAs($reception)->get(route('admin.merchandise.checkout'))->assertOk();
+    $this->actingAs($reception)->get(route('admin.merchandise.history'))->assertOk();
 
     $this->actingAs($reception)->get(route('admin.home'))->assertRedirect(route('reception.home'));
     $this->actingAs($reception)->get(route('admin.invoices.list'))->assertRedirect(route('reception.home'));

@@ -21,16 +21,19 @@
     <x-content class="content">
         <div class="container-fluid">
             <div class="row mb-3">
-                <div class="col-6 col-md-3 mb-2">
+                <div class="col-6 col-md-4 col-lg mb-2">
                     <a href="{{ route('admin.users.add') }}" class="btn btn-primary btn-lg btn-block py-3">{{ __('Add user') }}</a>
                 </div>
-                <div class="col-6 col-md-3 mb-2">
+                <div class="col-6 col-md-4 col-lg mb-2">
                     <a href="{{ route('admin.memberships.list') }}" class="btn btn-outline-primary btn-lg btn-block py-3">{{ __('Memberships') }}</a>
                 </div>
-                <div class="col-6 col-md-3 mb-2">
+                <div class="col-6 col-md-4 col-lg mb-2">
                     <a href="{{ route('admin.merchandise.checkout') }}" class="btn btn-outline-success btn-lg btn-block py-3">{{ __('Sell merchandise') }}</a>
                 </div>
-                <div class="col-6 col-md-3 mb-2">
+                <div class="col-6 col-md-4 col-lg mb-2">
+                    <a href="{{ route('admin.merchandise.history') }}" class="btn btn-outline-dark btn-lg btn-block py-3">{{ __('Sales history') }}</a>
+                </div>
+                <div class="col-6 col-md-4 col-lg mb-2">
                     <a href="{{ route('admin.attendance.scan') }}" class="btn btn-outline-secondary btn-lg btn-block py-3">{{ __('Scan attendance') }}</a>
                 </div>
             </div>

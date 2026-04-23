@@ -189,9 +189,15 @@
                         </li>
                         @endif
                         <li class="nav-item">
-                            <a href="{{ route('admin.merchandise.checkout') }}" class="nav-link {{ request()->routeIs('admin.merchandise*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.merchandise.checkout') }}" class="nav-link {{ request()->routeIs('admin.merchandise.checkout') || request()->routeIs('admin.merchandise.checkout.store') ? 'active' : '' }}">
                                 <i class="fas fa-cash-register nav-icon"></i>
                                 <p>{{ __("Sell merchandise") }}</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.merchandise.history') }}" class="nav-link {{ request()->routeIs('admin.merchandise.history') ? 'active' : '' }}">
+                                <i class="fas fa-receipt nav-icon"></i>
+                                <p>{{ __("Sales history") }}</p>
                             </a>
                         </li>
                     </ul>

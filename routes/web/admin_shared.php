@@ -77,6 +77,7 @@ Route::group([
     'prefix' => 'merchandise',
     'as' => 'merchandise.',
 ], function () {
+    Route::get('/history', [MerchandiseCheckoutController::class, 'history'])->name('history');
     Route::get('/checkout', [MerchandiseCheckoutController::class, 'create'])->name('checkout');
     Route::post('/checkout', [MerchandiseCheckoutController::class, 'store'])->name('checkout.store');
 });
