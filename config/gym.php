@@ -2,6 +2,7 @@
 
 return [
     'name' => 'My Fitness Gym',
+    'invoice_brand' => 'MyFitness',
     'invoice_name' => 'My Fitness GYM',
     'address' => [
         'area' => 'Jimma, Merkato',

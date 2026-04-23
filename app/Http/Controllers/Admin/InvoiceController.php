@@ -98,6 +98,7 @@ class InvoiceController extends Controller
             ]);
 
             return Pdf::loadView('pages.admin.invoices.pdf', ['invoice' => $invoice])
+                ->setPaper('a4')
                 ->download('invoice-'.$invoice->invoice_number.'.pdf');
         } catch (Throwable $e) {
             return redirect()->back()->with(self::ERROR_, $e->getMessage());

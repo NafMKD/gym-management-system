@@ -2,6 +2,9 @@
 
 @section('header')
 @include('layouts.header', ['title' => 'Admin | Invoice'])
+<style>
+@include('pages.admin.invoices.partials.document-css')
+</style>
 @endsection
 
 @section('content-header')
@@ -78,6 +81,7 @@
                     @csrf
                     <button type="submit" class="btn btn-outline-primary"><i class="fas fa-envelope"></i> {{ __("Email invoice") }}</button>
                 </form>
+                <button type="button" class="btn btn-outline-dark" onclick="window.print()"><i class="fas fa-print"></i> {{ __("Print invoice") }}</button>
                 <a href="{{ route('admin.invoices.pdf', $invoice) }}" class="btn btn-outline-secondary" target="_blank" rel="noopener"><i class="fas fa-file-pdf"></i> {{ __("Download PDF") }}</a>
 
                 @if ($invoice->status == 'unpaid' && $remaining > 0)
