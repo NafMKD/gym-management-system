@@ -4,6 +4,9 @@
 @section('meta_description', 'My Fitness Gym is a premium training club with modern strength spaces, guided coaching, membership packages, and a calm gym atmosphere.')
 
 @section('content')
+    @php($gymAddress = config('gym.address', []))
+    @php($gymContact = config('gym.contact', []))
+
     <section class="hero-section">
         <div class="hero-noise"></div>
         <div class="shell hero-grid">
@@ -21,6 +24,22 @@
                         <a href="{{ route('login') }}" class="primary-button">Start Membership</a>
                     @endauth
                     <a href="{{ route('gallery') }}" class="secondary-button">View Gallery</a>
+                </div>
+
+                <div class="hero-contact-card" data-reveal="up">
+                    <p class="eyebrow">Visit & contact</p>
+                    <div class="hero-contact-grid">
+                        <div class="hero-contact-item">
+                            <span class="hero-contact-label"><i class="fas fa-map-marker-alt" aria-hidden="true"></i> Address</span>
+                            <strong>{{ $gymAddress['area'] ?? 'Jimma, Merkato' }}</strong>
+                            <p>{{ $gymAddress['building'] ?? 'Tsinat Building, 4th Floor' }}</p>
+                        </div>
+                        <div class="hero-contact-item">
+                            <span class="hero-contact-label"><i class="fas fa-phone-alt" aria-hidden="true"></i> Contact</span>
+                            <a href="tel:{{ $gymContact['phone_href'] ?? '+251917553839' }}">{{ $gymContact['phone_display'] ?? '(251) 917-55-3839' }}</a>
+                            <a href="mailto:{{ $gymContact['email'] ?? 'myfitness743@gmail.com' }}">{{ $gymContact['email'] ?? 'myfitness743@gmail.com' }}</a>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="hero-metrics">

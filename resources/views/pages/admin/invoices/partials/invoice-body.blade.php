@@ -20,11 +20,11 @@
         <div class="col-sm-4 invoice-col">
             From
             <address>
-                <strong>MyFitness GYM</strong><br>
-                Jimma, Merkato<br>
-                Tsinat Building, 4<sup>th</sup> Flor <br>
-                Phone: (251) 917-55-3839<br>
-                Email: myfitness743@gmail.com
+                <strong>{{ config('gym.invoice_name', 'My Fitness GYM') }}</strong><br>
+                {{ config('gym.address.area', 'Jimma, Merkato') }}<br>
+                {{ config('gym.address.building', 'Tsinat Building, 4th Floor') }}<br>
+                Phone: {{ config('gym.contact.phone_display', '(251) 917-55-3839') }}<br>
+                Email: {{ config('gym.contact.email', 'myfitness743@gmail.com') }}
             </address>
         </div>
         <div class="col-sm-4 invoice-col">

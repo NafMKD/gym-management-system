@@ -320,6 +320,62 @@ main {
     margin: 1.9rem 0 1.8rem;
 }
 
+.hero-contact-card {
+    max-width: 38rem;
+    margin-bottom: 1.5rem;
+    padding: 1.15rem;
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    background:
+        linear-gradient(180deg, rgba(240, 96, 48, 0.05), rgba(255, 255, 255, 0.03)),
+        var(--surface);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(12px);
+}
+
+.hero-contact-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 0.8rem;
+}
+
+.hero-contact-item {
+    padding: 1rem;
+    border: 1px solid var(--line-soft);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.hero-contact-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--accent);
+    font-size: 0.78rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.hero-contact-item strong {
+    display: block;
+    margin: 0.7rem 0 0.3rem;
+    font-size: 1.08rem;
+    line-height: 1.4;
+}
+
+.hero-contact-item p,
+.hero-contact-item a {
+    display: block;
+    color: var(--muted);
+    text-decoration: none;
+    line-height: 1.7;
+}
+
+.hero-contact-item a:hover {
+    color: var(--text);
+}
+
 .hero-metrics,
 .feature-grid,
 .program-grid,
@@ -1073,6 +1129,10 @@ main {
 
     .hero-visual,
     .mosaic-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-contact-grid {
         grid-template-columns: 1fr;
     }
 

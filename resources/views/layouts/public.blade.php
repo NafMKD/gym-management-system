@@ -1,4 +1,6 @@
-@php($brandName = 'My Fitness Gym')
+@php($brandName = config('gym.name', 'My Fitness Gym'))
+@php($gymAddress = config('gym.address', []))
+@php($gymContact = config('gym.contact', []))
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -66,14 +68,14 @@
                 </div>
                 <div id="contact">
                     <p class="footer-title">Visit</p>
-                    <p>24/7 access for members</p>
-                    <p>Bole Skyline District</p>
-                    <p>Addis Ababa, Ethiopia</p>
+                    <p>16/6 access for members</p>
+                    <p>{{ $gymAddress['area'] ?? 'Jimma, Merkato' }}</p>
+                    <p>{{ $gymAddress['building'] ?? 'Tsinat Building, 4th Floor' }}</p>
                 </div>
                 <div>
                     <p class="footer-title">Contact</p>
-                    <a href="tel:+251900000000">+251 90 000 0000</a>
-                    <a href="mailto:hello@myfitnessclub.com">hello@myfitnessclub.com</a>
+                    <a href="tel:{{ $gymContact['phone_href'] ?? '+251917553839' }}">{{ $gymContact['phone_display'] ?? '(251) 917-55-3839' }}</a>
+                    <a href="mailto:{{ $gymContact['email'] ?? 'myfitness743@gmail.com' }}">{{ $gymContact['email'] ?? 'myfitness743@gmail.com' }}</a>
                     <a href="{{ route('login') }}">Member Login</a>
                 </div>
             </div>
