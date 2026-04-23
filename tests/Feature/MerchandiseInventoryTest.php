@@ -25,7 +25,7 @@ test('merchandise checkout creates invoice, payment, and decrements stock', func
         ],
     ]);
 
-    $response->assertRedirect();
+    $response->assertRedirect(route('admin.merchandise.checkout'));
     $product->refresh();
 
     expect($product->stock_quantity)->toBe(8);
@@ -66,7 +66,7 @@ test('walk-in merchandise checkout creates paid invoice with null user_id', func
         ],
     ]);
 
-    $response->assertRedirect();
+    $response->assertRedirect(route('admin.merchandise.checkout'));
     $product->refresh();
     expect($product->stock_quantity)->toBe(4);
 
@@ -85,6 +85,55 @@ test('walk-in merchandise checkout creates paid invoice with null user_id', func
         'status' => 'completed',
         'amount' => 25.00,
     ]);
+});
+
+test('merchandise checkout returns json success for fast POS flow', function () {
+    $admin = User::factory()->admin()->create();
+    $product = Product::factory()->create([
+        'name' => 'Energy Bar',
+        'stock_quantity' => 6,
+        'unit_price' => 30.00,
+        'low_stock_threshold' => 2,
+        'is_active' => true,
+    ]);
+
+    $response = $this
+        ->actingAs($admin)
+        ->postJson(route('admin.merchandise.checkout.store'), [
+            'user_id' => '',
+            'payment_method' => 'cash',
+            'lines' => [
+                ['product_id' => $product->id, 'quantity' => 2],
+            ],
+        ]);
+
+    $response
+        ->assertOk()
+        ->assertJsonPath('message', 'Sale recorded.')
+        ->assertJsonPath('products.0.id', $product->id)
+        ->assertJsonPath('products.0.stock_quantity', 4);
+});
+
+test('reception merchandise checkout redirects back to checkout for the next sale', function () {
+    $reception = User::factory()->create(['role' => 'reception']);
+    $product = Product::factory()->create([
+        'stock_quantity' => 3,
+        'unit_price' => 15.00,
+        'low_stock_threshold' => 1,
+        'is_active' => true,
+    ]);
+
+    $response = $this->actingAs($reception)->post(route('admin.merchandise.checkout.store'), [
+        'user_id' => '',
+        'payment_method' => 'cash',
+        'lines' => [
+            ['product_id' => $product->id, 'quantity' => 1],
+        ],
+    ]);
+
+    $response
+        ->assertRedirect(route('admin.merchandise.checkout'))
+        ->assertSessionHas('success', 'Sale recorded.');
 });
 
 test('inventory notify low stock command sends mail when products are low', function () {

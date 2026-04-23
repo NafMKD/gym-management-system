@@ -6,9 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\User;
 use App\Repositories\MerchandiseRepository;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -37,9 +37,9 @@ class MerchandiseCheckoutController extends Controller
     }
 
     /**
-     * @return RedirectResponse
+     * @return JsonResponse|RedirectResponse
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): JsonResponse|RedirectResponse
     {
         $validator = Validator::make($request->all(), [
             'user_id' => [
@@ -60,6 +60,13 @@ class MerchandiseCheckoutController extends Controller
         ]);
 
         if ($validator->fails()) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => __('Please check the checkout form and try again.'),
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
+
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
@@ -74,6 +81,12 @@ class MerchandiseCheckoutController extends Controller
         }
 
         if (count($lines) < 1) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => __('Add at least one product line.'),
+                ], 422);
+            }
+
             return redirect()->back()->withInput()->with(self::ERROR_, __('Add at least one product line.'));
         }
 
@@ -94,16 +107,32 @@ class MerchandiseCheckoutController extends Controller
         try {
             $invoice = $this->merchandiseRepository->checkout($payload);
 
-            if (Auth::user()->role === 'reception') {
-                return redirect()
-                    ->route('reception.home')
-                    ->with(self::SUCCESS_, __('Sale recorded. Invoice #:num', ['num' => $invoice->invoice_number]));
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => __('Sale recorded.'),
+                    'invoice_number' => $invoice->invoice_number,
+                    'total' => (float) $invoice->amount,
+                    'products' => $invoice->merchandiseSaleLines
+                        ->map(fn ($line) => [
+                            'id' => (int) $line->product_id,
+                            'name' => (string) ($line->product?->name ?? ''),
+                            'stock_quantity' => (int) ($line->product?->stock_quantity ?? 0),
+                        ])
+                        ->unique('id')
+                        ->values(),
+                ]);
             }
 
             return redirect()
-                ->route('admin.invoices.view', $invoice)
+                ->route('admin.merchandise.checkout')
                 ->with(self::SUCCESS_, __('Sale recorded.'));
         } catch (Throwable $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => $e->getMessage(),
+                ], 422);
+            }
+
             return redirect()->back()->withInput()->with(self::ERROR_, $e->getMessage());
         }
     }
