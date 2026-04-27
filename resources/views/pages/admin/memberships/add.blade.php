@@ -59,7 +59,7 @@
                                 >
                             <option value="">{{ __("Custom") }}</option>
                             @foreach ($availablePackages as $availablePackage)
-                                <option value="{{ $availablePackage->id }}" @selected((string) old('package_id', $selectedPackageId ?? '') === (string) $availablePackage->id)>{{ $availablePackage->name }}
+                                <option value="{{ $availablePackage->id }}" data-duration="{{ $availablePackage->duration }}" @selected((string) old('package_id', $selectedPackageId ?? '') === (string) $availablePackage->id)>{{ $availablePackage->name }}
                                 </option>
                             @endforeach
                         </select>
@@ -73,7 +73,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>{{ __("Start Date") }}</label> <i class="text-danger font-weight-bold">*</i>
-                                <input type="text" class="form-control @error('start_date') is-invalid @enderror datetimepicker-input" id="start_date" name="start_date" data-toggle="datetimepicker" data-target="#start_date"/>
+                                <input type="text" class="form-control @error('start_date') is-invalid @enderror datetimepicker-input" id="start_date" name="start_date" data-toggle="datetimepicker" data-target="#start_date" value="{{ old('start_date') }}"/>
                                 @error('start_date')
                                 <span class="text-danger" role="alert">
                                     {{ $message }}
@@ -84,7 +84,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>{{ __("End Date") }}</label> <i class="text-danger font-weight-bold">*</i>
-                                <input type="text" class="form-control @error('end_date') is-invalid @enderror datetimepicker-input" id="end_date" name="end_date" data-toggle="datetimepicker" data-target="#end_date"/>
+                                <input type="text" class="form-control @error('end_date') is-invalid @enderror datetimepicker-input" id="end_date" name="end_date" data-toggle="datetimepicker" data-target="#end_date" value="{{ old('end_date') }}"/>
                                 @error('end_date')
                                 <span class="text-danger" role="alert">
                                     {{ $message }}
@@ -113,7 +113,29 @@
                 text: '{{ __("You are adding a membership after #:id. Choose dates and package, then register.", ["id" => $renewalMembership->id]) }}'
             });
             @endif
-            let packageData = {};
+
+            function getSelectedPackageDuration() {
+                const selectedOption = $('#package_id').find(':selected');
+                const duration = Number(selectedOption.data('duration'));
+
+                return Number.isFinite(duration) ? duration : 0;
+            }
+
+            function setEndDateLocked(locked) {
+                $('#end_date').prop('disabled', locked);
+            }
+
+            function syncEndDateFromStart(startDate) {
+                const duration = getSelectedPackageDuration();
+
+                if (!startDate || duration <= 0) {
+                    setEndDateLocked(false);
+                    return;
+                }
+
+                $('#end_date').datetimepicker('date', startDate.clone().add(duration, 'days'));
+                setEndDateLocked(true);
+            }
 
             // date
             $('#start_date').datetimepicker({
@@ -132,38 +154,21 @@
             });
 
 
-            // on package select unhide section three
+            // Re-evaluate the end date when package changes.
             $('#package_id').on('change', function () {
+                const startDate = $('#start_date').datetimepicker('date');
 
-                if($('#package_id').val() !== "") {
-                    $.ajax({
-                        url: "{{ route('admin.packages.package.data') }}", 
-                        type: 'GET',
-                        data: { package_id: $('#package_id').val() },
-                        success: function (response) {
-                            packageData = response; 
-                        },
-                        error: function () {
-                            alert('Failed to fetch package data.');
-                        }
-                    });
+                if ($('#package_id').val() === "") {
+                    setEndDateLocked(false);
+                    return;
                 }
 
-            })
+                syncEndDateFromStart(startDate);
+            });
 
             // When start_date is selected, calculate and set end_date
             $('#start_date').on('change.datetimepicker', function (e) {
-                if ($('#package_id').val() !== "") {
-                    if (packageData && packageData.duration > 0) {
-                        const startDate = e.date; 
-                        const endDate = startDate.clone().add(packageData.duration, 'days'); 
-
-                        $('#end_date').datetimepicker('date', endDate);
-                        $('#end_date').attr('disabled', true);
-                    }
-                } else {
-                    $('#end_date').attr('disabled', false);
-                }
+                syncEndDateFromStart(e.date);
             });
         });
     </script>
