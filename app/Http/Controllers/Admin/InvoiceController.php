@@ -110,9 +110,15 @@ class InvoiceController extends Controller
      *
      * @return  JsonResponse
      */
-    public function getInvoicesData(): JsonResponse
+    public function getInvoicesData(Request $request): JsonResponse
     {
-        $query = Invoice::query()->with(['membership.user', 'membership.package', 'customer']);
+        $status = $request->string('status')->toString();
+
+        $query = Invoice::query()
+            ->with(['membership.user', 'membership.package', 'customer'])
+            ->when(in_array($status, ['paid', 'unpaid'], true), function ($query) use ($status) {
+                $query->where('status', $status);
+            });
 
         return DataTables::of($query)
             ->addIndexColumn()
@@ -132,6 +138,11 @@ class InvoiceController extends Controller
             })
             ->editColumn('amount', function ($row) {
                 return number_format($row->amount, 2); 
+            })
+            ->editColumn('issued_date', function ($row) {
+                return $row->issued_date
+                    ? $row->date((string) $row->issued_date)->format('M d, Y')
+                    : '-';
             })
             ->editColumn('status', function ($row) {
                 $badgeClass = '';
