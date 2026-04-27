@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Attendance;
+use App\Models\Membership;
 use App\Repositories\UserRepository;
 use App\Models\User;
 use App\Exceptions\NoUpdateNeededException;
 use App\Support\PhoneNumber;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -107,10 +110,91 @@ class UserController extends Controller
     public function show(User $user): View|RedirectResponse
     {
         try {
-            return view(self::ADMIN_.'users.view', compact('user'));
+            $membershipOptions = $user->memberships()
+                ->with('package:id,name')
+                ->orderByDesc('start_date')
+                ->orderByDesc('id')
+                ->get(['id', 'user_id', 'package_id', 'start_date', 'end_date', 'status']);
+
+            return view(self::ADMIN_.'users.view', compact('user', 'membershipOptions'));
         } catch (Throwable $e) {
             return redirect()->back()->withInput()->with(self::ERROR_, self::ERROR_UNKNOWN);
         }
+    }
+
+    /**
+     * Membership history for a single user.
+     */
+    public function getMembershipHistoryData(User $user): JsonResponse
+    {
+        $query = Membership::query()
+            ->with('package:id,name')
+            ->where('user_id', $user->id)
+            ->orderByDesc('start_date')
+            ->orderByDesc('id');
+
+        return DataTables::of($query)
+            ->editColumn('id', function (Membership $membership) {
+                return '<a href="' . route('admin.memberships.view', $membership) . '" class="font-weight-bold">#' . $membership->id . '</a>';
+            })
+            ->addColumn('package_name', function (Membership $membership) {
+                return $membership->package?->name ?? __('Custom');
+            })
+            ->editColumn('price', function (Membership $membership) {
+                return number_format((float) $membership->price, 2);
+            })
+            ->editColumn('status', function (Membership $membership) {
+                return $this->membershipStatusBadge((string) $membership->status);
+            })
+            ->editColumn('created_at', function (Membership $membership) {
+                return $membership->created_detail;
+            })
+            ->editColumn('updated_at', function (Membership $membership) {
+                return $membership->updated_detail;
+            })
+            ->rawColumns(['id', 'status'])
+            ->make(true);
+    }
+
+    /**
+     * Attendance history for a single user, optionally filtered by membership.
+     */
+    public function getAttendanceHistoryData(Request $request, User $user): JsonResponse
+    {
+        $membershipId = (int) $request->input('membership_id');
+
+        $query = Attendance::query()
+            ->with(['membership.package:id,name'])
+            ->whereHas('membership', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->when($membershipId > 0, function ($query) use ($membershipId) {
+                $query->where('membership_id', $membershipId);
+            })
+            ->orderByDesc('entry_date')
+            ->orderByDesc('id');
+
+        return DataTables::of($query)
+            ->editColumn('id', function (Attendance $attendance) {
+                return '<span class="font-weight-bold">#' . $attendance->id . '</span>';
+            })
+            ->editColumn('membership_id', function (Attendance $attendance) {
+                return '<a href="' . route('admin.memberships.view', $attendance->membership_id) . '" class="font-weight-bold">#' . $attendance->membership_id . '</a>';
+            })
+            ->addColumn('package_name', function (Attendance $attendance) {
+                return $attendance->membership?->package?->name ?? __('Custom');
+            })
+            ->editColumn('entry_date', function (Attendance $attendance) {
+                return Carbon::parse($attendance->entry_date)->setTimezone('Africa/Addis_Ababa')->format('d/m/Y H:i');
+            })
+            ->addColumn('membership_status', function (Attendance $attendance) {
+                return $this->membershipStatusBadge((string) ($attendance->membership?->status ?? 'inactive'));
+            })
+            ->addColumn('record_status', function () {
+                return '<span class="badge badge-success">' . __('Recorded') . '</span>';
+            })
+            ->rawColumns(['id', 'membership_id', 'membership_status', 'record_status'])
+            ->make(true);
     }
 
     /**
@@ -230,6 +314,18 @@ class UserController extends Controller
             })
             ->rawColumns(['action'])
             ->make(true);
+    }
+
+    private function membershipStatusBadge(string $status): string
+    {
+        $badgeClass = match ($status) {
+            'active' => 'badge-success',
+            'inactive' => 'badge-warning',
+            'cancelled' => 'badge-danger',
+            default => 'badge-secondary',
+        };
+
+        return '<span class="badge ' . $badgeClass . '">' . ucfirst($status) . '</span>';
     }
 
 }

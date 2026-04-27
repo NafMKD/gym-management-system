@@ -27,6 +27,8 @@ Route::group([
     Route::post('/add', [UserController::class, 'store'])->name('store');
     Route::get('/list', [UserController::class, 'index'])->name('list');
     Route::get('/view/{user}', [UserController::class, 'show'])->name('view');
+    Route::get('/view/{user}/membership-history-data', [UserController::class, 'getMembershipHistoryData'])->name('membership_history.data');
+    Route::get('/view/{user}/attendance-history-data', [UserController::class, 'getAttendanceHistoryData'])->name('attendance_history.data');
     Route::get('/edit/{user}', [UserController::class, 'edit'])->name('edit');
     Route::post('/update/{user}', [UserController::class, 'update'])->name('update');
     Route::get('/delete/{user}', [UserController::class, 'destroy'])->name('delete');
