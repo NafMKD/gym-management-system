@@ -44,6 +44,10 @@
                         <dd class="col-sm-9">{{ $package->price }}</dd>
                         <dt class="col-sm-3">{{ __("Duration") }}:</dt>
                         <dd class="col-sm-9">{{ $package->duration }}</dd>
+                        <dt class="col-sm-3">{{ __("Granted Days") }}:</dt>
+                        <dd class="col-sm-9">{{ $package->granted_days }}</dd>
+                        <dt class="col-sm-3">{{ __("Description") }}:</dt>
+                        <dd class="col-sm-9">{{ $package->description ?: '-' }}</dd>
                     </dl>
                 </div>
                 <div class="col-md-6">
