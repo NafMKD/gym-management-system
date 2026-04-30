@@ -1,17 +1,18 @@
 <?php
 
 /**
- * Admin + reception: front desk, members, classes operations, POS — no invoices/payments/dashboard exports.
- * See admin_only.php for finance, inventory CRUD, staff, and class/package administration.
+ * Admin + reception + accountant shared routes.
+ * Reception keeps desk operations; accountant only gets read-only reporting routes exposed below.
+ * See admin_only.php for finance / inventory pages and admin-only writes.
  */
 
 use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\ClassBookingController;
 use App\Http\Controllers\Admin\ClassScheduleController;
 use App\Http\Controllers\Admin\GymClassController;
-use App\Http\Controllers\Admin\MerchandiseCheckoutController;
-use App\Http\Controllers\Admin\MembershipExtensionRequestController;
 use App\Http\Controllers\Admin\MembershipController;
+use App\Http\Controllers\Admin\MembershipExtensionRequestController;
+use App\Http\Controllers\Admin\MerchandiseCheckoutController;
 use App\Http\Controllers\Admin\PackageController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
@@ -23,16 +24,23 @@ Route::group([
     'prefix' => 'users',
     'as' => 'users.',
 ], function () {
-    Route::get('/add', [UserController::class, 'create'])->name('add');
-    Route::post('/add', [UserController::class, 'store'])->name('store');
-    Route::get('/list', [UserController::class, 'index'])->name('list');
-    Route::get('/view/{user}', [UserController::class, 'show'])->name('view');
-    Route::get('/view/{user}/membership-history-data', [UserController::class, 'getMembershipHistoryData'])->name('membership_history.data');
-    Route::get('/view/{user}/attendance-history-data', [UserController::class, 'getAttendanceHistoryData'])->name('attendance_history.data');
-    Route::get('/edit/{user}', [UserController::class, 'edit'])->name('edit');
-    Route::post('/update/{user}', [UserController::class, 'update'])->name('update');
-    Route::get('/delete/{user}', [UserController::class, 'destroy'])->name('delete');
-    Route::get('/list-data', [UserController::class, 'getUsersData'])->name('list.data');
+    Route::middleware('user-access:admin,reception,accountant')->group(function () {
+        Route::get('/list', [UserController::class, 'index'])->name('list');
+        Route::get('/view/{user}', [UserController::class, 'show'])->name('view');
+        Route::get('/list-data', [UserController::class, 'getUsersData'])->name('list.data');
+        Route::get('/export/csv', [UserController::class, 'exportUsersCsv'])->name('export.csv');
+        Route::get('/print', [UserController::class, 'printUsersReport'])->name('print');
+    });
+
+    Route::middleware('user-access:admin,reception')->group(function () {
+        Route::get('/add', [UserController::class, 'create'])->name('add');
+        Route::post('/add', [UserController::class, 'store'])->name('store');
+        Route::get('/view/{user}/membership-history-data', [UserController::class, 'getMembershipHistoryData'])->name('membership_history.data');
+        Route::get('/view/{user}/attendance-history-data', [UserController::class, 'getAttendanceHistoryData'])->name('attendance_history.data');
+        Route::get('/edit/{user}', [UserController::class, 'edit'])->name('edit');
+        Route::post('/update/{user}', [UserController::class, 'update'])->name('update');
+        Route::get('/delete/{user}', [UserController::class, 'destroy'])->name('delete');
+    });
 });
 
 /**
@@ -42,10 +50,12 @@ Route::group([
     'prefix' => 'packages',
     'as' => 'packages.',
 ], function () {
-    Route::get('/list', [PackageController::class, 'index'])->name('list');
-    Route::get('/view/{package}', [PackageController::class, 'show'])->name('view');
-    Route::get('/list-data', [PackageController::class, 'getPackagesData'])->name('list.data');
-    Route::get('/package-data', [PackageController::class, 'getPackageData'])->name('package.data');
+    Route::middleware('user-access:admin,reception')->group(function () {
+        Route::get('/list', [PackageController::class, 'index'])->name('list');
+        Route::get('/view/{package}', [PackageController::class, 'show'])->name('view');
+        Route::get('/list-data', [PackageController::class, 'getPackagesData'])->name('list.data');
+        Route::get('/package-data', [PackageController::class, 'getPackageData'])->name('package.data');
+    });
 });
 
 /**
@@ -55,9 +65,11 @@ Route::group([
     'prefix' => 'gym-classes',
     'as' => 'gym_classes.',
 ], function () {
-    Route::get('/list', [GymClassController::class, 'index'])->name('list');
-    Route::get('/view/{gym_class}', [GymClassController::class, 'show'])->name('view');
-    Route::get('/list-data', [GymClassController::class, 'getListData'])->name('list.data');
+    Route::middleware('user-access:admin,reception')->group(function () {
+        Route::get('/list', [GymClassController::class, 'index'])->name('list');
+        Route::get('/view/{gym_class}', [GymClassController::class, 'show'])->name('view');
+        Route::get('/list-data', [GymClassController::class, 'getListData'])->name('list.data');
+    });
 });
 
 /**
@@ -67,9 +79,11 @@ Route::group([
     'prefix' => 'class-schedules',
     'as' => 'class_schedules.',
 ], function () {
-    Route::get('/list', [ClassScheduleController::class, 'index'])->name('list');
-    Route::get('/view/{class_schedule}', [ClassScheduleController::class, 'show'])->name('view');
-    Route::get('/list-data', [ClassScheduleController::class, 'getListData'])->name('list.data');
+    Route::middleware('user-access:admin,reception')->group(function () {
+        Route::get('/list', [ClassScheduleController::class, 'index'])->name('list');
+        Route::get('/view/{class_schedule}', [ClassScheduleController::class, 'show'])->name('view');
+        Route::get('/list-data', [ClassScheduleController::class, 'getListData'])->name('list.data');
+    });
 });
 
 /**
@@ -79,9 +93,16 @@ Route::group([
     'prefix' => 'merchandise',
     'as' => 'merchandise.',
 ], function () {
-    Route::get('/history', [MerchandiseCheckoutController::class, 'history'])->name('history');
-    Route::get('/checkout', [MerchandiseCheckoutController::class, 'create'])->name('checkout');
-    Route::post('/checkout', [MerchandiseCheckoutController::class, 'store'])->name('checkout.store');
+    Route::middleware('user-access:admin,reception,accountant')->group(function () {
+        Route::get('/history', [MerchandiseCheckoutController::class, 'history'])->name('history');
+        Route::get('/history/export/csv', [MerchandiseCheckoutController::class, 'exportHistoryCsv'])->name('history.export.csv');
+        Route::get('/history/print', [MerchandiseCheckoutController::class, 'printHistory'])->name('history.print');
+    });
+
+    Route::middleware('user-access:admin,reception')->group(function () {
+        Route::get('/checkout', [MerchandiseCheckoutController::class, 'create'])->name('checkout');
+        Route::post('/checkout', [MerchandiseCheckoutController::class, 'store'])->name('checkout.store');
+    });
 });
 
 /**
@@ -91,14 +112,16 @@ Route::group([
     'prefix' => 'class-bookings',
     'as' => 'class_bookings.',
 ], function () {
-    Route::get('/list', [ClassBookingController::class, 'index'])->name('list');
-    Route::get('/add', [ClassBookingController::class, 'create'])->name('add');
-    Route::post('/add', [ClassBookingController::class, 'store'])->name('store');
-    Route::get('/view/{class_booking}', [ClassBookingController::class, 'show'])->name('view');
-    Route::post('/cancel/{class_booking}', [ClassBookingController::class, 'cancel'])->name('cancel');
-    Route::post('/mark-attended/{class_booking}', [ClassBookingController::class, 'markAttended'])->name('mark_attended');
-    Route::post('/feedback/{class_booking}', [ClassBookingController::class, 'storeFeedback'])->name('feedback');
-    Route::get('/list-data', [ClassBookingController::class, 'getListData'])->name('list.data');
+    Route::middleware('user-access:admin,reception')->group(function () {
+        Route::get('/list', [ClassBookingController::class, 'index'])->name('list');
+        Route::get('/add', [ClassBookingController::class, 'create'])->name('add');
+        Route::post('/add', [ClassBookingController::class, 'store'])->name('store');
+        Route::get('/view/{class_booking}', [ClassBookingController::class, 'show'])->name('view');
+        Route::post('/cancel/{class_booking}', [ClassBookingController::class, 'cancel'])->name('cancel');
+        Route::post('/mark-attended/{class_booking}', [ClassBookingController::class, 'markAttended'])->name('mark_attended');
+        Route::post('/feedback/{class_booking}', [ClassBookingController::class, 'storeFeedback'])->name('feedback');
+        Route::get('/list-data', [ClassBookingController::class, 'getListData'])->name('list.data');
+    });
 });
 
 /**
@@ -108,28 +131,30 @@ Route::group([
     'prefix' => 'memberships',
     'as' => 'memberships.',
 ], function () {
-    Route::get('/renew/{membership}', [MembershipController::class, 'renew'])->name('renew');
-    Route::get('/upgrade/{membership}', [MembershipController::class, 'showUpgrade'])->name('upgrade');
-    Route::post('/upgrade/{membership}', [MembershipController::class, 'updateUpgrade'])->name('upgrade.update');
+    Route::middleware('user-access:admin,reception')->group(function () {
+        Route::get('/renew/{membership}', [MembershipController::class, 'renew'])->name('renew');
+        Route::get('/upgrade/{membership}', [MembershipController::class, 'showUpgrade'])->name('upgrade');
+        Route::post('/upgrade/{membership}', [MembershipController::class, 'updateUpgrade'])->name('upgrade.update');
 
-    Route::prefix('extension-requests')->as('extension_requests.')->group(function () {
-        Route::get('/list', [MembershipExtensionRequestController::class, 'index'])->name('list');
-        Route::get('/add', [MembershipExtensionRequestController::class, 'create'])->name('add');
-        Route::post('/add', [MembershipExtensionRequestController::class, 'store'])->name('store');
-        Route::get('/list-data', [MembershipExtensionRequestController::class, 'getListData'])->name('list.data');
-        Route::get('/view/{membership_extension_request}', [MembershipExtensionRequestController::class, 'show'])->name('view');
-        Route::post('/approve', [MembershipExtensionRequestController::class, 'approve'])->name('approve');
-        Route::post('/reject', [MembershipExtensionRequestController::class, 'reject'])->name('reject');
+        Route::prefix('extension-requests')->as('extension_requests.')->group(function () {
+            Route::get('/list', [MembershipExtensionRequestController::class, 'index'])->name('list');
+            Route::get('/add', [MembershipExtensionRequestController::class, 'create'])->name('add');
+            Route::post('/add', [MembershipExtensionRequestController::class, 'store'])->name('store');
+            Route::get('/list-data', [MembershipExtensionRequestController::class, 'getListData'])->name('list.data');
+            Route::get('/view/{membership_extension_request}', [MembershipExtensionRequestController::class, 'show'])->name('view');
+            Route::post('/approve', [MembershipExtensionRequestController::class, 'approve'])->name('approve');
+            Route::post('/reject', [MembershipExtensionRequestController::class, 'reject'])->name('reject');
+        });
+
+        Route::get('/add', [MembershipController::class, 'create'])->name('add');
+        Route::post('/add', [MembershipController::class, 'store'])->name('store');
+        Route::get('/list', [MembershipController::class, 'index'])->name('list');
+        Route::get('/view/{membership}', [MembershipController::class, 'show'])->name('view');
+        Route::get('/{membership}/print-id-card', [MembershipController::class, 'printIdCard'])->name('print_id_card');
+        Route::get('/list-data', [MembershipController::class, 'getMembershipsData'])->name('list.data');
+        Route::post('/cancel', [MembershipController::class, 'cancel'])->name('cancel');
+        Route::post('/change-status', [MembershipController::class, 'changeStatus'])->name('change.status');
     });
-
-    Route::get('/add', [MembershipController::class, 'create'])->name('add');
-    Route::post('/add', [MembershipController::class, 'store'])->name('store');
-    Route::get('/list', [MembershipController::class, 'index'])->name('list');
-    Route::get('/view/{membership}', [MembershipController::class, 'show'])->name('view');
-    Route::get('/{membership}/print-id-card', [MembershipController::class, 'printIdCard'])->name('print_id_card');
-    Route::get('/list-data', [MembershipController::class, 'getMembershipsData'])->name('list.data');
-    Route::post('/cancel', [MembershipController::class, 'cancel'])->name('cancel');
-    Route::post('/change-status', [MembershipController::class, 'changeStatus'])->name('change.status');
 });
 
 /**
@@ -139,6 +164,8 @@ Route::group([
     'prefix' => 'attendance',
     'as' => 'attendance.',
 ], function () {
-    Route::get('/scan', [AttendanceController::class, 'showScanPage'])->name('scan');
-    Route::post('/scan', [AttendanceController::class, 'recordAttendance'])->name('record');
+    Route::middleware('user-access:admin,reception')->group(function () {
+        Route::get('/scan', [AttendanceController::class, 'showScanPage'])->name('scan');
+        Route::post('/scan', [AttendanceController::class, 'recordAttendance'])->name('record');
+    });
 });

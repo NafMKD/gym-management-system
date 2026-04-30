@@ -56,4 +56,14 @@ class UserFactory extends Factory
             'role' => 'admin',
         ]);
     }
+
+    /**
+     * Accountant user for tests or seeding.
+     */
+    public function accountant(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'accountant',
+        ]);
+    }
 }

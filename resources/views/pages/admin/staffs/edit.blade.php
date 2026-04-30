@@ -81,7 +81,7 @@
                         <label>{{ __("Role") }}</label> <i class="text-danger font-weight-bold">*</i>
                         <select name="role" id="role"
                                 class="form-control @error('role') is-invalid @enderror" required>
-                            @foreach (['trainer' => __('Trainer'), 'reception' => __('Reception'), 'admin' => __('Admin')] as $value => $label)
+                            @foreach (['trainer' => __('Trainer'), 'accountant' => __('Accountant'), 'reception' => __('Reception'), 'admin' => __('Admin')] as $value => $label)
                                 <option value="{{ $value }}" {{ old('role', $user->role) === $value ? 'selected' : '' }}>{{ $label }}</option>
                             @endforeach
                         </select>

@@ -17,6 +17,7 @@ Route::middleware('auth')->get('/dashboard', function () {
 
     return match ($role) {
         'admin' => redirect()->route('admin.home'),
+        'accountant' => redirect()->route('accountant.home'),
         'trainer' => redirect()->route('trainer.home'),
         'reception' => redirect()->route('reception.home'),
         'member' => redirect()->route('member.home'),
@@ -25,12 +26,13 @@ Route::middleware('auth')->get('/dashboard', function () {
 })->name('dashboard');
 
 /**
- * Admin + reception (front desk): members, memberships, POS, attendance, class ops — no invoice/payment UI routes.
+ * Admin + reception + accountant:
+ * reception keeps desk routes, accountant gets read-only report routes from the shared file.
  */
 Route::group([
     'middleware' => [
         'auth',
-        'user-access:admin,reception',
+        'user-access:admin,reception,accountant',
     ],
     'prefix' => 'admin',
     'as' => 'admin.',
@@ -39,12 +41,13 @@ Route::group([
 });
 
 /**
- * Admin-only: KPI dashboard, invoices, payments, revenue, inventory admin, staff, audits, package/class admin.
+ * Admin + accountant:
+ * accountant gets read-only finance / inventory reporting routes, while write routes stay narrowed inside the file.
  */
 Route::group([
     'middleware' => [
         'auth',
-        'user-access:admin',
+        'user-access:admin,accountant',
     ],
     'prefix' => 'admin',
     'as' => 'admin.',

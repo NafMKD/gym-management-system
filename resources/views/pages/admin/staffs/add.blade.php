@@ -73,6 +73,7 @@
                         <select name="role" id="role"
                                 class="form-control @error('role') is-invalid @enderror" required>
                             <option value="trainer" {{ old('role', 'trainer') === 'trainer' ? 'selected' : '' }}>{{ __("Trainer") }}</option>
+                            <option value="accountant" {{ old('role') === 'accountant' ? 'selected' : '' }}>{{ __("Accountant") }}</option>
                             <option value="reception" {{ old('role') === 'reception' ? 'selected' : '' }}>{{ __("Reception") }}</option>
                             <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>{{ __("Admin") }}</option>
                         </select>

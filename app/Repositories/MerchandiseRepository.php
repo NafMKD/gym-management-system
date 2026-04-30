@@ -3,9 +3,11 @@
 namespace App\Repositories;
 
 use App\Models\MerchandiseSaleLine;
-use App\Models\Product;
 use App\Models\StockMovement;
 use App\Models\Invoice;
+use App\Models\Product;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -135,5 +137,91 @@ class MerchandiseRepository
 
             return $invoice->fresh(['merchandiseSaleLines.product', 'customer', 'payments']);
         });
+    }
+
+    /**
+     * Filtered merchandise sale lines with invoice and payment context.
+     *
+     * @param  array<string, mixed>  $filters
+     */
+    public function getFilteredSalesLinesQuery(array $filters): Builder
+    {
+        return MerchandiseSaleLine::query()
+            ->with([
+                'product',
+                'invoice' => function ($query) {
+                    $query->with([
+                        'customer',
+                        'createdBy',
+                        'payments' => fn ($paymentQuery) => $paymentQuery->orderBy('payment_date')->orderBy('id'),
+                    ]);
+                },
+            ])
+            ->whereHas('invoice', function (Builder $query) use ($filters) {
+                $query->where('invoice_source', 'merchandise')
+                    ->when(! empty($filters['start_date']), function (Builder $invoiceQuery) use ($filters) {
+                        $invoiceQuery->where('issued_date', '>=', $this->reportDateStart((string) $filters['start_date']));
+                    })
+                    ->when(! empty($filters['end_date']), function (Builder $invoiceQuery) use ($filters) {
+                        $invoiceQuery->where('issued_date', '<=', $this->reportDateEnd((string) $filters['end_date']));
+                    })
+                    ->when(! empty($filters['salesman_id']), function (Builder $invoiceQuery) use ($filters) {
+                        $invoiceQuery->where('created_by_user_id', (int) $filters['salesman_id']);
+                    })
+                    ->when(! empty($filters['invoice_number']), function (Builder $invoiceQuery) use ($filters) {
+                        $invoiceQuery->where('invoice_number', 'like', '%'.$this->escapeLike((string) $filters['invoice_number']).'%');
+                    })
+                    ->when(! empty($filters['customer_id']), function (Builder $invoiceQuery) use ($filters) {
+                        $invoiceQuery->where('user_id', (int) $filters['customer_id']);
+                    })
+                    ->when(! empty($filters['payment_method']) || ! empty($filters['payment_bank']), function (Builder $invoiceQuery) use ($filters) {
+                        $invoiceQuery->whereHas('payments', function (Builder $paymentQuery) use ($filters) {
+                            $paymentQuery
+                                ->where('status', 'completed')
+                                ->when(! empty($filters['payment_method']), function (Builder $filteredPaymentQuery) use ($filters) {
+                                    $filteredPaymentQuery->where('payment_method', $filters['payment_method']);
+                                })
+                                ->when(! empty($filters['payment_bank']), function (Builder $filteredPaymentQuery) use ($filters) {
+                                    $filteredPaymentQuery->where('payment_bank', $filters['payment_bank']);
+                                });
+                        });
+                    });
+            })
+            ->when(! empty($filters['product_id']), function (Builder $query) use ($filters) {
+                $query->where('product_id', (int) $filters['product_id']);
+            });
+    }
+
+    /**
+     * Aggregated sales figures for the filtered merchandise report.
+     *
+     * @param  array<string, mixed>  $filters
+     * @return array<string, int|float>
+     */
+    public function getSalesSummary(array $filters): array
+    {
+        $query = $this->getFilteredSalesLinesQuery($filters);
+
+        return [
+            'invoice_count' => (int) (clone $query)->distinct('invoice_id')->count('invoice_id'),
+            'line_count' => (int) (clone $query)->count(),
+            'item_quantity' => (int) (clone $query)->sum('quantity'),
+            'gross_total' => (float) (clone $query)->sum('line_total'),
+        ];
+    }
+
+    private function reportDateStart(string $date): Carbon
+    {
+        return Carbon::parse($date, 'Africa/Addis_Ababa')->startOfDay()->utc();
+    }
+
+    private function reportDateEnd(string $date): Carbon
+    {
+        return Carbon::parse($date, 'Africa/Addis_Ababa')->endOfDay()->utc();
+    }
+
+    private function escapeLike(string $value): string
+    {
+        return addcslashes($value, '\%_');
     }
 }

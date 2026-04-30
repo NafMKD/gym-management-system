@@ -46,7 +46,7 @@ test('invoice list data supports status filtering and returns formatted issue da
     $response->assertOk()
         ->assertJsonCount(1, 'data')
         ->assertJsonPath('data.0.id', $paidInvoice->id)
-        ->assertJsonPath('data.0.issued_date', 'Apr 23, 2026');
+        ->assertJsonPath('data.0.issued_date', '23/04/2026 11:00');
 
     expect($response->json('data.0.status'))->toContain('Paid');
 });

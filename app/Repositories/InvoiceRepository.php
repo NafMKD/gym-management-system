@@ -4,6 +4,8 @@ namespace App\Repositories;
 
 use App\Models\Invoice;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class InvoiceRepository extends BaseRepository
@@ -22,6 +24,7 @@ class InvoiceRepository extends BaseRepository
                 $validatedAttributes = [
                     'membership_id' => $attributes['membership_id'] ?? null,
                     'user_id' => $attributes['user_id'] ?? null,
+                    'created_by_user_id' => $attributes['created_by_user_id'] ?? Auth::id(),
                     'amount' => $attributes['amount'] ?? null,
                     'invoice_source' => $attributes['invoice_source'] ?? 'membership',
                 ];
@@ -125,5 +128,41 @@ class InvoiceRepository extends BaseRepository
         if ($invoice->status === 'paid') {
             $invoice->update(['status' => 'unpaid']);
         }
+    }
+
+    /**
+     * Build the accountant/admin invoice reporting query.
+     *
+     * @param  array<string, mixed>  $filters
+     */
+    public function getFilteredInvoicesQuery(array $filters): Builder
+    {
+        return Invoice::query()
+            ->with(['membership.user', 'membership.package', 'customer', 'createdBy'])
+            ->when(! empty($filters['issued_from']), function (Builder $query) use ($filters) {
+                $query->where('issued_date', '>=', $this->reportDateStart((string) $filters['issued_from']));
+            })
+            ->when(! empty($filters['issued_to']), function (Builder $query) use ($filters) {
+                $query->where('issued_date', '<=', $this->reportDateEnd((string) $filters['issued_to']));
+            })
+            ->when(! empty($filters['status']), function (Builder $query) use ($filters) {
+                $query->where('status', $filters['status']);
+            })
+            ->when(! empty($filters['invoice_source']), function (Builder $query) use ($filters) {
+                $query->where('invoice_source', $filters['invoice_source']);
+            })
+            ->when(! empty($filters['created_by_user_id']), function (Builder $query) use ($filters) {
+                $query->where('created_by_user_id', (int) $filters['created_by_user_id']);
+            });
+    }
+
+    private function reportDateStart(string $date): Carbon
+    {
+        return Carbon::parse($date, 'Africa/Addis_Ababa')->startOfDay()->utc();
+    }
+
+    private function reportDateEnd(string $date): Carbon
+    {
+        return Carbon::parse($date, 'Africa/Addis_Ababa')->endOfDay()->utc();
     }
 }

@@ -34,6 +34,16 @@ class UserSeeder extends Seeder
         ]);
 
         User::create([
+            'first_name' => 'Accountant',
+            'last_name' => 'User',
+            'email' => 'accountant@gmail.com',
+            'password' => Hash::make('12345678'),
+            'phone' => '0955555555',
+            'role' => 'accountant',
+            'gender' => 'Female',
+        ]);
+
+        User::create([
             'first_name' => 'Reception',
             'last_name' => 'User',
             'email' => 'reception@gmail.com',

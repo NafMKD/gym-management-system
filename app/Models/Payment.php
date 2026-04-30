@@ -15,6 +15,7 @@ class Payment extends Model
     protected $fillable = [
         'invoice_id',
         'membership_id',
+        'created_by_user_id',
         'amount',
         'payment_date',
         'payment_method',
@@ -43,5 +44,13 @@ class Payment extends Model
     public function membership(): BelongsTo
     {
         return $this->belongsTo(Membership::class);
+    }
+
+    /**
+     * Staff user who recorded the payment/refund.
+     */
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by_user_id');
     }
 }

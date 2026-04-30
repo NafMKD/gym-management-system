@@ -81,6 +81,10 @@
                         @endif
                     </p>
                 @endif
+                <p class="invoice-detail-line">
+                    <strong>{{ __('Created By') }}:</strong>
+                    {{ $invoice->createdBy?->getName() ?? __('Legacy / Unknown') }}
+                </p>
             </td>
         </tr>
     </table>

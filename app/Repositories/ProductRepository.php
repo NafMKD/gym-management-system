@@ -4,6 +4,8 @@ namespace App\Repositories;
 
 use App\Models\Product;
 use App\Models\StockMovement;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -97,5 +99,77 @@ class ProductRepository extends BaseRepository
                 'notes' => $notes,
             ]);
         });
+    }
+
+    /**
+     * Product snapshot query for the reporting page.
+     *
+     * @param  array<string, mixed>  $filters
+     */
+    public function getFilteredProductsQuery(array $filters): Builder
+    {
+        return Product::query()
+            ->when(! empty($filters['product_id']), function (Builder $query) use ($filters) {
+                $query->whereKey((int) $filters['product_id']);
+            });
+    }
+
+    /**
+     * Stock movement query for accountant/admin reporting.
+     *
+     * @param  array<string, mixed>  $filters
+     */
+    public function getFilteredStockMovementsQuery(array $filters): Builder
+    {
+        return StockMovement::query()
+            ->with(['product', 'user', 'invoice.customer'])
+            ->when(! empty($filters['start_date']), function (Builder $query) use ($filters) {
+                $query->where('created_at', '>=', $this->reportDateStart((string) $filters['start_date']));
+            })
+            ->when(! empty($filters['end_date']), function (Builder $query) use ($filters) {
+                $query->where('created_at', '<=', $this->reportDateEnd((string) $filters['end_date']));
+            })
+            ->when(! empty($filters['product_id']), function (Builder $query) use ($filters) {
+                $query->where('product_id', (int) $filters['product_id']);
+            })
+            ->when(! empty($filters['reason']), function (Builder $query) use ($filters) {
+                $query->where('reason', $filters['reason']);
+            })
+            ->when(! empty($filters['actor_id']), function (Builder $query) use ($filters) {
+                $query->where('user_id', (int) $filters['actor_id']);
+            });
+    }
+
+    /**
+     * Aggregated product movement metrics for the filtered report.
+     *
+     * @param  array<string, mixed>  $filters
+     * @return array<string, int|float>
+     */
+    public function getMovementSummary(array $filters): array
+    {
+        $movementQuery = $this->getFilteredStockMovementsQuery($filters);
+        $productQuery = $this->getFilteredProductsQuery($filters);
+
+        return [
+            'product_count' => (int) (clone $productQuery)->count(),
+            'stock_on_hand' => (int) (clone $productQuery)->sum('stock_quantity'),
+            'low_stock_count' => (int) (clone $productQuery)->lowStock()->count(),
+            'quantity_in' => (int) (clone $movementQuery)->where('quantity_change', '>', 0)->sum('quantity_change'),
+            'quantity_out' => abs((int) (clone $movementQuery)->where('quantity_change', '<', 0)->sum('quantity_change')),
+            'restock_quantity' => (int) (clone $movementQuery)->where('reason', 'restock')->sum('quantity_change'),
+            'sale_quantity' => abs((int) (clone $movementQuery)->where('reason', 'sale')->sum('quantity_change')),
+            'adjustment_net' => (int) (clone $movementQuery)->where('reason', 'adjustment')->sum('quantity_change'),
+        ];
+    }
+
+    private function reportDateStart(string $date): Carbon
+    {
+        return Carbon::parse($date, 'Africa/Addis_Ababa')->startOfDay()->utc();
+    }
+
+    private function reportDateEnd(string $date): Carbon
+    {
+        return Carbon::parse($date, 'Africa/Addis_Ababa')->endOfDay()->utc();
     }
 }

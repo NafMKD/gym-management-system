@@ -23,6 +23,7 @@
 @endsection
 
 @section('content')
+    @php($canManagePayment = auth()->user()->role === 'admin')
     <x-content class="content">
         <x-card class="card-default" title="Payment Detail" no-message footer>
             <x-slot:headerTools>
@@ -39,9 +40,17 @@
                         <dt class="col-sm-3">{{ __("Invoice Number") }}:</dt>
                         <dd class="col-sm-9"><a href="{{ route('admin.invoices.view', $payment->invoice->id) }}">{{ $payment->invoice->invoice_number }}</a></dd>
                         <dt class="col-sm-3">{{ __("Membership ID") }}:</dt>
-                        <dd class="col-sm-9"><a href="{{ route('admin.memberships.view', $payment->membership->id) }}">{{ $payment->membership->id }}</a></dd>
+                        <dd class="col-sm-9">
+                            @if($payment->membership)
+                                <a href="{{ route('admin.memberships.view', $payment->membership->id) }}">{{ $payment->membership->id }}</a>
+                            @else
+                                {{ __("N/A") }}
+                            @endif
+                        </dd>
                         <dt class="col-sm-3">{{ __("Payment Date") }}:</dt>
-                        <dd class="col-sm-9">{{ $payment->payment_date }}</dd>
+                        <dd class="col-sm-9">{{ \Carbon\Carbon::parse($payment->payment_date)->setTimezone('Africa/Addis_Ababa')->format('d/m/Y H:i') }}</dd>
+                        <dt class="col-sm-3">{{ __("Source") }}:</dt>
+                        <dd class="col-sm-9">{{ ucfirst((string) ($payment->invoice->invoice_source ?? 'membership')) }}</dd>
                         <dt class="col-sm-3">{{ __("Type") }}:</dt>
                         <dd class="col-sm-9">{{ ($payment->payment_type ?? 'payment') === 'refund' ? __('Refund') : __('Payment') }}</dd>
                         <dt class="col-sm-3">{{ __("Amount") }}:</dt>
@@ -60,13 +69,15 @@
                         <dd class="col-sm-9 {{ $payment->status === 'completed' ? 'text-success' : ($payment->status === 'failed' ? 'text-danger' : 'text-warning') }}">
                             {{ ucfirst($payment->status) }}
                         </dd>
+                        <dt class="col-sm-3">{{ __("Created By") }}:</dt>
+                        <dd class="col-sm-9">{{ $payment->createdBy?->getName() ?? __('Legacy / Unknown') }}</dd>
                         <dt class="col-sm-3">{{ __("Notes") }}:</dt>
                         <dd class="col-sm-9">{{ $payment->notes ?? __("N/A") }}</dd>
                     </dl>
                 </div>
             </div>
             <x-slot:footer>
-                @if($payment->status !== 'completed' && $payment->status !== 'failed')
+                @if($canManagePayment && $payment->status !== 'completed' && $payment->status !== 'failed')
                 <button type="button" id="markCompleted" class="btn btn-success float-right">{{ __("Mark as Completed") }}</button>
                 <button type="button" id="markFailed" class="btn btn-danger float-left">{{ __("Mark as Failed") }}</button>
                 @endif
@@ -76,85 +87,87 @@
 @endsection
 
 @section('script')
-    <script>
-        $(function () {
-            $('#markCompleted').on('click', function() {
-                Swal.fire({
-                    title: '{{ __("Are you sure?") }}',
-                    text: '{{ __("You are about to mark this payment as completed!") }}',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: '{{ __("Yes, complete it!") }}'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            url: '{{ route('admin.payments.mark.completed') }}',
-                            type: 'POST',
-                            data: {
-                                _token: '{{ csrf_token() }}',
-                                payment_id: '{{ $payment->id }}'
-                            },
-                            success: function(response) {
-                                Swal.fire(
-                                    '{{ __("Completed!") }}',
-                                    '{{ __("The payment has been marked as completed.") }}',
-                                    'success'
-                                ).then((result) => {
-                                    location.reload();
-                                });
-                            },
-                            error: function(xhr) {
-                                Swal.fire(
-                                    '{{ __("Error!") }}',
-                                    `{{ __("`+xhr.responseJSON.error+`") }}`,
-                                    'error'
-                                );
-                            }
-                        });
-                    }
+    @if($canManagePayment)
+        <script>
+            $(function () {
+                $('#markCompleted').on('click', function() {
+                    Swal.fire({
+                        title: '{{ __("Are you sure?") }}',
+                        text: '{{ __("You are about to mark this payment as completed!") }}',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: '{{ __("Yes, complete it!") }}'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            $.ajax({
+                                url: '{{ route('admin.payments.mark.completed') }}',
+                                type: 'POST',
+                                data: {
+                                    _token: '{{ csrf_token() }}',
+                                    payment_id: '{{ $payment->id }}'
+                                },
+                                success: function() {
+                                    Swal.fire(
+                                        '{{ __("Completed!") }}',
+                                        '{{ __("The payment has been marked as completed.") }}',
+                                        'success'
+                                    ).then(() => {
+                                        location.reload();
+                                    });
+                                },
+                                error: function(xhr) {
+                                    Swal.fire(
+                                        '{{ __("Error!") }}',
+                                        xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : '{{ __("An error occurred.") }}',
+                                        'error'
+                                    );
+                                }
+                            });
+                        }
+                    });
                 });
-            });
 
-            $('#markFailed').on('click', function() {
-                Swal.fire({
-                    title: '{{ __("Are you sure?") }}',
-                    text: '{{ __("You are about to mark this payment as failed!") }}',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: '{{ __("Yes, mark as failed!") }}'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            url: '{{ route('admin.payments.mark.failed') }}',
-                            type: 'POST',
-                            data: {
-                                _token: '{{ csrf_token() }}',
-                                payment_id: '{{ $payment->id }}'
-                            },
-                            success: function(response) {
-                                Swal.fire(
-                                    '{{ __("Failed!") }}',
-                                    '{{ __("The payment has been marked as failed.") }}',
-                                    'success'
-                                ).then((result) => {
-                                    location.reload();
-                                });
-                            },
-                            error: function(xhr) {
-                                Swal.fire(
-                                    '{{ __("Error!") }}',
-                                    `{{ __("`+xhr.responseJSON.error+`") }}`,
-                                    'error'
-                                );
-                            }
-                        });
-                    }
+                $('#markFailed').on('click', function() {
+                    Swal.fire({
+                        title: '{{ __("Are you sure?") }}',
+                        text: '{{ __("You are about to mark this payment as failed!") }}',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: '{{ __("Yes, mark as failed!") }}'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            $.ajax({
+                                url: '{{ route('admin.payments.mark.failed') }}',
+                                type: 'POST',
+                                data: {
+                                    _token: '{{ csrf_token() }}',
+                                    payment_id: '{{ $payment->id }}'
+                                },
+                                success: function() {
+                                    Swal.fire(
+                                        '{{ __("Failed!") }}',
+                                        '{{ __("The payment has been marked as failed.") }}',
+                                        'success'
+                                    ).then(() => {
+                                        location.reload();
+                                    });
+                                },
+                                error: function(xhr) {
+                                    Swal.fire(
+                                        '{{ __("Error!") }}',
+                                        xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : '{{ __("An error occurred.") }}',
+                                        'error'
+                                    );
+                                }
+                            });
+                        }
+                    });
                 });
             });
-        });
-    </script>
+        </script>
+    @endif
 @endsection

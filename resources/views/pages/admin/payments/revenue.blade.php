@@ -8,76 +8,158 @@
     <x-content class="content-header">
         <div class="row mb-2">
             <div class="col-sm-6">
-                <h1 class="m-0">{{ __("Revenue Overview") }}</h1>
-            </div><!-- /.col -->
+                <h1 class="m-0">{{ __('Revenue Overview') }}</h1>
+            </div>
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item">{{ __("Home") }}</li>
-                    <li class="breadcrumb-item">{{ __("Reports") }}</li>
-                    <li class="breadcrumb-item active">{{ __("Revenue Overview") }}</li>
+                    <li class="breadcrumb-item">{{ __('Home') }}</li>
+                    <li class="breadcrumb-item">{{ __('Reports') }}</li>
+                    <li class="breadcrumb-item active">{{ __('Revenue Overview') }}</li>
                 </ol>
-            </div><!-- /.col -->
-        </div><!-- /.row -->
+            </div>
+        </div>
     </x-content>
 @endsection
 
 @section('content')
     <x-content class="content">
-        <x-card class="card-default" title="Revenue Report" no-message footer>
-            <!-- Filters Section -->
-            <form id="filterForm">
+        <x-card class="card-default" title="{{ __('Revenue Report') }}" no-message footer>
+            <form id="revenueFilterForm">
                 <div class="row">
                     <div class="col-md-3">
-                        <label>{{ __("Start Date") }}</label>
+                        <label for="start_date">{{ __('Payment From') }}</label>
                         <input type="date" name="start_date" id="start_date" class="form-control">
                     </div>
                     <div class="col-md-3">
-                        <label>{{ __("End Date") }}</label>
+                        <label for="end_date">{{ __('Payment To') }}</label>
                         <input type="date" name="end_date" id="end_date" class="form-control">
                     </div>
-                    <div class="col-md-3">
-                        <label>{{ __("Payment Method") }}</label>
+                    <div class="col-md-2">
+                        <label for="payment_method">{{ __('Method') }}</label>
                         <select name="payment_method" id="payment_method" class="form-control">
-                            <option value="">{{ __("All") }}</option>
-                            <option value="cash">{{ __("Cash") }}</option>
-                            <option value="bank">{{ __("Bank") }}</option>
+                            <option value="">{{ __('All') }}</option>
+                            <option value="cash">{{ __('Cash') }}</option>
+                            <option value="bank">{{ __('Bank') }}</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="payment_bank">{{ __('Bank') }}</label>
+                        <select name="payment_bank" id="payment_bank" class="form-control">
+                            <option value="">{{ __('All') }}</option>
+                            <option value="telebirr">Telebirr</option>
+                            <option value="cbe">CBE</option>
+                            <option value="boa">BOA</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="status">{{ __('Status') }}</label>
+                        <select name="status" id="status" class="form-control">
+                            <option value="">{{ __('All') }}</option>
+                            <option value="completed">{{ __('Completed') }}</option>
+                            <option value="pending">{{ __('Pending') }}</option>
+                            <option value="failed">{{ __('Failed') }}</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-3">
+                        <label for="payment_type">{{ __('Type') }}</label>
+                        <select name="payment_type" id="payment_type" class="form-control">
+                            <option value="">{{ __('All') }}</option>
+                            <option value="payment">{{ __('Payment') }}</option>
+                            <option value="refund">{{ __('Refund') }}</option>
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label>{{ __("Status") }}</label>
-                        <select name="status" id="status" class="form-control">
-                            <option value="">{{ __("All") }}</option>
-                            <option value="pending">{{ __("Pending") }}</option>
-                            <option value="completed">{{ __("Completed") }}</option>
-                            <option value="failed">{{ __("Failed") }}</option>
+                        <label for="invoice_source">{{ __('Source') }}</label>
+                        <select name="invoice_source" id="invoice_source" class="form-control">
+                            <option value="">{{ __('All') }}</option>
+                            <option value="membership">{{ __('Membership') }}</option>
+                            <option value="merchandise">{{ __('Merchandise') }}</option>
                         </select>
                     </div>
-                    <div class="col-md-3 mt-4">
-                        <button type="submit" class="btn btn-primary">{{ __("Filter") }}</button>
-                        <button type="reset" id="reset" class="btn btn-secondary">{{ __("Reset") }}</button>
+                    <div class="col-md-3">
+                        <label for="created_by_user_id">{{ __('Created By') }}</label>
+                        <select name="created_by_user_id" id="created_by_user_id" class="form-control">
+                            <option value="">{{ __('All') }}</option>
+                            @foreach($creators as $creator)
+                                <option value="{{ $creator->id }}">{{ $creator->getName() }}</option>
+                            @endforeach
+                        </select>
                     </div>
+                    <div class="col-md-3">
+                        <label class="d-block">{{ __('Export Columns') }}</label>
+                        <div class="d-flex flex-wrap" style="gap: 0.5rem 0.75rem; max-height: 120px; overflow-y: auto; padding-top: 0.25rem;">
+                            @foreach($exportColumns as $key => $column)
+                                <div class="form-check mr-2">
+                                    <input class="form-check-input revenue-export-column" type="checkbox" value="{{ $key }}" id="revenue-column-{{ $key }}" {{ in_array($key, $defaultExportColumns, true) ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="revenue-column-{{ $key }}">{{ __($column['label']) }}</label>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-3 d-flex flex-wrap" style="gap: 0.5rem;">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-filter"></i> {{ __('Apply Filters') }}
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="resetRevenueFilters">
+                        {{ __('Reset') }}
+                    </button>
+                    <button type="button" class="btn btn-outline-success" id="exportRevenueCsv">
+                        <i class="fas fa-file-csv"></i> {{ __('Export CSV') }}
+                    </button>
+                    <button type="button" class="btn btn-outline-dark" id="printRevenueReport">
+                        <i class="fas fa-print"></i> {{ __('Print Report') }}
+                    </button>
                 </div>
             </form>
 
             <hr>
 
-            <!-- Revenue Summary -->
-            <div class="alert alert-info">
-                <h4>{{ __("Total Revenue:") }} {{ __('Birr')}} <span id="total-revenue">0.00</span></h4>
-                <p>{{ __("Total Transactions:") }} <span id="total-transactions">0</span></p>
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <div class="alert alert-info h-100">
+                        <div class="small text-uppercase text-white">{{ __('Net Revenue') }}</div>
+                        <div class="h4 mb-0">{{ __('Birr') }} <span id="total-revenue">0.00</span></div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="alert alert-secondary h-100">
+                        <div class="small text-uppercase text-white">{{ __('Transactions') }}</div>
+                        <div class="h4 mb-0"><span id="total-transactions">0</span></div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="alert alert-success h-100">
+                        <div class="small text-uppercase text-white">{{ __('Payments') }}</div>
+                        <div class="h4 mb-0"><span id="total-payments">0</span></div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="alert alert-warning h-100">
+                        <div class="small text-uppercase text-white">{{ __('Refunds') }}</div>
+                        <div class="h4 mb-0"><span id="total-refunds">0</span></div>
+                    </div>
+                </div>
             </div>
 
-            <!-- Payments DataTable -->
             <table class="table table-bordered" id="paymentsTable">
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>{{ __("Member") }}</th>
-                        <th>{{ __("Invoice") }}</th>
-                        <th>{{ __("Amount") }}</th>
-                        <th>{{ __("Payment Method") }}</th>
-                        <th>{{ __("Status") }}</th>
-                        <th>{{ __("Payment Date") }}</th>
+                        <th>{{ __('Customer / Member') }}</th>
+                        <th>{{ __('Invoice') }}</th>
+                        <th>{{ __('Source') }}</th>
+                        <th>{{ __('Type') }}</th>
+                        <th>{{ __('Amount') }}</th>
+                        <th>{{ __('Method') }}</th>
+                        <th>{{ __('Bank') }}</th>
+                        <th>{{ __('Payment Date') }}</th>
+                        <th>{{ __('Created By') }}</th>
+                        <th>{{ __('Status') }}</th>
                     </tr>
                 </thead>
             </table>
@@ -89,103 +171,139 @@
 
 @section('script')
     <script>
+        function revenueFilters() {
+            return {
+                start_date: $('#start_date').val(),
+                end_date: $('#end_date').val(),
+                payment_method: $('#payment_method').val(),
+                payment_bank: $('#payment_bank').val(),
+                status: $('#status').val(),
+                payment_type: $('#payment_type').val(),
+                invoice_source: $('#invoice_source').val(),
+                created_by_user_id: $('#created_by_user_id').val()
+            };
+        }
+
+        function selectedRevenueColumns() {
+            return $('.revenue-export-column:checked').map(function () {
+                return $(this).val();
+            }).get();
+        }
+
+        function revenueQuery(includeColumns) {
+            let params = revenueFilters();
+            if (includeColumns) {
+                let columns = selectedRevenueColumns();
+                columns.forEach(function (column) {
+                    if (!params.columns) {
+                        params.columns = [];
+                    }
+                    params.columns.push(column);
+                });
+            }
+
+            return $.param(params, true);
+        }
+
+        function toggleRevenueBank() {
+            let bankMethod = $('#payment_method').val() === 'bank';
+            $('#payment_bank').prop('disabled', !bankMethod && $('#payment_bank').val() === '');
+            if (!bankMethod && $('#payment_bank').val() === '') {
+                $('#payment_bank').prop('disabled', true);
+            } else {
+                $('#payment_bank').prop('disabled', false);
+            }
+        }
+
         function fetchTotalRevenue() {
             $.ajax({
                 url: "{{ route('admin.payments.revenue.total') }}",
                 type: "GET",
-                data: {
-                    start_date: $('#start_date').val(),
-                    end_date: $('#end_date').val(),
-                    payment_method: $('#payment_method').val(),
-                    status: $('#status').val()
-                },
+                data: revenueFilters(),
                 success: function(response) {
-                    let formattedTotal = response.totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    let formattedTotal = Number.parseFloat(response.totalRevenue || 0).toLocaleString('en-US', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
 
-                    // Update UI
                     $('#total-revenue').text(formattedTotal);
                     $('#total-transactions').text(response.totalTransactions);
+                    $('#total-payments').text(response.netPayments);
+                    $('#total-refunds').text(response.refundTransactions);
                 },
                 error: function(xhr) {
+                    let errors = xhr.responseJSON && xhr.responseJSON.errors ? xhr.responseJSON.errors : {};
+                    let messages = Object.values(errors).flat().join('<br>');
+
                     Toast.fire({
                         icon: 'error',
-                        title: 'Failed to fetch total revenue.'
+                        title: '{{ __('Validation Errors') }}',
+                        html: messages || '{{ __('Failed to fetch total revenue.') }}'
                     });
                 }
             });
         }
 
-        $(document).ready(function () {
+        $(function () {
             let table = $('#paymentsTable').DataTable({
                 processing: true,
                 serverSide: true,
-                order: [[6, 'desc']],
+                order: [[8, 'desc']],
                 ajax: {
                     url: "{{ route('admin.payments.revenue.list') }}",
                     data: function (d) {
-                        d.start_date = $('#start_date').val();
-                        d.end_date = $('#end_date').val();
-                        d.payment_method = $('#payment_method').val();
-                        d.status = $('#status').val();
-                    }, 
-                    error: function(xhr, status, error) {
-                        let errors = xhr.responseJSON.errors;
-                        let errorMessages = '';
-
-                        Object.keys(errors).forEach(function(key) {
-                            errorMessages += errors[key].join('<br>') + '<br>';
-                        });
+                        Object.assign(d, revenueFilters());
+                    },
+                    error: function(xhr) {
+                        let errors = xhr.responseJSON && xhr.responseJSON.errors ? xhr.responseJSON.errors : {};
+                        let messages = Object.values(errors).flat().join('<br>');
 
                         Toast.fire({
                             icon: 'error',
-                            title: 'Validation Errors',
-                            html: errorMessages  
+                            title: '{{ __('Validation Errors') }}',
+                            html: messages || '{{ __('Please review your filters and try again.') }}'
                         });
-
-                        $('#filterForm input, #filterForm select').val(''); 
-                        table.ajax.reload();
                     }
                 },
                 columns: [
                     { data: 'DT_RowIndex', orderable: false, searchable: false },
-                    { data: 'membership_id', name: 'membership_id' },
+                    { data: 'name', name: 'name' },
                     { data: 'invoice', name: 'invoice' },
+                    { data: 'source', name: 'source' },
+                    { data: 'payment_type', name: 'payment_type' },
                     { data: 'amount', name: 'amount' },
                     { data: 'payment_method', name: 'payment_method' },
-                    { data: 'status', name: 'status' },
-                    { data: 'payment_date', name: 'payment_date' }
+                    { data: 'payment_bank', name: 'payment_bank' },
+                    { data: 'payment_date', name: 'payment_date' },
+                    { data: 'created_by', name: 'created_by' },
+                    { data: 'status', name: 'status' }
                 ],
-                drawCallback: function(settings) {
+                drawCallback: function() {
                     fetchTotalRevenue();
                 }
             });
 
-            $('#filterForm').on('submit', function(e) {
+            $('#revenueFilterForm').on('submit', function(e) {
                 e.preventDefault();
-
-                let startDate = $('#start_date').val();
-                let endDate = $('#end_date').val();
-
-                // Validation: If start date is set, end date is required
-                if (startDate && !endDate) {
-                    Toast.fire({
-                        icon: 'warning',
-                        title: 'Please select an end date if a start date is set.'
-                    });
-                    $('#end_date').focus();
-                    return;
-                }
-
                 table.ajax.reload();
             });
 
-            $('#reset').on('click', function() {
-                $('#filterForm input, #filterForm select').val(''); 
-                Toast.fire({
-                    icon: 'success',
-                    title: 'Filters have been reset.'
-                });
-                $('#paymentsTable').DataTable().ajax.reload();
+            $('#resetRevenueFilters').on('click', function() {
+                $('#revenueFilterForm')[0].reset();
+                toggleRevenueBank();
+                table.ajax.reload();
+                fetchTotalRevenue();
+            });
+
+            $('#payment_method').on('change', toggleRevenueBank);
+            toggleRevenueBank();
+
+            $('#exportRevenueCsv').on('click', function () {
+                window.location = "{{ route('admin.payments.revenue.export.csv') }}?" + revenueQuery(true);
+            });
+
+            $('#printRevenueReport').on('click', function () {
+                window.open("{{ route('admin.payments.revenue.print') }}?" + revenueQuery(false), '_blank');
             });
 
             fetchTotalRevenue();

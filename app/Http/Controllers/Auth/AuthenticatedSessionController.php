@@ -45,7 +45,7 @@ class AuthenticatedSessionController extends Controller
         if (Auth::attempt($credentials)) {
             $role = Auth::user()->role;
 
-            if (! in_array($role, ['admin', 'trainer', 'reception', 'member'], true)) {
+            if (! in_array($role, ['admin', 'accountant', 'trainer', 'reception', 'member'], true)) {
                 Auth::logout();
 
                 return redirect()->back()->withInput()->with('error', 'Invalid Role Type, please contact admin!');

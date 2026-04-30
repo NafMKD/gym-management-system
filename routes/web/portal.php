@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Accountant\HomeController as AccountantHomeController;
 use App\Http\Controllers\Member\GymClassBookingController;
 use App\Http\Controllers\Member\HomeController as MemberHomeController;
 use App\Http\Controllers\Reception\HomeController as ReceptionHomeController;
@@ -18,6 +19,17 @@ Route::group([
     Route::get('/home', [TrainerHomeController::class, 'index'])->name('home');
     Route::get('/profile', [TrainerProfileController::class, 'edit'])->name('profile.edit');
     Route::post('/profile', [TrainerProfileController::class, 'update'])->name('profile.update');
+});
+
+Route::group([
+    'middleware' => [
+        'auth',
+        'user-access:accountant',
+    ],
+    'prefix' => 'accountant',
+    'as' => 'accountant.',
+], function () {
+    Route::get('/home', [AccountantHomeController::class, 'index'])->name('home');
 });
 
 Route::group([

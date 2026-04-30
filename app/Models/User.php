@@ -96,6 +96,22 @@ class User extends Authenticatable
     }
 
     /**
+     * Invoices created by this user.
+     */
+    public function createdInvoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class, 'created_by_user_id');
+    }
+
+    /**
+     * Payments created by this user.
+     */
+    public function createdPayments(): HasMany
+    {
+        return $this->hasMany(Payment::class, 'created_by_user_id');
+    }
+
+    /**
      * Get all Audit Trail for this User
      *
      * @return HasMany

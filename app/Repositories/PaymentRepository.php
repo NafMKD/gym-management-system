@@ -5,6 +5,8 @@ namespace App\Repositories;
 use App\Models\Invoice;
 use App\Models\Payment;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class PaymentRepository extends BaseRepository
@@ -26,6 +28,7 @@ class PaymentRepository extends BaseRepository
             $validatedAttributes = [
                 'invoice_id' => $attributes['invoice_id'] ?? null,
                 'membership_id' => $attributes['membership_id'] ?? null,
+                'created_by_user_id' => $attributes['created_by_user_id'] ?? Auth::id(),
                 'amount' => $attributes['amount'] ?? null,
                 'payment_date' => Carbon::now(),
                 'payment_method' => $attributes['payment_method'] ?? null,
@@ -76,6 +79,7 @@ class PaymentRepository extends BaseRepository
             $payment = Payment::create([
                 'invoice_id' => $invoice->id,
                 'membership_id' => $invoice->membership_id,
+                'created_by_user_id' => $attributes['created_by_user_id'] ?? Auth::id(),
                 'amount' => -$refundAmount,
                 'payment_date' => Carbon::now(),
                 'payment_method' => $attributes['payment_method'],
@@ -161,24 +165,50 @@ class PaymentRepository extends BaseRepository
     }
 
     /**
-     * Get filtered payments query for DataTables.
+     * Get filtered payments query for accountant/admin reporting.
      *
-     * @param array $filters
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @param  array<string, mixed>  $filters
      */
-    public function getFilteredPaymentsQuery(array $filters)
+    public function getFilteredPaymentsQuery(array $filters): Builder
     {
         return Payment::query()
-            ->with(['invoice.customer', 'membership.user'])
-            ->when(isset($filters['start_date']) && isset($filters['end_date']), function ($query) use ($filters) {
-                $query->whereBetween('payment_date', [$filters['start_date'], $filters['end_date']]);
+            ->with(['invoice.customer', 'invoice.createdBy', 'membership.user', 'createdBy'])
+            ->when(! empty($filters['start_date']), function (Builder $query) use ($filters) {
+                $query->where('payment_date', '>=', $this->reportDateStart((string) $filters['start_date']));
             })
-            ->when(isset($filters['payment_method']), function ($query) use ($filters) {
+            ->when(! empty($filters['end_date']), function (Builder $query) use ($filters) {
+                $query->where('payment_date', '<=', $this->reportDateEnd((string) $filters['end_date']));
+            })
+            ->when(! empty($filters['payment_method']), function (Builder $query) use ($filters) {
                 $query->where('payment_method', $filters['payment_method']);
             })
-            ->when(isset($filters['status']), function ($query) use ($filters) {
+            ->when(! empty($filters['payment_bank']), function (Builder $query) use ($filters) {
+                $query->where('payment_bank', $filters['payment_bank']);
+            })
+            ->when(! empty($filters['status']), function (Builder $query) use ($filters) {
                 $query->where('status', $filters['status']);
+            })
+            ->when(! empty($filters['payment_type']), function (Builder $query) use ($filters) {
+                $query->where('payment_type', $filters['payment_type']);
+            })
+            ->when(! empty($filters['created_by_user_id']), function (Builder $query) use ($filters) {
+                $query->where('created_by_user_id', (int) $filters['created_by_user_id']);
+            })
+            ->when(! empty($filters['invoice_source']), function (Builder $query) use ($filters) {
+                $query->whereHas('invoice', function (Builder $invoiceQuery) use ($filters) {
+                    $invoiceQuery->where('invoice_source', $filters['invoice_source']);
+                });
             });
+    }
+
+    private function reportDateStart(string $date): Carbon
+    {
+        return Carbon::parse($date, 'Africa/Addis_Ababa')->startOfDay()->utc();
+    }
+
+    private function reportDateEnd(string $date): Carbon
+    {
+        return Carbon::parse($date, 'Africa/Addis_Ababa')->endOfDay()->utc();
     }
 
 

@@ -15,6 +15,7 @@ class Invoice extends Model
     protected $fillable = [
         'membership_id',
         'user_id',
+        'created_by_user_id',
         'invoice_number',
         'amount',
         'status',
@@ -39,6 +40,14 @@ class Invoice extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * Staff user who created the invoice.
+     */
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by_user_id');
     }
 
     /**

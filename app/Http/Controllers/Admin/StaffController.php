@@ -19,7 +19,7 @@ use Yajra\DataTables\Facades\DataTables;
 class StaffController extends Controller
 {
     /** Roles that appear in staff management (non-member). */
-    public const STAFF_ROLES = ['admin', 'trainer', 'reception'];
+    public const STAFF_ROLES = ['admin', 'accountant', 'trainer', 'reception'];
 
     public function __construct(
         protected UserRepository $userRepository
@@ -32,6 +32,7 @@ class StaffController extends Controller
             $staffCounts = [
                 'all' => (clone $base)->count(),
                 'admin' => User::where('role', 'admin')->count(),
+                'accountant' => User::where('role', 'accountant')->count(),
                 'trainer' => User::where('role', 'trainer')->count(),
                 'reception' => User::where('role', 'reception')->count(),
             ];
@@ -67,7 +68,7 @@ class StaffController extends Controller
             'last_name' => 'required|string|max:255',
             'phone' => ['required', 'string', 'regex:'.PhoneNumber::REGEX_VALIDATION, Rule::unique('users', 'phone')],
             'gender' => 'required|in:Female,Male',
-            'role' => 'required|in:admin,trainer,reception',
+            'role' => 'required|in:admin,accountant,trainer,reception',
         ]);
 
         if ($validator->fails()) {
@@ -127,7 +128,7 @@ class StaffController extends Controller
             'email' => PhoneNumber::optionalEmailRules($user->id),
             'password' => 'sometimes|string|min:8',
             'phone' => ['required', 'string', 'regex:'.PhoneNumber::REGEX_VALIDATION, Rule::unique('users', 'phone')->ignore($user->id)],
-            'role' => 'required|in:admin,trainer,reception',
+            'role' => 'required|in:admin,accountant,trainer,reception',
             'gender' => 'sometimes|in:Female,Male',
         ]);
 

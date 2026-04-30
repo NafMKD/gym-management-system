@@ -44,6 +44,8 @@ class ComprehensiveSystemSeeder extends Seeder
 
     private const RECEPTION_COUNT = 3;
 
+    private const ACCOUNTANT_COUNT = 2;
+
     private const ADMIN_COUNT = 2;
 
     private const PACKAGE_COUNT = 28;
@@ -119,6 +121,7 @@ class ComprehensiveSystemSeeder extends Seeder
             [
                 ['admin@gmail.com', '0911111111'],
                 ['trainer@gmail.com', '0922222222'],
+                ['accountant@gmail.com', '0955555555'],
                 ['reception@gmail.com', '0933333333'],
                 ['member@gmail.com', '0944444444'],
             ]
@@ -130,6 +133,7 @@ class ComprehensiveSystemSeeder extends Seeder
         $fixed = [
             ['Admin', 'User', 'admin@gmail.com', '0911111111', 'admin', 'Male'],
             ['Trainer', 'User', 'trainer@gmail.com', '0922222222', 'trainer', 'Female'],
+            ['Accountant', 'User', 'accountant@gmail.com', '0955555555', 'accountant', 'Female'],
             ['Reception', 'User', 'reception@gmail.com', '0933333333', 'reception', 'Female'],
             ['Member', 'User', 'member@gmail.com', '0944444444', 'member', 'Male'],
         ];
@@ -199,6 +203,23 @@ class ComprehensiveSystemSeeder extends Seeder
                 'password' => $passwordHash,
                 'phone' => $phone,
                 'role' => 'reception',
+                'gender' => fake()->randomElement(['Female', 'Male']),
+                'email_verified_at' => $created,
+                'created_at' => $created,
+                'updated_at' => (clone $created)->addMinutes(random_int(10, 50_000)),
+            ]);
+        }
+
+        for ($a = 0; $a < self::ACCOUNTANT_COUNT; $a++) {
+            $phone = sprintf('09%08d', $n++);
+            $created = $this->randomDateTime();
+            User::query()->create([
+                'first_name' => fake()->firstName(),
+                'last_name' => fake()->lastName(),
+                'email' => fake()->unique()->safeEmail(),
+                'password' => $passwordHash,
+                'phone' => $phone,
+                'role' => 'accountant',
                 'gender' => fake()->randomElement(['Female', 'Male']),
                 'email_verified_at' => $created,
                 'created_at' => $created,

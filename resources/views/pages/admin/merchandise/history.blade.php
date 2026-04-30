@@ -9,28 +9,17 @@
             gap: 1rem;
         }
 
-        .sales-history-toolbar {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: end;
-            justify-content: space-between;
-            gap: 1rem;
-        }
-
-        .sales-history-toolbar .form-inline {
-            flex-wrap: wrap;
-            gap: 0.75rem;
-            align-items: end;
-        }
-
-        .sales-history-toolbar .form-group {
-            margin-bottom: 0;
+        .sales-history-filter-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0.85rem;
         }
 
         .sales-history-toolbar-actions {
             display: flex;
             flex-wrap: wrap;
             gap: 0.5rem;
+            margin-top: 1rem;
         }
 
         .sales-history-summary {
@@ -84,7 +73,8 @@
             font-size: 1.05rem;
         }
 
-        .sales-history-day-meta {
+        .sales-history-day-meta,
+        .sales-history-report-meta {
             display: flex;
             flex-wrap: wrap;
             gap: 0.75rem;
@@ -99,7 +89,7 @@
         .sales-history-table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 1120px;
+            min-width: 1260px;
         }
 
         .sales-history-table caption {
@@ -168,6 +158,12 @@
             font-size: 0.82rem;
         }
 
+        @media (max-width: 1199.98px) {
+            .sales-history-filter-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
         @media (max-width: 991.98px) {
             .sales-history-summary {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -175,6 +171,7 @@
         }
 
         @media (max-width: 575.98px) {
+            .sales-history-filter-grid,
             .sales-history-summary {
                 grid-template-columns: 1fr;
             }
@@ -206,10 +203,6 @@
                 margin: 0 !important;
                 padding: 0 !important;
                 background: #ffffff !important;
-            }
-
-            .sales-history-shell > :not(.sales-history-day-card) {
-                display: none !important;
             }
 
             .sales-history-day-card {
@@ -262,13 +255,15 @@
         <div class="row mb-1 mb-sm-2 align-items-center">
             <div class="col">
                 <h1 class="m-0 h4">{{ __('Sales history') }}</h1>
-                <p class="text-muted small mb-0 d-none d-sm-block">{{ __('Daily merchandise sales report for accountant handoff.') }}</p>
+                <p class="text-muted small mb-0 d-none d-sm-block">{{ __('Merchandise sales report with accountant-ready filters, export, and print actions.') }}</p>
             </div>
-            <div class="col-auto no-print">
-                <a href="{{ route('admin.merchandise.checkout') }}" class="btn btn-outline-secondary btn-sm">
-                    <i class="fas fa-cash-register"></i> {{ __('Back to POS') }}
-                </a>
-            </div>
+            @if(auth()->user()->role !== 'accountant')
+                <div class="col-auto no-print">
+                    <a href="{{ route('admin.merchandise.checkout') }}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-cash-register"></i> {{ __('Back to POS') }}
+                    </a>
+                </div>
+            @endif
         </div>
     </x-content>
 @endsection
@@ -278,28 +273,99 @@
         <div class="sales-history-shell">
             <div class="card card-default shadow-sm no-print">
                 <div class="card-body">
-                    <div class="sales-history-toolbar">
-                        <form method="GET" action="{{ route('admin.merchandise.history') }}" class="form-inline">
-                            <div class="form-group">
-                                <label for="date" class="small font-weight-bold mb-1 d-block">{{ __('Report date') }}</label>
-                                <input type="date" name="date" id="date" value="{{ $selectedDate }}" class="form-control form-control-sm">
+                    <form method="GET" action="{{ route('admin.merchandise.history') }}" id="salesHistoryForm">
+                        <div class="sales-history-filter-grid">
+                            <div class="form-group mb-0">
+                                <label for="start_date" class="small font-weight-bold">{{ __('From') }}</label>
+                                <input type="date" name="start_date" id="start_date" value="{{ $filters['start_date'] ?? '' }}" class="form-control form-control-sm">
                             </div>
-                            <div class="sales-history-toolbar-actions">
-                                <button type="submit" class="btn btn-primary btn-sm">
-                                    <i class="fas fa-filter"></i> {{ __('Apply') }}
-                                </button>
-                                <a href="{{ route('admin.merchandise.history') }}" class="btn btn-outline-secondary btn-sm">
-                                    {{ __('Today') }}
-                                </a>
+                            <div class="form-group mb-0">
+                                <label for="end_date" class="small font-weight-bold">{{ __('To') }}</label>
+                                <input type="date" name="end_date" id="end_date" value="{{ $filters['end_date'] ?? '' }}" class="form-control form-control-sm">
                             </div>
-                        </form>
+                            <div class="form-group mb-0">
+                                <label for="product_id" class="small font-weight-bold">{{ __('Product') }}</label>
+                                <select name="product_id" id="product_id" class="form-control form-control-sm">
+                                    <option value="">{{ __('All') }}</option>
+                                    @foreach($products as $product)
+                                        <option value="{{ $product->id }}" {{ (string) ($filters['product_id'] ?? '') === (string) $product->id ? 'selected' : '' }}>
+                                            {{ $product->name }}{{ $product->sku ? ' ('.$product->sku.')' : '' }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="form-group mb-0">
+                                <label for="salesman_id" class="small font-weight-bold">{{ __('Salesman') }}</label>
+                                <select name="salesman_id" id="salesman_id" class="form-control form-control-sm">
+                                    <option value="">{{ __('All') }}</option>
+                                    @foreach($salesmen as $salesman)
+                                        <option value="{{ $salesman->id }}" {{ (string) ($filters['salesman_id'] ?? '') === (string) $salesman->id ? 'selected' : '' }}>
+                                            {{ $salesman->getName() }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="form-group mb-0">
+                                <label for="invoice_number" class="small font-weight-bold">{{ __('Invoice Number') }}</label>
+                                <input type="text" name="invoice_number" id="invoice_number" value="{{ $filters['invoice_number'] ?? '' }}" class="form-control form-control-sm" placeholder="{{ __('Search invoice') }}">
+                            </div>
+                            <div class="form-group mb-0">
+                                <label for="payment_method" class="small font-weight-bold">{{ __('Payment Method') }}</label>
+                                <select name="payment_method" id="payment_method" class="form-control form-control-sm">
+                                    <option value="">{{ __('All') }}</option>
+                                    <option value="cash" {{ ($filters['payment_method'] ?? '') === 'cash' ? 'selected' : '' }}>{{ __('Cash') }}</option>
+                                    <option value="bank" {{ ($filters['payment_method'] ?? '') === 'bank' ? 'selected' : '' }}>{{ __('Bank') }}</option>
+                                </select>
+                            </div>
+                            <div class="form-group mb-0">
+                                <label for="payment_bank" class="small font-weight-bold">{{ __('Payment Bank') }}</label>
+                                <select name="payment_bank" id="payment_bank" class="form-control form-control-sm">
+                                    <option value="">{{ __('All') }}</option>
+                                    <option value="telebirr" {{ ($filters['payment_bank'] ?? '') === 'telebirr' ? 'selected' : '' }}>Telebirr</option>
+                                    <option value="cbe" {{ ($filters['payment_bank'] ?? '') === 'cbe' ? 'selected' : '' }}>CBE</option>
+                                    <option value="boa" {{ ($filters['payment_bank'] ?? '') === 'boa' ? 'selected' : '' }}>BOA</option>
+                                </select>
+                            </div>
+                            <div class="form-group mb-0">
+                                <label for="customer_id" class="small font-weight-bold">{{ __('Customer') }}</label>
+                                <select name="customer_id" id="customer_id" class="form-control form-control-sm">
+                                    <option value="">{{ __('All') }}</option>
+                                    @foreach($customers as $customer)
+                                        <option value="{{ $customer->id }}" {{ (string) ($filters['customer_id'] ?? '') === (string) $customer->id ? 'selected' : '' }}>
+                                            {{ $customer->getName() }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mt-3">
+                            <label class="small font-weight-bold d-block">{{ __('Export Columns') }}</label>
+                            <div class="d-flex flex-wrap" style="gap: 0.5rem 0.75rem;">
+                                @foreach($exportColumns as $key => $column)
+                                    <div class="form-check mr-2">
+                                        <input class="form-check-input history-export-column" type="checkbox" value="{{ $key }}" id="history-column-{{ $key }}" {{ in_array($key, $defaultExportColumns, true) ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="history-column-{{ $key }}">{{ __($column['label']) }}</label>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
 
                         <div class="sales-history-toolbar-actions">
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="fas fa-filter"></i> {{ __('Apply') }}
+                            </button>
+                            <a href="{{ route('admin.merchandise.history') }}" class="btn btn-outline-secondary btn-sm">
+                                {{ __('Today') }}
+                            </a>
+                            <button type="button" class="btn btn-outline-success btn-sm" id="exportSalesHistory">
+                                <i class="fas fa-file-csv"></i> {{ __('Export CSV') }}
+                            </button>
                             <button type="button" class="btn btn-outline-dark btn-sm" id="printSalesHistory">
                                 <i class="fas fa-print"></i> {{ __('Print report') }}
                             </button>
                         </div>
-                    </div>
+                    </form>
                 </div>
             </div>
 
@@ -322,13 +388,14 @@
                 </div>
             </div>
 
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 no-print">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
                 <div>
                     <h2 class="h5 mb-1">{{ __('Merchandise Sales Report') }}</h2>
-                    <p class="text-muted mb-0">{{ __('Grouped by sales date for cashier-to-accountant handoff.') }}</p>
-                </div>
-                <div class="sales-history-report-stamp">
-                    {{ __('Selected date') }}: <strong>{{ \Carbon\Carbon::createFromFormat('Y-m-d', $selectedDate, 'Africa/Addis_Ababa')->format('d/m/Y') }}</strong>
+                    <p class="text-muted mb-1">{{ __('Grouped by sales date with invoice, product, salesman, and payment context.') }}</p>
+                    <div class="sales-history-report-meta">
+                        <span>{{ __('Generated at') }}: <strong>{{ $reportGeneratedAt->format('d/m/Y H:i') }}</strong></span>
+                        <span>{{ __('Filters') }}: <strong>{{ $filterSummary }}</strong></span>
+                    </div>
                 </div>
             </div>
 
@@ -358,6 +425,7 @@
                                     <th>{{ __('Invoice') }}</th>
                                     <th>{{ __('Time') }}</th>
                                     <th>{{ __('Customer') }}</th>
+                                    <th>{{ __('Salesman') }}</th>
                                     <th>{{ __('Payment') }}</th>
                                     <th>{{ __('Product') }}</th>
                                     <th>{{ __('SKU') }}</th>
@@ -387,6 +455,9 @@
                                                     @endif
                                                 </td>
                                                 <td rowspan="{{ $invoice['row_count'] }}" class="sales-history-invoice-cell">
+                                                    <strong>{{ $invoice['salesman_name'] }}</strong>
+                                                </td>
+                                                <td rowspan="{{ $invoice['row_count'] }}" class="sales-history-invoice-cell">
                                                     <strong>{{ $invoice['payment_label'] }}</strong>
                                                     @if($invoice['payment_detail'])
                                                         <span class="sales-history-subtle">{{ $invoice['payment_detail'] }}</span>
@@ -397,7 +468,7 @@
                                                 <span class="sales-history-product">{{ $line['product_name'] }}</span>
                                             </td>
                                             <td class="sales-history-line-cell">
-                                                {{ $line['sku'] ?: '—' }}
+                                                {{ $line['sku'] ?: '-' }}
                                             </td>
                                             <td class="sales-history-line-cell">
                                                 {{ number_format($line['quantity']) }}
@@ -411,6 +482,7 @@
                                             @if($lineIndex === 0)
                                                 <td rowspan="{{ $invoice['row_count'] }}" class="sales-history-money sales-history-invoice-cell">
                                                     <strong>{{ __('Birr') }} {{ number_format($invoice['invoice_total'], 2) }}</strong>
+                                                    <span class="sales-history-subtle">{{ __('Reported') }}: {{ __('Birr') }} {{ number_format($invoice['reported_total'], 2) }}</span>
                                                     <span class="sales-history-subtle">{{ __('Qty') }}: {{ number_format($invoice['quantity_total']) }}</span>
                                                 </td>
                                             @endif
@@ -420,21 +492,21 @@
                             @endforeach
                             <tfoot>
                                 <tr>
-                                    <td colspan="6">{{ __('Daily total') }}</td>
+                                    <td colspan="7">{{ __('Daily total') }}</td>
                                     <td>{{ number_format($group['summary']['item_quantity']) }}</td>
                                     <td></td>
-                                    <td></td>
                                     <td class="text-right">{{ __('Birr') }} {{ number_format($group['summary']['gross_total'], 2) }}</td>
+                                    <td></td>
                                 </tr>
                             </tfoot>
                         </table>
                     </div>
                 </section>
             @empty
-                <div class="sales-history-day-card no-print">
+                <div class="sales-history-day-card">
                     <div class="sales-history-empty">
-                        <h3 class="h5">{{ __('No merchandise sales found for this date.') }}</h3>
-                        <p class="mb-0">{{ __('Choose another date or return to POS to record a sale.') }}</p>
+                        <h3 class="h5">{{ __('No merchandise sales found for the selected filters.') }}</h3>
+                        <p class="mb-0">{{ __('Try another date range, product, or salesman.') }}</p>
                     </div>
                 </div>
             @endforelse
@@ -445,12 +517,59 @@
 @section('script')
 <script>
     (function () {
-        var printButton = document.getElementById('printSalesHistory');
-        if (printButton) {
-            printButton.addEventListener('click', function () {
-                window.print();
+        function selectedHistoryColumns() {
+            return $('.history-export-column:checked').map(function () {
+                return $(this).val();
+            }).get();
+        }
+
+        function historyParams(includeColumns) {
+            let params = $('#salesHistoryForm').serializeArray();
+            let data = new URLSearchParams();
+
+            params.forEach(function (entry) {
+                data.append(entry.name, entry.value);
+            });
+
+            if (includeColumns) {
+                selectedHistoryColumns().forEach(function (column) {
+                    data.append('columns[]', column);
+                });
+            }
+
+            return data.toString();
+        }
+
+        function toggleHistoryBank() {
+            let bankMethod = $('#payment_method').val() === 'bank';
+            $('#payment_bank').prop('disabled', !bankMethod && $('#payment_bank').val() === '');
+            if (!bankMethod && $('#payment_bank').val() === '') {
+                $('#payment_bank').prop('disabled', true);
+            } else {
+                $('#payment_bank').prop('disabled', false);
+            }
+        }
+
+        $('#payment_method').on('change', toggleHistoryBank);
+        toggleHistoryBank();
+
+        let exportButton = document.getElementById('exportSalesHistory');
+        if (exportButton) {
+            exportButton.addEventListener('click', function () {
+                window.location = "{{ route('admin.merchandise.history.export.csv') }}?" + historyParams(true);
             });
         }
+
+        let printButton = document.getElementById('printSalesHistory');
+        if (printButton) {
+            printButton.addEventListener('click', function () {
+                window.open("{{ route('admin.merchandise.history.print') }}?" + historyParams(false), '_blank');
+            });
+        }
+
+        @if(!empty($autoPrint))
+            window.print();
+        @endif
     })();
 </script>
 @endsection

@@ -3,6 +3,8 @@
 namespace App\Repositories;
 
 use App\Models\User;
+use App\Support\DataTables\UserNameSearch;
+use Illuminate\Database\Eloquent\Builder;
 use App\Support\PhoneNumber;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
@@ -114,5 +116,33 @@ class UserRepository extends BaseRepository {
         } catch (\Exception $e) {
             throw $e;
         }
+    }
+
+    /**
+     * Filtered member-only query for report/list screens.
+     *
+     * @param  array{created_from?:string|null,created_to?:string|null,search?:string|null}  $filters
+     */
+    public function getFilteredMembersQuery(array $filters): Builder
+    {
+        $search = trim((string) ($filters['search'] ?? ''));
+
+        return User::query()
+            ->where('role', 'member')
+            ->when(! empty($filters['created_from']), function (Builder $query) use ($filters) {
+                $query->whereDate('created_at', '>=', $filters['created_from']);
+            })
+            ->when(! empty($filters['created_to']), function (Builder $query) use ($filters) {
+                $query->whereDate('created_at', '<=', $filters['created_to']);
+            })
+            ->when($search !== '', function (Builder $query) use ($search) {
+                $like = '%'.UserNameSearch::escapeLike($search).'%';
+
+                $query->where(function (Builder $q) use ($like, $search) {
+                    UserNameSearch::applyToUserQuery($q, $search);
+                    $q->orWhere('email', 'like', $like)
+                        ->orWhere('phone', 'like', $like);
+                });
+            });
     }
 }

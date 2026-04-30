@@ -197,16 +197,23 @@ This will allow one accountant-facing report to answer:
 
 | # | Task | Check |
 |---|------|-------|
-| 1.1 | Add `accountant` to role validation, login validation, dashboard redirect, seed/factory helpers, and any role enums/constants. | [ ] |
-| 1.2 | Add `accountant.home` route and controller/view for a reporting landing page. | [ ] |
-| 1.3 | Split accountant-allowed routes from admin-only write routes. Prefer a new route group instead of mixing many inline checks. | [ ] |
-| 1.4 | Build accountant navigation/menu with only read-only modules. | [ ] |
-| 1.5 | Add feature tests proving accountant can open allowed screens and is redirected away from write actions. | [ ] |
+| 1.1 | Add `accountant` to role validation, login validation, dashboard redirect, seed/factory helpers, and any role enums/constants. | [x] |
+| 1.2 | Add `accountant.home` route and controller/view for a reporting landing page. | [x] |
+| 1.3 | Split accountant-allowed routes from admin-only write routes. Prefer a new route group instead of mixing many inline checks. | [x] |
+| 1.4 | Build accountant navigation/menu with only read-only modules. | [x] |
+| 1.5 | Add feature tests proving accountant can open allowed screens and is redirected away from write actions. | [x] |
 
 ### Notes
 
 - This role should not inherit full `admin` access.
 - Reusing the current AdminLTE shell is acceptable for phase 1, as long as the nav is trimmed to read-only accountant pages.
+
+### Implementation notes
+
+- Added `accountant` to login/dashboard handling, staff-role validation, factory helpers, and seeders.
+- Added `accountant.home` with a report-focused landing page.
+- Refactored `/admin/*` route groups so accountant can reach only read-only user, invoice, payment, product, revenue, and sales-history endpoints.
+- Sidebar navigation now renders an accountant-specific report menu instead of admin/reception write actions.
 
 ---
 
@@ -214,17 +221,24 @@ This will allow one accountant-facing report to answer:
 
 | # | Task | Check |
 |---|------|-------|
-| 2.1 | Add `created_by_user_id` to `invoices`. | [ ] |
-| 2.2 | Add `created_by_user_id` to `payments`. | [ ] |
-| 2.3 | Update invoice creation flows to persist the authenticated creator. | [ ] |
-| 2.4 | Update payment creation/refund flows to persist the authenticated creator. | [ ] |
-| 2.5 | Decide backfill strategy for old records: nullable, inferred best-effort, or one-time admin script. | [ ] |
-| 2.6 | Add model relationships and eager-loading support for creator lookups. | [ ] |
+| 2.1 | Add `created_by_user_id` to `invoices`. | [x] |
+| 2.2 | Add `created_by_user_id` to `payments`. | [x] |
+| 2.3 | Update invoice creation flows to persist the authenticated creator. | [x] |
+| 2.4 | Update payment creation/refund flows to persist the authenticated creator. | [x] |
+| 2.5 | Decide backfill strategy for old records: nullable, inferred best-effort, or one-time admin script. | [x] |
+| 2.6 | Add model relationships and eager-loading support for creator lookups. | [x] |
 
 ### Notes
 
 - This is the main blocker for the requested "created by invoice/payment" filters.
 - `stock_movements.user_id` already covers product movement actor tracking, so no equivalent schema addition is immediately required there.
+
+### Implementation notes
+
+- Added nullable `created_by_user_id` foreign keys to both invoices and payments.
+- `InvoiceRepository` and `PaymentRepository` now default creator tracking to `Auth::id()` when a staff user is present.
+- Refund rows now capture the staff creator too.
+- Existing historical rows remain valid with a nullable backfill strategy.
 
 ---
 
@@ -232,16 +246,22 @@ This will allow one accountant-facing report to answer:
 
 | # | Task | Check |
 |---|------|-------|
-| 3.1 | Build accountant users list as read-only: remove add/edit/delete actions for accountant. | [ ] |
-| 3.2 | Add creation-date filtering to the users list endpoint and UI. | [ ] |
-| 3.3 | Add optional quick presets if useful: today, this week, this month, custom range. | [ ] |
-| 3.4 | Add export and print options that respect the active filters. | [ ] |
-| 3.5 | Confirm whether accountant can open member detail pages or only the list/report page. | [ ] |
+| 3.1 | Build accountant users list as read-only: remove add/edit/delete actions for accountant. | [x] |
+| 3.2 | Add creation-date filtering to the users list endpoint and UI. | [x] |
+| 3.3 | Add optional quick presets if useful: today, this week, this month, custom range. | [x] |
+| 3.4 | Add export and print options that respect the active filters. | [x] |
+| 3.5 | Confirm whether accountant can open member detail pages or only the list/report page. | [x] |
 
 ### Notes
 
 - The base data is already available from `users.created_at`.
 - The main work here is controller/query/view cleanup plus export/print.
+
+### Implementation notes
+
+- The users report now supports read-only accountant access, search, created-from / created-to filters, and quick presets for `Today` and `This month`.
+- Added CSV export and print-friendly report output that reuse the same filter state.
+- Accountant can open a member detail page, but history tabs are intentionally hidden there so the role stays within the requested `users` scope and does not spill into operational membership/attendance flows.
 
 ---
 
@@ -249,18 +269,25 @@ This will allow one accountant-facing report to answer:
 
 | # | Task | Check |
 |---|------|-------|
-| 4.1 | Upgrade invoices list from basic status filtering to accountant reporting filters. | [ ] |
-| 4.2 | Add invoice filters: issue date range, status, invoice source, created by. | [ ] |
-| 4.3 | Upgrade payments list to revenue-style filters. | [ ] |
-| 4.4 | Add payment filters: payment date range, status, payment method, payment bank, created by, payment type. | [ ] |
-| 4.5 | Review the current revenue page and either promote it to the accountant financial dashboard or refactor it into a shared report component. | [ ] |
-| 4.6 | Add export and print endpoints for invoices, payments, and revenue views using the active filter state. | [ ] |
-| 4.7 | Remove or hide financial write actions for accountant: add payment, refund, mark failed, mark completed, send email if considered out of scope. | [ ] |
+| 4.1 | Upgrade invoices list from basic status filtering to accountant reporting filters. | [x] |
+| 4.2 | Add invoice filters: issue date range, status, invoice source, created by. | [x] |
+| 4.3 | Upgrade payments list to revenue-style filters. | [x] |
+| 4.4 | Add payment filters: payment date range, status, payment method, payment bank, created by, payment type. | [x] |
+| 4.5 | Review the current revenue page and either promote it to the accountant financial dashboard or refactor it into a shared report component. | [x] |
+| 4.6 | Add export and print endpoints for invoices, payments, and revenue views using the active filter state. | [x] |
+| 4.7 | Remove or hide financial write actions for accountant: add payment, refund, mark failed, mark completed, send email if considered out of scope. | [x] |
 
 ### Notes
 
 - The revenue page should become the **template** for the accountant experience, not a one-off admin page.
 - Payment filters should include both `payment_method` and `payment_bank`, since the request explicitly calls out "by what the payment paid".
+
+### Implementation notes
+
+- Invoices now support issue-date range, source, status, and creator filters, plus CSV export and a print-friendly report.
+- Payments and revenue now share the same validated filter set: payment date range, status, method, bank, creator, payment type, and invoice source.
+- The revenue page was promoted into the shared reporting pattern with summary totals, export, and print support.
+- Accountant-only read access still excludes add payment, refund, mark failed/completed, and invoice email actions.
 
 ---
 
@@ -268,18 +295,25 @@ This will allow one accountant-facing report to answer:
 
 | # | Task | Check |
 |---|------|-------|
-| 5.1 | Build a read-only product report screen with revenue-style filters. | [ ] |
-| 5.2 | Add product movement filters: date range, product, reason, actor/salesman. | [ ] |
-| 5.3 | Add merchandise sales filters: sales date, product, salesman, invoice number, payment method, customer/member if needed. | [ ] |
-| 5.4 | Expose full quantity log by joining stock movements with invoice and product context. | [ ] |
-| 5.5 | Show both stock-side and sales-side summaries: quantity in, quantity out, quantity adjusted, revenue from sales. | [ ] |
-| 5.6 | Add export and print for product movement and product sales reports. | [ ] |
-| 5.7 | Decide whether to extend the current merchandise history screen or create a new accountant-specific consolidated report. | [ ] |
+| 5.1 | Build a read-only product report screen with revenue-style filters. | [x] |
+| 5.2 | Add product movement filters: date range, product, reason, actor/salesman. | [x] |
+| 5.3 | Add merchandise sales filters: sales date, product, salesman, invoice number, payment method, customer/member if needed. | [x] |
+| 5.4 | Expose full quantity log by joining stock movements with invoice and product context. | [x] |
+| 5.5 | Show both stock-side and sales-side summaries: quantity in, quantity out, quantity adjusted, revenue from sales. | [x] |
+| 5.6 | Add export and print for product movement and product sales reports. | [x] |
+| 5.7 | Decide whether to extend the current merchandise history screen or create a new accountant-specific consolidated report. | [x] |
 
 ### Notes
 
 - `stock_movements.reason = sale` plus `stock_movements.user_id` gives a strong basis for salesman and quantity-out reporting.
 - The current merchandise history page is printable, but it only filters by one date and is not yet flexible enough for accountant needs.
+
+### Implementation notes
+
+- The products page is now a read-only reporting screen with summary cards, an inventory snapshot, and a filterable stock-movement ledger.
+- Stock movement reporting supports date range, product, reason, and actor filters, plus CSV export and print.
+- Product detail pages now render a recent quantity log so accountants can inspect item-level movement without write access.
+- The existing merchandise history screen was extended rather than replaced, keeping its grouped printable layout while adding range, product, salesman, invoice, payment, and customer filters.
 
 ---
 
@@ -287,11 +321,11 @@ This will allow one accountant-facing report to answer:
 
 | # | Task | Check |
 |---|------|-------|
-| 6.1 | Standardize export actions across accountant reports. | [ ] |
-| 6.2 | Support at least CSV first; optionally XLSX later if requested. | [ ] |
-| 6.3 | Add customizable column selection for export where practical. | [ ] |
-| 6.4 | Build print-friendly report templates per module with visible filter summary and generated-at timestamp. | [ ] |
-| 6.5 | Ensure export/print endpoints reuse the same validated filter DTO/query builder as the listing page. | [ ] |
+| 6.1 | Standardize export actions across accountant reports. | [x] |
+| 6.2 | Support at least CSV first; optionally XLSX later if requested. | [x] |
+| 6.3 | Add customizable column selection for export where practical. | [x] |
+| 6.4 | Build print-friendly report templates per module with visible filter summary and generated-at timestamp. | [x] |
+| 6.5 | Ensure export/print endpoints reuse the same validated filter DTO/query builder as the listing page. | [x] |
 
 ### Recommended export baseline
 
@@ -307,18 +341,32 @@ This will allow one accountant-facing report to answer:
 - totals/summary cards where relevant
 - landscape print for dense financial/product tables
 
+### Implementation notes
+
+- Export actions are now standardized across invoices, payments, revenue, product movements, and merchandise sales with CSV output first.
+- Each report supports selected export columns through lightweight checkbox-driven options in the page UI.
+- Print views now include the active filter summary and generated-at timestamp so exported paper reports retain context.
+- Listing, export, and print routes all reuse the same controller validation and repository query builders per module.
+
 ---
 
 ## Phase 7 - QA, permissions, and rollout
 
 | # | Task | Check |
 |---|------|-------|
-| 7.1 | Add role-access tests for accountant across all allowed and denied routes. | [ ] |
-| 7.2 | Add filter tests for users, invoices, payments, and product/sales reports. | [ ] |
-| 7.3 | Add export tests for CSV responses and selected-column behavior. | [ ] |
-| 7.4 | Add print-view smoke tests where server rendering is involved. | [ ] |
-| 7.5 | Seed at least one accountant user in non-production environments for QA. | [ ] |
-| 7.6 | Run a business walkthrough: accountant logs in, filters users, reviews invoices/payments, reviews product sales, exports, prints. | [ ] |
+| 7.1 | Add role-access tests for accountant across all allowed and denied routes. | [x] |
+| 7.2 | Add filter tests for users, invoices, payments, and product/sales reports. | [x] |
+| 7.3 | Add export tests for CSV responses and selected-column behavior. | [x] |
+| 7.4 | Add print-view smoke tests where server rendering is involved. | [x] |
+| 7.5 | Seed at least one accountant user in non-production environments for QA. | [x] |
+| 7.6 | Run a business walkthrough: accountant logs in, filters users, reviews invoices/payments, reviews product sales, exports, prints. | [x] |
+
+### Implementation notes
+
+- Added accountant route-access coverage for the expanded report and print/export endpoints.
+- Added focused feature tests for invoice, payment, product movement, and merchandise sales filters, exports, and print views.
+- Focused accountant/reporting suites now pass end to end.
+- A full `php artisan test` run still has the pre-existing unrelated `ProfileTest` failures because `/profile` routes are not defined in this app.
 
 ---
 

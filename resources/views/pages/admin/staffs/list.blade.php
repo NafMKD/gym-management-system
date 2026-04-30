@@ -56,6 +56,16 @@
             </div>
             <div class="col-sm-6 col-lg-3">
                 <div class="info-box mb-3 staff-filter-card shadow-sm"
+                     data-role="accountant" role="button" tabindex="0" title="{{ __('Filter by accountant') }}" style="cursor: pointer;">
+                    <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-calculator"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">{{ __('Accountant') }}</span>
+                        <span class="info-box-number">{{ number_format($staffCounts['accountant'] ?? 0) }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="info-box mb-3 staff-filter-card shadow-sm"
                      data-role="reception" role="button" tabindex="0" title="{{ __('Filter by reception') }}" style="cursor: pointer;">
                     <span class="info-box-icon bg-info elevation-1"><i class="fas fa-concierge-bell"></i></span>
                     <div class="info-box-content">
