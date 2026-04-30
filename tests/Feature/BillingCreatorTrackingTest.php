@@ -5,7 +5,7 @@ use App\Models\Membership;
 use App\Models\Package;
 use App\Models\User;
 
-test('membership invoice stores creator id when created by admin', function () {
+test('membership and invoice store creator id when created by admin', function () {
     $admin = User::factory()->admin()->create();
     $member = User::factory()->create(['role' => 'member']);
     $package = Package::create([
@@ -24,10 +24,49 @@ test('membership invoice stores creator id when created by admin', function () {
 
     $response->assertRedirect();
 
+    $membership = Membership::query()->latest('id')->first();
     $invoice = Invoice::query()->latest('id')->first();
 
+    expect($membership)->not->toBeNull();
     expect($invoice)->not->toBeNull();
+    expect($membership?->created_by_user_id)->toBe($admin->id);
     expect($invoice?->created_by_user_id)->toBe($admin->id);
+
+    $this->actingAs($admin)
+        ->get(route('admin.memberships.view', $membership))
+        ->assertOk()
+        ->assertSee(__('Registered by'))
+        ->assertSee($admin->getName());
+});
+
+test('member registration stores creator id when created by reception', function () {
+    $reception = User::factory()->create([
+        'role' => 'reception',
+        'first_name' => 'Desk',
+        'last_name' => 'Agent',
+    ]);
+
+    $response = $this->actingAs($reception)->post(route('admin.users.store'), [
+        'first_name' => 'New',
+        'last_name' => 'Member',
+        'email' => 'new-member@test.com',
+        'phone' => '0918887766',
+        'gender' => 'Male',
+        'role' => 'member',
+    ]);
+
+    $response->assertRedirect(route('admin.memberships.add'));
+
+    $registeredUser = User::query()->where('phone', '0918887766')->first();
+
+    expect($registeredUser)->not->toBeNull();
+    expect($registeredUser?->created_by_user_id)->toBe($reception->id);
+
+    $this->actingAs($reception)
+        ->get(route('admin.users.view', $registeredUser))
+        ->assertOk()
+        ->assertSee(__('Registered by'))
+        ->assertSee($reception->getName());
 });
 
 test('payment and refund store creator id when recorded by admin', function () {

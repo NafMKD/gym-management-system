@@ -66,6 +66,10 @@
                         <dd class="col-sm-9">
                             {{ $membership->created_detail }}
                         </dd>
+                        <dt class="col-sm-3">{{ __("Registered by") }}:</dt>
+                        <dd class="col-sm-9">
+                            {{ $membership->createdBy?->getName() ?? __('Legacy / Unknown') }}
+                        </dd>
                         <dt class="col-sm-3">{{ __("Last Update") }}:</dt>
                         <dd class="col-sm-9">
                             {{ $membership->updated_detail }}

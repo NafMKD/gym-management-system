@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -33,6 +34,7 @@ class User extends Authenticatable
         'password',
         'phone',
         'role',
+        'created_by_user_id',
         'gender'
     ];
 
@@ -80,6 +82,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Staff user who created this user record.
+     */
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by_user_id');
+    }
+
+    /**
      * Trainer-only extended profile (qualifications, default session commission, etc.).
      */
     public function trainerProfile(): HasOne
@@ -109,6 +119,22 @@ class User extends Authenticatable
     public function createdPayments(): HasMany
     {
         return $this->hasMany(Payment::class, 'created_by_user_id');
+    }
+
+    /**
+     * Memberships created by this user.
+     */
+    public function createdMemberships(): HasMany
+    {
+        return $this->hasMany(Membership::class, 'created_by_user_id');
+    }
+
+    /**
+     * User records created by this user.
+     */
+    public function registeredUsers(): HasMany
+    {
+        return $this->hasMany(User::class, 'created_by_user_id');
     }
 
     /**

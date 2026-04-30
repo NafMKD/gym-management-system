@@ -255,7 +255,11 @@
         <div class="row mb-1 mb-sm-2 align-items-center">
             <div class="col">
                 <h1 class="m-0 h4">{{ __('Sales history') }}</h1>
-                <p class="text-muted small mb-0 d-none d-sm-block">{{ __('Merchandise sales report with accountant-ready filters, export, and print actions.') }}</p>
+                <p class="text-muted small mb-0 d-none d-sm-block">
+                    {{ $salesmanFilterLocked
+                        ? __('Reception can only review their own merchandise sales history.')
+                        : __('Merchandise sales report with accountant-ready filters, export, and print actions.') }}
+                </p>
             </div>
             @if(auth()->user()->role !== 'accountant')
                 <div class="col-auto no-print">
@@ -296,14 +300,19 @@
                             </div>
                             <div class="form-group mb-0">
                                 <label for="salesman_id" class="small font-weight-bold">{{ __('Salesman') }}</label>
-                                <select name="salesman_id" id="salesman_id" class="form-control form-control-sm">
-                                    <option value="">{{ __('All') }}</option>
-                                    @foreach($salesmen as $salesman)
-                                        <option value="{{ $salesman->id }}" {{ (string) ($filters['salesman_id'] ?? '') === (string) $salesman->id ? 'selected' : '' }}>
-                                            {{ $salesman->getName() }}
-                                        </option>
-                                    @endforeach
-                                </select>
+                                @if($salesmanFilterLocked)
+                                    <input type="text" class="form-control form-control-sm" value="{{ auth()->user()->getName() }}" disabled>
+                                    <input type="hidden" name="salesman_id" id="salesman_id" value="{{ auth()->id() }}">
+                                @else
+                                    <select name="salesman_id" id="salesman_id" class="form-control form-control-sm">
+                                        <option value="">{{ __('All') }}</option>
+                                        @foreach($salesmen as $salesman)
+                                            <option value="{{ $salesman->id }}" {{ (string) ($filters['salesman_id'] ?? '') === (string) $salesman->id ? 'selected' : '' }}>
+                                                {{ $salesman->getName() }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                @endif
                             </div>
                             <div class="form-group mb-0">
                                 <label for="invoice_number" class="small font-weight-bold">{{ __('Invoice Number') }}</label>
@@ -506,7 +515,11 @@
                 <div class="sales-history-day-card">
                     <div class="sales-history-empty">
                         <h3 class="h5">{{ __('No merchandise sales found for the selected filters.') }}</h3>
-                        <p class="mb-0">{{ __('Try another date range, product, or salesman.') }}</p>
+                        <p class="mb-0">
+                            {{ $salesmanFilterLocked
+                                ? __('Try another date range, product, or payment filter.')
+                                : __('Try another date range, product, or salesman.') }}
+                        </p>
                     </div>
                 </div>
             @endforelse

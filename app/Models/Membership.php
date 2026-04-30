@@ -19,6 +19,7 @@ class Membership extends Model
      */
     protected $fillable = [
         'user_id',
+        'created_by_user_id',
         'start_date',
         'end_date',
         'package_id',
@@ -45,6 +46,14 @@ class Membership extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * Staff user who created this membership.
+     */
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by_user_id');
     }
 
     /**

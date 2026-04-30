@@ -95,6 +95,8 @@
                         <dl class="row">
                             <dt class="col-sm-3">{{ __("Register Date") }}:</dt>
                             <dd class="col-sm-9">{{ $user->created_detail }}</dd>
+                            <dt class="col-sm-3">{{ __("Registered by") }}:</dt>
+                            <dd class="col-sm-9">{{ $user->createdBy?->getName() ?? __('Self-service / Legacy') }}</dd>
                             <dt class="col-sm-3">{{ __("Last Update") }}:</dt>
                             <dd class="col-sm-9">{{ $user->updated_detail }}</dd>
                         </dl>
@@ -134,6 +136,7 @@
                                             <th>{{ __("End Date") }}</th>
                                             <th>{{ __("Remaining Days") }}</th>
                                             <th>{{ __("Price") }}</th>
+                                            <th>{{ __("Registered By") }}</th>
                                             <th>{{ __("Status") }}</th>
                                             <th>{{ __("Registered") }}</th>
                                             <th>{{ __("Updated") }}</th>
@@ -213,6 +216,7 @@
                             { data: 'end_date', name: 'end_date' },
                             { data: 'remaining_days', name: 'remaining_days' },
                             { data: 'price', name: 'price' },
+                            { data: 'created_by', name: 'created_by', orderable: false, searchable: false },
                             { data: 'status', name: 'status', orderable: false, searchable: false },
                             { data: 'created_at', name: 'created_at' },
                             { data: 'updated_at', name: 'updated_at' }

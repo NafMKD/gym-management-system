@@ -58,6 +58,7 @@ test('user membership history endpoint returns latest memberships first', functi
 
     $latestMembership = Membership::create([
         'user_id' => $member->id,
+        'created_by_user_id' => $admin->id,
         'package_id' => $package->id,
         'start_date' => '2026-04-01',
         'end_date' => '2026-06-30',
@@ -75,7 +76,8 @@ test('user membership history endpoint returns latest memberships first', functi
 
     $response->assertOk()
         ->assertJsonCount(2, 'data')
-        ->assertJsonPath('data.0.start_date', '2026-04-01');
+        ->assertJsonPath('data.0.start_date', '2026-04-01')
+        ->assertJsonPath('data.0.created_by', $admin->getName());
 
     expect($response->json('data.0.id'))->toContain('#'.$latestMembership->id);
 });

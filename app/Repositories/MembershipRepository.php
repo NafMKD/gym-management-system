@@ -7,6 +7,7 @@ use App\Models\Package;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Endroid\QrCode\Writer\PngWriter;
 use Endroid\QrCode\QrCode;
@@ -31,6 +32,7 @@ class MembershipRepository extends BaseRepository {
             return DB::transaction(function () use ($attributes) {
                 $validatedAttributes = [
                     'user_id' => $attributes['user_id'] ?? null,
+                    'created_by_user_id' => $attributes['created_by_user_id'] ?? Auth::id(),
                     'start_date' => $attributes['start_date'] ?? null,
                     'end_date' => $attributes['end_date'] ?? null,
                     'package_id' => $attributes['package_id'] ?? null,

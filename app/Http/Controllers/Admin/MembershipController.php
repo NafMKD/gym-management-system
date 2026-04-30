@@ -256,6 +256,7 @@ class MembershipController extends Controller
     public function show(Membership $membership): View|RedirectResponse
     {
         try {
+            $membership->loadMissing(['user', 'createdBy:id,first_name,last_name']);
             return view(self::ADMIN_.'memberships.view', compact('membership'));
         } catch (Throwable $e) {
             return redirect()->back()->withInput()->with(self::ERROR_, self::ERROR_UNKNOWN);

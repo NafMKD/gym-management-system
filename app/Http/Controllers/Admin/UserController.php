@@ -102,12 +102,13 @@ class UserController extends Controller
     public function show(User $user): View|RedirectResponse
     {
         try {
+            $user->loadMissing('createdBy:id,first_name,last_name');
             $showHistory = Auth::user()?->role !== 'accountant';
             $membershipOptions = collect();
 
             if ($showHistory) {
                 $membershipOptions = $user->memberships()
-                    ->with('package:id,name')
+                    ->with(['package:id,name', 'createdBy:id,first_name,last_name'])
                     ->orderByDesc('start_date')
                     ->orderByDesc('id')
                     ->get(['id', 'user_id', 'package_id', 'start_date', 'end_date', 'status']);
@@ -125,7 +126,7 @@ class UserController extends Controller
     public function getMembershipHistoryData(User $user): JsonResponse
     {
         $query = Membership::query()
-            ->with('package:id,name')
+            ->with(['package:id,name', 'createdBy:id,first_name,last_name'])
             ->where('user_id', $user->id)
             ->orderByDesc('start_date')
             ->orderByDesc('id');
@@ -136,6 +137,9 @@ class UserController extends Controller
             })
             ->addColumn('package_name', function (Membership $membership) {
                 return $membership->package?->name ?? __('Custom');
+            })
+            ->addColumn('created_by', function (Membership $membership) {
+                return $membership->createdBy?->getName() ?? __('Legacy / Unknown');
             })
             ->editColumn('price', function (Membership $membership) {
                 return number_format((float) $membership->price, 2);

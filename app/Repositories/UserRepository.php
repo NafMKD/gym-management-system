@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Support\DataTables\UserNameSearch;
 use Illuminate\Database\Eloquent\Builder;
 use App\Support\PhoneNumber;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 
@@ -33,6 +34,7 @@ class UserRepository extends BaseRepository {
                     'password' => $attributes['password'] ?? null,
                     'phone' => $attributes['phone'] ?? null,
                     'role' => $attributes['role'] ?? null,
+                    'created_by_user_id' => $attributes['created_by_user_id'] ?? Auth::id(),
                     'gender' => $attributes['gender'] ?? null,
                 ];
 

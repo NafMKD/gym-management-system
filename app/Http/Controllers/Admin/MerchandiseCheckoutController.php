@@ -13,6 +13,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -73,7 +74,7 @@ class MerchandiseCheckoutController extends Controller
             return redirect()->route('admin.merchandise.history')->withErrors($validator)->withInput();
         }
 
-        $filters = $this->normalizeHistoryFilters($validator->validated());
+        $filters = $this->enforceHistoryScope($this->normalizeHistoryFilters($validator->validated()));
         $columns = $this->normalizeSelectedColumns(
             $filters['columns'] ?? null,
             $this->historyExportColumns(),
@@ -361,6 +362,21 @@ class MerchandiseCheckoutController extends Controller
     }
 
     /**
+     * Reception can only review their own cashier history, even if the request is tampered with.
+     *
+     * @param  array<string, mixed>  $filters
+     * @return array<string, mixed>
+     */
+    private function enforceHistoryScope(array $filters): array
+    {
+        if ($this->salesmanFilterLocked()) {
+            $filters['salesman_id'] = Auth::id();
+        }
+
+        return $filters;
+    }
+
+    /**
      * @return \Illuminate\Database\Eloquent\Collection<int, Product>
      */
     private function getHistoryProducts()
@@ -375,9 +391,17 @@ class MerchandiseCheckoutController extends Controller
     {
         return User::query()
             ->whereIn('role', ['admin', 'reception', 'accountant'])
+            ->when($this->salesmanFilterLocked(), function ($query) {
+                $query->whereKey(Auth::id());
+            })
             ->orderBy('first_name')
             ->orderBy('last_name')
             ->get(['id', 'first_name', 'last_name']);
+    }
+
+    private function salesmanFilterLocked(): bool
+    {
+        return Auth::user()?->role === 'reception';
     }
 
     /**
@@ -546,7 +570,7 @@ class MerchandiseCheckoutController extends Controller
 
         try {
             $timezone = 'Africa/Addis_Ababa';
-            $filters = $this->normalizeHistoryFilters($validator->validated());
+            $filters = $this->enforceHistoryScope($this->normalizeHistoryFilters($validator->validated()));
             $lines = $this->merchandiseRepository
                 ->getFilteredSalesLinesQuery($filters)
                 ->get();
@@ -566,6 +590,7 @@ class MerchandiseCheckoutController extends Controller
                 'filterSummary' => $this->historyFilterSummary($filters),
                 'exportColumns' => $this->historyExportColumns(),
                 'defaultExportColumns' => $this->defaultHistoryColumns(),
+                'salesmanFilterLocked' => $this->salesmanFilterLocked(),
             ]);
         } catch (Throwable $e) {
             return redirect()->back()->with(self::ERROR_, self::ERROR_UNKNOWN);

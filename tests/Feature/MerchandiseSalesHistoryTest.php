@@ -71,11 +71,11 @@ test('sales history report defaults to todays sales and merges invoice rows for 
     createSalesHistoryInvoice('INV-HIST-2401', Carbon::create(2026, 4, 24, 9, 15, 0, 'Africa/Addis_Ababa'), [
         ['product' => $protein, 'quantity' => 1],
         ['product' => $water, 'quantity' => 3],
-    ], $customer);
+    ], $customer, $reception);
 
     createSalesHistoryInvoice('INV-HIST-2301', Carbon::create(2026, 4, 23, 18, 0, 0, 'Africa/Addis_Ababa'), [
         ['product' => $wrap, 'quantity' => 2],
-    ]);
+    ], null, $reception);
 
     $response = $this->actingAs($reception)->get(route('admin.merchandise.history'));
 
@@ -99,11 +99,11 @@ test('sales history report can be filtered to a specific date', function () {
 
     createSalesHistoryInvoice('INV-HIST-2402', Carbon::create(2026, 4, 24, 11, 0, 0, 'Africa/Addis_Ababa'), [
         ['product' => $product, 'quantity' => 1],
-    ]);
+    ], null, $reception);
 
     createSalesHistoryInvoice('INV-HIST-2302', Carbon::create(2026, 4, 23, 12, 30, 0, 'Africa/Addis_Ababa'), [
         ['product' => $product, 'quantity' => 2],
-    ]);
+    ], null, $reception);
 
     $response = $this->actingAs($reception)->get(route('admin.merchandise.history', [
         'date' => '2026-04-23',
@@ -115,6 +115,56 @@ test('sales history report can be filtered to a specific date', function () {
         ->assertDontSee('INV-HIST-2402', false)
         ->assertSee('Thursday, 23 Apr 2026', false)
         ->assertSee('value="2026-04-23"', false);
+});
+
+test('reception sales history is locked to the logged in cashier', function () {
+    Carbon::setTestNow(Carbon::create(2026, 4, 24, 10, 0, 0, 'Africa/Addis_Ababa'));
+
+    $reception = User::factory()->create([
+        'role' => 'reception',
+        'first_name' => 'Marta',
+        'last_name' => 'Desk',
+    ]);
+    $otherReception = User::factory()->create([
+        'role' => 'reception',
+        'first_name' => 'Abel',
+        'last_name' => 'Desk',
+    ]);
+    $product = Product::factory()->create(['name' => 'Electrolyte Drink', 'sku' => 'SKU-ELC-1', 'unit_price' => 95]);
+
+    createSalesHistoryInvoice('INV-HIST-LOCK-1', Carbon::create(2026, 4, 24, 10, 30, 0, 'Africa/Addis_Ababa'), [
+        ['product' => $product, 'quantity' => 1],
+    ], null, $reception);
+
+    createSalesHistoryInvoice('INV-HIST-LOCK-2', Carbon::create(2026, 4, 24, 11, 0, 0, 'Africa/Addis_Ababa'), [
+        ['product' => $product, 'quantity' => 1],
+    ], null, $otherReception);
+
+    $response = $this->actingAs($reception)->get(route('admin.merchandise.history', [
+        'start_date' => '2026-04-24',
+        'end_date' => '2026-04-24',
+        'salesman_id' => $otherReception->id,
+    ]));
+
+    $response->assertOk()
+        ->assertSee('INV-HIST-LOCK-1', false)
+        ->assertDontSee('INV-HIST-LOCK-2', false)
+        ->assertSee('Reception can only review their own merchandise sales history.')
+        ->assertDontSee('Abel Desk', false)
+        ->assertSee('Marta Desk', false);
+
+    $export = $this->actingAs($reception)->get(route('admin.merchandise.history.export.csv', [
+        'start_date' => '2026-04-24',
+        'end_date' => '2026-04-24',
+        'salesman_id' => $otherReception->id,
+        'columns' => ['invoice_number', 'salesman'],
+    ]));
+
+    $export->assertOk();
+    $csv = $export->streamedContent();
+
+    expect($csv)->toContain('INV-HIST-LOCK-1');
+    expect($csv)->not->toContain('INV-HIST-LOCK-2');
 });
 
 test('sales history report supports salesman and product filters', function () {
